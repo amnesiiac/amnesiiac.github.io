@@ -1,0 +1,41 @@
+#searchbar search-container{
+  width: 100%;
+}
+
+#search-input{
+  width: 98%;
+  border-left: 2px solid black;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+}
+
+#search-input[type="text"]{
+  box-sizing: border-box;
+  padding-left: 2px;
+}
+
+.search-result-doc-title{
+  font-size: 13px;
+  text-decoration-line: underline;
+}
+
+.search-result-preview{
+  font-size: 12px;
+}
+
+.search-result-preview .search-result-highlight{
+  font-weight: bold;
+}
+
+input:focus{
+  outline-style: none;
+}
+
+.search-no-result{
+  font-size: 12px;
+} 
+
+.search-results-list-item{
+  margin-top: -18px;
+}

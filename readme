@@ -1,0 +1,97 @@
+# context search context output: 
+https://github.com/raghudotcc/simply-jekyll
+
+
+# context search title output: simple-jekyll-search
+ref: twistfatezzz.blog - search2
+
+
+# context search title output: lunr.js
+ref: https://jekyllcodex.org/without-plugin/search-lunr/ 
+
+
+# auto generated gallery with lightbox
+ref: https://jekyllcodex.org/without-plugin/image-gallery/  
+ref: https://jekyllcodex.org/without-plugin/lightbox/# 
+
+
+# add new gallery page
+1 add event.html under /assets/gallery/event.html  
+2 add items under /assets/gallery/gallery.html  
+3 put images in sub image folder under images
+
+
+# todo: add copy code button
+ref: https://clipboardjs.com  
+
+
+# directory
+.
+|-- 404.html
+|-- Gemfile                               // requirements version
+|-- Gemfile.lock                          // lock file for dependencies
+|-- _config.yml
+|-- _data
+|   |-- lang.yml
+|   `-- menus.yml                         // config file for blog index page menu
+|-- _includes
+|   |-- analytics.html
+|   |-- comments.html
+|   |-- disqus.html
+|   |-- footer.html
+|   |-- gallery.html                      // template for gallery picture page
+|   |-- head.html
+|   |-- header.html
+|   `-- posts.html
+|-- _layouts                              // layout to reuse
+|   |-- archive.html                      // default layout for tag/categories, config in _config.yml
+|   |-- default.html
+|   |-- page.html
+|   `-- post.html
+|-- _posts
+|   `-- _drafts
+|-- _sass                                 // highlight files for parts of blog
+|   |-- category.scss                     // category
+|   |-- container.scss
+|   |-- float.scss
+|   |-- footer.scss
+|   |-- header.scss
+|   |-- highlighter.scss                  // code block
+|   |-- lightbox.css                      // lightbox for gallery pics
+|   |-- mermaid.scss
+|   |-- mobile.scss
+|   |-- page.scss
+|   |-- post-list.scss
+|   |-- post.scss
+|   |-- printer.scss
+|   |-- reset.scss                        // main default
+|   |-- search.scss                       // search
+|   |-- tag.scss                          // tag
+|   `-- task-list.scss
+|-- assets
+|   |-- css
+|   |   |-- base.scss                     // import config from _sass
+|   |   `-- highlight.scss                // rough code highlight config
+|   |-- gallery
+|   |   |-- images                        // gallery image folder
+|   |   |-- nokia.html                    // gallery event list page
+|   |   `-- nokia
+|   |-- images                            // post image folder
+|   |   |-- 2022
+|   |   `-- 2023
+|   `-- script
+|       |-- jekyllpaper.js                // main theme script
+|       |-- lightbox.js                   // 
+|       `-- search                        // script for search engine
+|           |-- lunr.min.js
+|           |-- search.js
+|           `-- search.json
+|-- favicon.ico
+|-- index.html
+|-- pages
+|   |-- about.md                          // about page
+|   |-- category.html                     // category html page
+|   |-- gallery.html                      // gallery list html page
+|   |-- search.html                       // search html page
+|   `-- tag.html                          // tag html page
+`-- readme

@@ -1,0 +1,15 @@
+---
+layout: default
+title: tags 
+permalink: /tag/
+---
+
+<article class="page-container">
+    <ul class="container-posts">
+        {% for tag in site.tags %}
+	    <div class="tag-list">
+                <li><a href="{{ base.url }}/tag/{{ tag | first | slugify }}">{{ tag | first }}</a></li>
+            </div>
+        {% endfor %}
+    </ul>
+</article>

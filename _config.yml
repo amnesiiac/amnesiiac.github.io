@@ -1,0 +1,69 @@
+# Welcome to Jekyll-Paper!
+
+title: MELON 
+email: 664634473@qq.com
+name: MELON 
+description: an awesome description.
+keywords: [Your keywords]
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site, e.g. http://example.com
+domain: "melon.com" # the domain name for your site, e.g. example.com
+language: en
+future: true
+# Supported languages list:
+# en: English
+# de: Deutsche (German)
+# es: Español (Spanish)
+# fr: Français (French)
+# ja: 日本語 (Japanese)
+# pt: Português (Portuguese)
+# zh-cn: 简体中文 (Simplified Chinese)
+# zh-tw: 繁體中文 (Traditional Chinese)
+# ko : 한국어(Korean)
+
+analytics:   # the Google Analytics property ID, e.g. UA-XXXXX-Y
+
+paginate: 25
+paginate_path: "/page:num/"
+
+comments: false             # enable comments
+disqus:                     # disqus account
+mathjax: true               # Mathematics
+mermaid: false              # Diagrams
+
+permalink: /:year/:month/:day/:title
+
+sass:
+  sass_dir: _sass
+  style: expanded # compressed, compact, expanded or compressed
+
+# archive settings
+jekyll-archives:
+  enabled: 
+    - categories
+    - tags
+  layout: archive
+  permalinks:
+    category: /category/:name/
+    tag: /tag/:name/
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-paginate
+  - jekyll-sitemap
+  - jekyll-archives
+  - jekyll-seo-tag
+
+# Exclude from processing.
+# The following items will not be processed, by default. Create a custom list
+# to override the default setting.
+# exclude:
+#   - Gemfile
+#   - Gemfile.lock
+#   - node_modules
+#   - vendor/bundle/
+#   - vendor/cache/
+#   - vendor/gems/
+#   - vendor/ruby/

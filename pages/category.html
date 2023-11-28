@@ -1,0 +1,15 @@
+---
+layout: default
+title: categories
+permalink: /category/
+---
+
+<article class="page-container">
+    <ul class="container-posts">
+        {% for category in site.categories %}
+	    <div class="category-list">
+                <li><a href="{{ base.url }}/category/{{ category | first | slugify }}">{{ category | first }}</a></li>
+            </div>
+        {% endfor %}
+    </ul>
+</article>

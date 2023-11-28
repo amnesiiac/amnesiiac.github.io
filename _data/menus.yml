@@ -1,0 +1,17 @@
+- title: Index
+  url:   ""
+
+- title: Categories 
+  url:   "category"
+
+- title: Tags 
+  url:   "tag"
+
+- title: Search 
+  url:   "search"
+
+- title: Gallery 
+  url:   "gallery"
+
+- title: About
+  url:   "about"

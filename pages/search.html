@@ -1,0 +1,22 @@
+---
+layout: default
+title: search
+permalink: /search/
+---
+
+<!-- https://github.com/raghudotcc/simply-jekyll -->
+
+<div class="searchbar search-container">
+    {%- if site.preferences.search.shortcut_hint.enabled -%}
+        <div class="search-shortcut disable-select">
+            <kbd class="disable-select">Shift</kbd>
+            <kbd class="disable-select">s</kbd>
+        </div>
+    {%- endif -%}
+    <label for="search-input"></label>
+    <input type="text" style="font-size:13px;" id="search-input" autocomplete="off" autofocus placeholder="search ..."/>
+    <div id="search-results" class="search-results"></div>
+</div>
+
+<script type="text/javascript" src="/assets/script/search/lunr.min.js"></script>
+<script src="/assets/script/search/search.js"></script>
