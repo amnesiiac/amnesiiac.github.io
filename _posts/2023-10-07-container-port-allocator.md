@@ -38,6 +38,7 @@ note: the nerdctl project(<=1.5.0) has bugs when use "-p" to dynamically allocat
 <hr>
 
 ### # code
+{% raw %}
 __network.py__: allocate port across all processses on a host machine, based on the filelock implemented in __filelock.py__. For details see comment inline.
 ```text
 #!/usr/bin/env python3
@@ -1016,3 +1017,4 @@ if __name__ == "__main__":
     s = get_str(8, "0123456789ABCDEF")
     print(s)
 ```
+{% endraw %}

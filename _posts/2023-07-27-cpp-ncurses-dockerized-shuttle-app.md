@@ -16,7 +16,7 @@ tags:
 
 
 {% raw %}
-### # dockerfile for building env - todo self made base images
+### # dockerfile for frozen env to compile & run shuttle app
 ```text
 # alpine
 FROM anthonyzou/alpine-build-essentials
@@ -35,6 +35,30 @@ docker run -it --rm -v ${PWD}:/root/shuttle/ -w /root/shuttle shuttle make      
 docker run -it --rm -v ${PWD}:/root/shuttle/ -w /root/shuttle shuttle ./out       # run the app
 docker run -it --rm -v ${PWD}:/root/shuttle/ -w /root/shuttle shuttle make clean  # clean
 ```
+
+<hr>
+
+### # build up my own env base
+inspect the above image base:
+```text
+$ docker pull anthonyzou/alpine-build-essentials
+Using default tag: latest
+latest: Pulling from anthonyzou/alpine-build-essentials
+5843afab3874: Already exists
+91de67d95162: Already exists
+Digest: sha256:0f1a97d23690f00bd607ab0e5d5bf91e521d57aa898f31470622ec5cae3904bd
+Status: Downloaded newer image for anthonyzou/alpine-build-essentials:latest
+docker.io/anthonyzou/alpine-build-essentials:latest
+```
+check each stacked layer infomation:
+```text
+$ docker history anthonyzou/alpine-build-essentials
+IMAGE             CREATED      CREATED BY                                             SIZE   COMMENT
+sha256:f4a660...  2 years ago  RUN /bin/sh -c apk --update add gcc make g++ zlib-dev  190MB  buildkit.dockerfile.v0
+<missing>         2 years ago  /bin/sh -c #(nop) CMD ["/bin/sh"]                      0B
+<missing>         2 years ago  /bin/sh -c #(nop) ADD file:f2783... in /               5.6MB
+```
+todo: try using the cmd exposed in layer 1 for built up my own env base.
 
 <hr>
 

@@ -185,7 +185,7 @@ $ ps 24294
   PID   TT  STAT      TIME COMMAND
 24294   ??  S     38:09.83 /Applications/Docker.app/Contents/MacOS/com.docker.backend -watchdog -native-api
 ```
-then the details of data transfering using docker destkop is as:  
+then the details of data transfering using docker desktop is as:  
 1) the "com.docker.backend" process on host system acting as a user-space proxy, which create a socket using specified ip:port.  
 2) the created socket can accessed by the host network, which is used to send data to container.  
 3) data send to the socket, it gets forwarded by vpkkit-bridge to VM's external network interface.  

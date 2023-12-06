@@ -27,71 +27,68 @@ ref: https://clipboardjs.com
 
 # directory
 .
-|-- 404.html
-|-- Gemfile                               // requirements version
-|-- Gemfile.lock                          // lock file for dependencies
-|-- _config.yml
-|-- _data
-|   |-- lang.yml
-|   `-- menus.yml                         // config file for blog index page menu
-|-- _includes
-|   |-- analytics.html
-|   |-- comments.html
-|   |-- disqus.html
-|   |-- footer.html
-|   |-- gallery.html                      // template for gallery picture page
-|   |-- head.html
-|   |-- header.html
-|   `-- posts.html
-|-- _layouts                              // layout to reuse
-|   |-- archive.html                      // default layout for tag/categories, config in _config.yml
-|   |-- default.html
-|   |-- page.html
-|   `-- post.html
-|-- _posts
-|   `-- _drafts
-|-- _sass                                 // highlight files for parts of blog
-|   |-- category.scss                     // category
-|   |-- container.scss
-|   |-- float.scss
-|   |-- footer.scss
-|   |-- header.scss
-|   |-- highlighter.scss                  // code block
-|   |-- lightbox.css                      // lightbox for gallery pics
-|   |-- mermaid.scss
-|   |-- mobile.scss
-|   |-- page.scss
-|   |-- post-list.scss
-|   |-- post.scss
-|   |-- printer.scss
-|   |-- reset.scss                        // main default
-|   |-- search.scss                       // search
-|   |-- tag.scss                          // tag
-|   `-- task-list.scss
-|-- assets
-|   |-- css
-|   |   |-- base.scss                     // import config from _sass
-|   |   `-- highlight.scss                // rough code highlight config
-|   |-- gallery
-|   |   |-- images                        // gallery image folder
-|   |   |-- nokia.html                    // gallery event list page
-|   |   `-- nokia
-|   |-- images                            // post image folder
-|   |   |-- 2022
-|   |   `-- 2023
-|   `-- script
-|       |-- jekyllpaper.js                // main theme script
-|       |-- lightbox.js                   // 
-|       `-- search                        // script for search engine
-|           |-- lunr.min.js
-|           |-- search.js
-|           `-- search.json
-|-- favicon.ico
-|-- index.html
-|-- pages
-|   |-- about.md                          // about page
-|   |-- category.html                     // category html page
-|   |-- gallery.html                      // gallery list html page
-|   |-- search.html                       // search html page
-|   `-- tag.html                          // tag html page
-`-- readme
+├── 404.html
+├── Gemfile                      // requirements version info
+├── Gemfile.lock                 // lock
+├── _config.ymlu
+├── _data
+│   ├── lang.yml
+│   └── menus.yml                // config file for blog index page men
+├── _includes
+│   ├── analytics.html
+│   ├── comments.html
+│   ├── disqus.html
+│   ├── footer.html
+│   ├── gallery.html             // template for gallery picture page
+│   ├── head.html
+│   ├── header.html
+│   └── posts.html
+├── _layouts                     // basic html layout for reuse
+│   ├── archive.html
+│   ├── default.html             // default layout for tag/categories, config in _config.ym
+│   ├── page.html
+│   └── post.html
+├── _posts                       // blog posts
+├── _sass                        // css style subgroups
+│   ├── category.scss
+│   ├── container.scss
+│   ├── float.scss
+│   ├── footer.scss
+│   ├── header.scss
+│   ├── highlighter.scss         // code block style
+│   ├── lightbox.css             // gallery image navi style
+│   ├── mermaid.scss
+│   ├── mobile.scss
+│   ├── page.scss
+│   ├── post-list.scss
+│   ├── post.scss
+│   ├── printer.scss
+│   ├── reset.scss               // default
+│   ├── search.scss              // search style
+│   ├── tag.scss                 // tag style
+│   └── task-list.scss
+├── assets
+│   ├── css
+│   │   ├── base.scss            // import all scss in _sass folder
+│   │   └── highlight.scss       // rouge code highlight config
+│   ├── gallery
+│   │   ├── gallery.html         // gallery page
+│   │   ├── images               // gallery image
+│   ├── images                   // post image folder (sort by year)
+│   │   ├── 2022
+│   │   └── 2023
+│   └── script
+│       ├── jekyllpaper.js       // script for main theme
+│       ├── lightbox.js          // gallery image navi page
+│       └── search               // scripts for search engine
+│           ├── lunr.min.js
+│           ├── search.js
+│           └── search.json
+├── favicon.ico
+├── index.html
+├── pages
+│   ├── about.md                 // about page
+│   ├── category.html            // category page
+│   ├── search.html              // search page
+│   └── tag.html                 // tag page
+└── readme
