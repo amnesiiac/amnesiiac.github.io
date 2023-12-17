@@ -9,28 +9,26 @@ tags:
 ---
 
 ### # asciinema usages on macos
-#### \>>> installation:
+1) installation:
 ```shell
 $ brew install asciinema
 ```
 
-#### \>>> record
-record & save to local:
-```shell
+2) record
+```text
+# record & save to local:
 $ asciinema rec ${filename}.cast
-```
-record & upload to remote:
-```shell
+
+# record & upload to remote:
 $ asciinema rec -t "${my_record_name}"
 ```
 
-#### \>>> play
-play local record:
-```shell
+3) play
+```text
+# play local record:
 asciinema play ${record.cast}
-```
-play remote cast:
-```shell
+
+# play remote cast:
 $ asciinema play https://asciinema.org/a/difqlgx86ym6emrmd8u62yqu8
 ```
 

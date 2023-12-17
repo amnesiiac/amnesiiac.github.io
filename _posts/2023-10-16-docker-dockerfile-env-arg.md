@@ -99,19 +99,19 @@ Multi-stage builds (see shuttle/desc/dockermultistagebuild) is good method to hi
 $ cat ./Dockerfile.v1
 FROM alpine:latest 
 ENV ALPINE_VER=3.17
-ARG SITE=artifactory-blr1.int.net.nokia.com
+ARG SITE=artifactory-blr1.int.net.xxxxx.com
 ARG REBORN_BUILD_KEY=reborn-638089aa
 ARG ARTIFACTORY_REBORN=https://$SITE/artifactory/rebornlinux-generic-local
 
 $ docker build -f ./Dockerfile.v1 -t test:v1 .
 $ docker history --no-trunc test:v1                                           # trunc output manually
 IMAGE           CREATED          CREATED BY                                                         SIZE      COMMENT
-sha256:a4e6af   36 seconds ago   /bin/sh -c #(nop)  ARG ARTIFACTORY_REBORN=https://artifactory...   0B        
-sha256:bf5c00   37 seconds ago   /bin/sh -c #(nop)  ARG REBORN_BUILD_KEY=reborn-638089aa            0B        
-sha256:4e9072   37 seconds ago   /bin/sh -c #(nop)  ARG SITE=artifactory-blr1.int.net.nokia.com     0B        
-sha256:fab063   39 seconds ago   /bin/sh -c #(nop)  ENV ALPINE_VER=3.17                             0B        
-sha256:7e01a0   2 months ago     /bin/sh -c #(nop)  CMD ["/bin/sh"]                                 0B        
-<missing>       2 months ago     /bin/sh -c #(nop)  ADD file:32ff5e in /                            7.34MB    
+sha256:a4e6af   36 seconds ago   /bin/sh -c #(nop)  ARG ARTIFACTORY_REBORN=https://artifactory...   0B
+sha256:bf5c00   37 seconds ago   /bin/sh -c #(nop)  ARG REBORN_BUILD_KEY=reborn-638089aa            0B
+sha256:4e9072   37 seconds ago   /bin/sh -c #(nop)  ARG SITE=artifactory-blr1.int.net.xxxxx.com     0B
+sha256:fab063   39 seconds ago   /bin/sh -c #(nop)  ENV ALPINE_VER=3.17                             0B
+sha256:7e01a0   2 months ago     /bin/sh -c #(nop)  CMD ["/bin/sh"]                                 0B
+<missing>       2 months ago     /bin/sh -c #(nop)  ADD file:32ff5e in /                            7.34MB
 
 $ docker run -it --rm test:v1 sh                                              # access the container of test:v1
 / # echo $ALPINE_VER                                                          # the ENV is still available
@@ -125,7 +125,7 @@ $ docker run -it --rm test:v1 sh                                              # 
 ```text
 $ cat ./Dockerfile.v2                                                         # dockerfile undertest v2
 ARG ALPINE_VER=3.17                                                           # define variable=value
-ARG SITE=artifactory-blr1.int.net.nokia.com
+ARG SITE=artifactory-blr1.int.net.xxxxx.com
 ARG REBORN_BUILD_KEY=reborn-638089aa
 
 FROM alpine:latest                                                            # from
@@ -154,7 +154,7 @@ $ cat ./dockerfile.v3
                                                                               #        no build stage in current context
                                                                               #        cannot use ENV before FROM clause
 ARG ALPINE_VER=3.17                                                           # define ALPINE_VER
-ARG SITE=artifactory-blr1.int.net.nokia.com
+ARG SITE=artifactory-blr1.int.net.xxxxx.com
 ARG REBORN_BUILD_KEY=reborn-638089aa
 
 FROM alpine:latest                                                            # image base

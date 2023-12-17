@@ -73,21 +73,25 @@ WORKDIR /usr/local/tomcat
 EXPOSE 8080
 CMD ["/scripts/start.py"]
 ```
+
 build up docker images:
 ```text
-docker build -t libhv .
+$ docker build -t libhv .
 ```
+
 start opengrok indexing inside container, and publish/listen service on localhost:
 ```text
-docker run -d -p 127.0.0.1:8080:8080 libhv
+$ docker run -d -p 127.0.0.1:8080:8080 libhv
 ```
+
 check the indexing process by:
 ```text
-docker logs ${container_id}
+$ docker logs ${container_id}
 ```
-However, if we start the container using other ports, the service will not start correctly:
+
+however, if we start the container using other ports, the service will not start correctly:
 ```shell
-docker run -d -p 127.0.0.1:6666:8080 ${images}
+$ docker run -d -p 127.0.0.1:6666:8080 ${images}
 ```
 
 <hr>

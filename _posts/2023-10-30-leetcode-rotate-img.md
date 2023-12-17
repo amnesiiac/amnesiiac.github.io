@@ -30,7 +30,7 @@ void print2dvec(const vector<vector<T>>& vec){
     for(auto subvec : vec){
         for_each(subvec.begin(), subvec.end(), [](T ele){ cout << ele << " "; });
         cout << endl;
-	}
+    }
     cout << endl;
 }
 
@@ -48,10 +48,10 @@ void solve(vector<vector<int>>& vec){
     for(int i=0; i<=n/2; i++){            // column of an ele to get handled
         for(int j=i; j<n-i; j++){         // row of the ele to get handled
             tmp = vec[i][j];              // for inplace modification
-			vec[i][j] = vec[n-j][i]; 
-			vec[n-j][i] = vec[n-i][n-j];
-			vec[n-i][n-j] = vec[j][n-i];
-			vec[j][n-i] = tmp;
+            vec[i][j] = vec[n-j][i];
+            vec[n-j][i] = vec[n-i][n-j];
+            vec[n-i][n-j] = vec[j][n-i];
+            vec[j][n-i] = tmp;
         }
     }
 }

@@ -8,35 +8,34 @@ tags:
   - shell
 ---
 
-### # background
-gitlab-runner job fails when using yes and pipe for automation of interactive cmd
+### # background: gitlab-runner job fails when using yes and pipe for automation of interactive cmd
 
-given __rebornlinux/devkit/.gitlab-ci.yml__ for gitlab ci/cd as:
+given rebornlinux/devkit/.gitlab-ci.yml for gitlab ci/cd as:
 ```text
 stages:
   - release
 
 release:
   stage: release
-  rules:                  # run on changes of .gitlab-ci.yml
+  rules:                                                    # run on changes of .gitlab-ci.yml
     - changes:
       - .gitlab-ci.yml
   before_script:
     - mkdir -p $HOME/.docker
     - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
   script:
-    - yes | make base
-    - yes | make toolchain
-    - yes | make devkit
+    - yes | make base                                       # build & upload base layer (docker image)
+    - yes | make toolchain                                  # build & upload toolchain layer (docker image)
+    - yes | make devkit                                     # build & upload vscode server layer (docker image)
   tags:
     - shell-generic
 ```
 
-given __rebornlinux/devkit/Makefile__ for build & push docker image to self-maintained registry:
+given rebornlinux/devkit/Makefile for build & push docker image to self-maintained registry:
 ```text
 proxy := http://10.158.100.9:8080
 repo_tag := $(shell git describe --tags --abbrev=0)
-site := artifactory-blr1.int.net.nokia.com
+site := artifactory-blr1.int.net.xxxxx.com
 artifactory := rebornlinux-docker-local.$(site)
 
 define docker_push #from,to
@@ -86,7 +85,7 @@ which will cause the ci/cd job fail.
 <hr>
 
 ### # solution
-modify the __rebornlinux/devkit/.gitlab-ci.yml__, explcitly set pipefail=false:
+modify the rebornlinux/devkit/.gitlab-ci.yml, explicitly set pipefail=false:
 ```text
 stages:
   - release
@@ -114,6 +113,7 @@ release:
 ```text
 #!/bin/bash
 
+# pipefail enabled, will result in 141
 pipefail_analysis() {
     set +o pipefail
     yes | true
@@ -123,7 +123,8 @@ pipefail_analysis() {
     echo "after setting pipefail,     yes | true          returns: $?"
 }
 
-another_method_to_use_yes_with_pipefail() {
+# provide a way to use yes with pipefail
+method_to_use_yes_with_pipefail() {
     set +o pipefail
     { yes || :; } | true
     echo "without setting pipefail, { yes || :;} | true   returns: $?"
@@ -133,12 +134,13 @@ another_method_to_use_yes_with_pipefail() {
 }
 
 pipefail_analysis
-another_method_to_use_yes_with_pipefail
-
-# without setting pipefail,   yes | true          returns: 0
-# after setting pipefail,     yes | true          returns: 141
-# without setting pipefail, { yes || :;} | true   returns: 0
-# after setting pipefail,   { yes || :;} | true   returns: 0
-
-# return code 141 means pipefail, 0 for success.
+method_to_use_yes_with_pipefail
 ```
+the above script outputs:
+```text
+without setting pipefail,   yes | true          returns: 0
+after setting pipefail,     yes | true          returns: 141
+without setting pipefail, { yes || :;} | true   returns: 0
+after setting pipefail,   { yes || :;} | true   returns: 0
+```
+the return code 141 means pipefail, 0 for success.
