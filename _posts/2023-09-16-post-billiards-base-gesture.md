@@ -15,43 +15,41 @@ tags:
 <hr>
 
 ### # personal body gesture to make the cue movement straight
-1 heel of right foot should be on the aim line.  
-2 the right foot line and the aim line form a angle of 30 degrees.  
-3 left foot line and the aim line are parallel.  
-4 when lying down to aim, left leg naturally bends, while the right leg keep straight.  
-5 always keep the cue close to the chest, but do not put too much pressure between.  
-6 always keep the cue under chin, when do straight shot, stun shot or shot with greate power, keep the pressure between the cue and the chin to make sure the cue follows the aim line.  
+1 heel of right foot should be on the aim line, and slightly deviate to right in direction.  
+2 left foot line and the aim line are parallel.  
+3 when lying down to aim, left leg naturally bends, while the right leg keep straight.  
+4 always keep the cue close to the chest.  
+5 always keep the cue under chin.  
+
+<hr>
+
+### # personal checkpoint for cue direction
+1 1st & 2nd finger of left hand.  
+2 chin bottom.  
+3 chest.  
+4 composition of thumb & 3rd & 4th finger of right hand.
+
+all the checkpoint need to be under a soft but consistent pressure during pre-stop till after shot,
+which will keep the shot line consistent with which you aim at.
 
 <hr>
 
 ### # actions for hitting the cueball close to poolside
 1 first need to aim horizontally, then lift the cue bottom a bit higher.  
 2 the right hand need to grip a bit ahead, and grip the cue a bit tighter.  
-3 but at the moment of hitting, release the cue out short forwards.
+3 but at the moment just before hitting the cue ball, release the cue out in that short time period.
 
 <hr>
 
 ### # actions for pull & develop the cue
-1 all fingers of right hands are gripping the cue, while only the first three fingers are holding the cue __still__.  
-2 when pullback, the rest two fingers release the cue naturally.  
-3 when pull forth, the rest two fingers gently hold, without adding even a tiny force on the cue.
-4 when pulling the cue back and forth, all fingers are in a relatxing state, but not in "nervous" one.  
+1 all fingers of right hands are gripping the cue.  
+2 only the 3rd & 4th finger and thumb actually used to grip the cue always.  
+3 when pulling back & forth, the rest two fingers gently hold, without adding even a tiny force on the cue.  
+4 when pulling back & forth, all fingers are in a relaxing state (minimal strengh to hold the cue).  
 5 always relax your wrist joint.  
-6 make sure to pre stop, check the aim angles during this.  
-7 pull back and forth __slowly__, check the aim line once more.  
+6 make sure to pre stop, check the aim point during this.  
+7 pull back and forth slowly, check the aim line & point again.  
 8 make sure to post stop, determine the speed of cue during.  
-
-<hr>
-
-### # personal hand (left/right) gestures
-two point to form a straight line:  
-1 left hand: thumb & index clamb tightly to makeup the first aim dot.  
-2 right hand: thumb & index hold the cue a bit tight to makeup the second aim dot.  
-3 let the cue lying on left hands pivot, and lifted up by the intersection angle madeup by index & thumb of right hand.  
-
-relaxing the cue at the moment of hitting the cueball:  
-1 when make back spin and top spin, if want to make the cue ball sroll faster, try not to grip the cue too hard, just let it go.  
-2 always make sure the moment the cue kiss the cue ball, your right hand does is relaxing and no extra power to grip the cue.  
 
 <hr>
 

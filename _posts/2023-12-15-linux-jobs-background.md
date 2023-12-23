@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "exit jobs that cannot accept SIGTERM to exit (linux)"
+title: "exit jobs that cannot accept SIGINT to exit (linux)"
 author: "melon"
 date: 2023-12-15 20:56
 categories: "2023"
@@ -22,7 +22,7 @@ please search 'connect to terminal' in blog.
 <hr>
 
 ### # solution
-using ctrl+z to make the tail as background job:
+using ctrl+z to make the tail suspended (sending SIGTSTP):
 ```text
 $ sudo vim /etc/gitlab-runner/config.toml | tail -n 21
   Vim: Warning: Output is not to a terminal
@@ -39,3 +39,16 @@ $ jobs -l
 
 $ kill %1          # use kill to terminate processes
 ```
+
+<hr>
+
+### # application of ctrl+z
+when do some experiments on a file opened by vim, a common workflow might be:
+```text
+vim file => edit lines => close vim => do some test based on changed file => undo the changes by imagine
+```
+however, some times we could not remember exactly all the way back, here's a shortcut:
+```text
+vim file => edit lines => ctrl+z to make it background => do some test => fg %1 && undo the changes by typing 'u'
+```
+

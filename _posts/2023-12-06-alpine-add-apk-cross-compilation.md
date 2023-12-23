@@ -1,17 +1,22 @@
 ---
 layout: post
-title: "using self-hosted artifactory for alpine apks (alpine)"
+title: "add apks not suitable for chost arch (self-hosted alpine)"
 author: "melon"
 date: 2023-12-06 22:31
 categories: "2023"
 tags:
   - alpine
   - linux
-  - ongoing
 ---
 
-### # problem when setup self-maintained alpine mirror
-the problem is that: some apk (for cross compiling & part of buildroot) cannot be added using 'apk add xxx', relying on self-maintained repo.
+### # some apk cannot be added by "apk add xxx"
+some apk which CHOST is not the same arch as current alpine arch:
+```text
+echo $(apk --print-arch)
+```
+we add it for cross compiling & part of buildroot. However, it cannot
+be added using 'apk add xxx'. hence, we are maintaining self-hosted mirror, which enable
+us to add the apk though.
 
 <hr>
 
@@ -19,7 +24,7 @@ the problem is that: some apk (for cross compiling & part of buildroot) cannot b
 inside docker container of toolchain, check the groups:
 ```text
 $(centos7) docker run -it --rm rebornlinux/toolchain bash
-$(reborn)  groups
+$(reborn) groups
 reborn wheel abuild
 ```
 
@@ -64,6 +69,7 @@ build-base-mips64-0.5-r3 noarch {build-base-mips64} (MIT)
 build-base-0.5-r3 x86_64 {build-base} (MIT) [installed]     <--- installed by default
 build-base-aarch64-0.5-r3 noarch {build-base-aarch64} (MIT)
 ```
+
 the installation of x86_64 arch build-base can be confirmed by:
 ```text
 $ apk info | grep build-base
