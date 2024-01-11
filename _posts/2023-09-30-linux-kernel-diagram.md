@@ -9,6 +9,7 @@ tags:
 ---
 
 ### # linux kernel diagram (relationship between linux layers/functional components)
+
 ```txt
  linux layers                                                functions
 +------------+ +-------------------------------------------------------------------------------------------------------+

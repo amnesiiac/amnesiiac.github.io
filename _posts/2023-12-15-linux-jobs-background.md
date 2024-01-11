@@ -27,7 +27,7 @@ using ctrl+z to make the tail suspended (sending SIGTSTP):
 $ sudo vim /etc/gitlab-runner/config.toml | tail -n 21
   Vim: Warning: Output is not to a terminal
   ...
-  <press ctrl+z, let it running on background>
+  <press ctrl+z, let it stop at background>
   [1]+  Stopped                 sudo vim /etc/gitlab-runner/config.toml | tail -n 21
 ```
 
@@ -47,6 +47,7 @@ when do some experiments on a file opened by vim, a common workflow might be:
 ```text
 vim file => edit lines => close vim => do some test based on changed file => undo the changes by imagine
 ```
+
 however, some times we could not remember exactly all the way back, here's a shortcut:
 ```text
 vim file => edit lines => ctrl+z to make it background => do some test => fg %1 && undo the changes by typing 'u'

@@ -8,8 +8,8 @@ tags:
   - shell
 ---
 
-### # background: gitlab-runner job fails when using yes and pipe for automation of interactive cmd
-
+### # autocompletion of interactive cmd failed when enable pipefail
+background: gitlab-runner job fails when using yes and pipe for automation of interactive cmd.  
 given rebornlinux/devkit/.gitlab-ci.yml for gitlab ci/cd as:
 ```text
 stages:
@@ -63,28 +63,20 @@ docker_build.%:
 	$(call docker_push,$(IMG):latest,$(artifactory)/$(IMG):latest)
 ```
 
-<hr>
-
-### # actual behaviour
-inside gitlab runner jobs result page, when exec 'yes | make base', returned:
+actual behaviour: inside gitlab runner jobs result page, when exec 'yes | make base', returned:
 ```text
 ERROR: Job failed: exit status 1
 ```
 which means the yes pipe command return non-zero value.
 
-<hr>
-
-### # root cause analysis
-for cmd like 'yes | ${interactive_cmd}' will fail when yes tries to write to stdout, 
-but the interactive proc's is not reading from its stdin (connected to yes's stdout), 
+root cause analysis: for cmd like 'yes | ${interactive_cmd}' will fail when yes tries to write to stdout,
+but the interactive proc's is not reading from its stdin (connected to yes's stdout),
 this will cause an EPIPE signal.
 
 by default, the gitlab runner enable pipefail check feature by 'set -o pipefail' for scripts running on it, 
 which will cause the ci/cd job fail.
 
-<hr>
-
-### # solution
+solution:  
 modify the rebornlinux/devkit/.gitlab-ci.yml, explicitly set pipefail=false:
 ```text
 stages:
@@ -136,6 +128,7 @@ method_to_use_yes_with_pipefail() {
 pipefail_analysis
 method_to_use_yes_with_pipefail
 ```
+
 the above script outputs:
 ```text
 without setting pipefail,   yes | true          returns: 0

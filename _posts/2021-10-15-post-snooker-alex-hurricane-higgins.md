@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "Billiards: Alex Higgins (the hurricane)"
-author: "twistfatezz"
+title: "Alex Higgins the hurricane (snooker)"
+author: "melon"
 date: 2021-10-15 10:36
 categories: "2021"
 tags:
-  - billiards
+  - snooker
 ---
 
 ### # Alex Higgins BBC Documentary - People's Champion

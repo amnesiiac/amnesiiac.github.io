@@ -8,6 +8,46 @@ tags:
   - shell
 ---
 
+### # shell variable basic usage
+shell variable initialization
+```text
+${parameter:-defaultValue}      get default shell variables value
+${parameter:=defaultValue}      set default shell variables value
+${parameter:?"Error Message"}   display an error message if parameter is not set
+```
+
+the colon usage explanation:
+```text
+${parameter:-defaultValue}      if parameter is not present or unset, return defaultValue to caller.
+${parameter-defaultValue}       if parameter is no present, return defaultValue.
+```
+the colon typically do nothing but expand the parameter, which is used to prevent
+execution of defaultValue as a shell cmd.
+
+other usages
+```text
+${#var}	                        find the length of the string
+
+${var%pattern}                  remove from shortest rear (end) pattern
+${var%%pattern}	                remove from longest rear (end) pattern
+${var:num1:num2}                substring
+
+${var#pattern}                  remove from shortest front pattern
+${var##pattern}	                remove from longest front pattern
+
+${var/pattern/string}	        find and replace (only replace first occurrence)
+${var//pattern/string}	        find and replace all occurrences
+
+${!prefix*}                     expands to the names of variables whose names begin with prefix.
+
+${var,} ${var,pattern}	        convert first character to lowercase.
+${var,,} ${var,,pattern}        convert all characters to lowercase.
+${var^} ${var^pattern}	        convert first character to uppercase.
+${var^^} ${var^^pattern}        convert all character to uppercase.
+```
+
+<hr>
+
 ### # init shell variable using colon
 in rebornlinux/devkit/scripts/build.sh, we have the following variable definition:
 ```text
@@ -37,29 +77,29 @@ readonly BASEBRANCH=$CI_MERGE_REQUEST_TARGET_BRANCH_NAME   # from gitlab ci job 
 
 a quick test to emphasis the drawbacks when using readonly variable:
 ```text
-# set readonly variables
-$ declare -rx logs=hello
+$ declare -rx logs=hello                        # set readonly variables
 
-# check env variables
-$ export
+$ export                                        # check env variables
   declare -x DISPLAY="localhost:16.0"
   declare -x USER="metung"
-  declare -rx logs="hello"  <--- readonly
+  declare -rx logs="hello"                      # readonly
   ...
 
-# check env on cur shell
-$ echo $logs
+$ echo $logs                                    # check env on cur shell
   hello
 
-# try set env on cur shell
-$ logs=good
+$ logs=good                                     # try set env on cur shell
   -bash: logs: readonly variable
+```
 
-# try set env on inherited shell
-# double quote: before var assigned to subshell, it get expanded, so value in cur shell is echo out
-$ bash -c "logs=goodbye; echo $logs"
+```text
+$ bash -c "logs=goodbye; echo $logs"            # try set env on inherited shell
   hello
-# single quote: keep the string pass to subshell static, which will break cur shell readonly env var
-$ bash -c 'logs=goodbye; echo $logs'
+```
+analysis: before var assigned to subshell, double quoted var get expanded, so value in cur shell is echo out.
+
+```text
+$ bash -c 'logs=goodbye; echo $logs'            # try set env on inherited shell
   goodbye
 ```
+analysis: single quote keep the string pass to subshell static, which will break cur shell readonly env var
