@@ -1,3 +1,6 @@
+# tags page in blog work locally but not on github pages (404)
+github pages only allow a whilelist of plugins, jekyll-tag is not included
+
 # context search context output: 
 https://github.com/raghudotcc/simply-jekyll
 
