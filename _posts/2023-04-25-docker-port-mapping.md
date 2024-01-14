@@ -8,8 +8,8 @@ tags:
   - container
   - ongoing
 ---
-{% raw %}
 ### # check port mapping of containers
+{% raw %}
 ```text
 $ docker ps --format="table {{.ID}}\t{{.Image}}\t{{.Ports}}"
 CONTAINER ID   IMAGE       PORTS
@@ -17,15 +17,18 @@ fff4712570ae   transhell
 f8f45cf255d2   blog:v1     0.0.0.0:4000->4000/tcp
 4802b8612083   nvim:v1 
 ```
+{% endraw %}
 the network interface 4000 of host is mapping to the container's 4000/tcp inner port.
 
 <hr>
 
 ### # check port mapping of images
+{% raw %}
 ```text
 $ docker inspect --format="{{json .Config.ExposedPorts}}" blog:v1
 null
 ```
+{% endraw %}
 the null output due to no "EXPOSE ${port}" in blog:v1 Dockerfile, even the running container is configured with port mapping dynamically.
 
 <hr>
@@ -99,4 +102,3 @@ $ docker run -p 6000-6100:8000-8100
 bind a large range of ports will impact on performances due to creating iptable rules for each.
 
 
-{% endraw %}

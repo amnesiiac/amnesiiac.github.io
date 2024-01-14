@@ -9,7 +9,6 @@ tags:
   - ncurses
 ---
 
-{% raw %}
 ### # program read local file(contains special chars) and output to ncurses screen
 ```cpp
 #include <ncurses.h>
@@ -182,7 +181,6 @@ press keys 'ctrl+x; o'   # cycle through windows
 # method-2
 $ focus next
 ```
-{% endraw %}
 
 <hr>
 

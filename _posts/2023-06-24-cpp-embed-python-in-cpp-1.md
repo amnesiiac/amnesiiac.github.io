@@ -9,7 +9,6 @@ tags:
 ---
 
 ### # code to run python hello world in cpp 
-{% raw %}
 menuitem.h: the header file to init 'json-like' key-value data.
 ```cpp
 #include <stdio.h>
@@ -29,7 +28,6 @@ int main(){
     return 0;
 }
 ```
-{% endraw %}
 
 <hr>
 

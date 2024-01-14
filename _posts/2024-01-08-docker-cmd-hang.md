@@ -66,6 +66,7 @@ need restart docker daemon to clean.
 
 inside hostfw, the docker inspect cmd is trying to check mounts from a container,
 but the related syscall poll received no response.
+{% raw %}
 ```text
 status, text = sh.run("{} inspect -f '{{.Mounts}}' {}".format(container_cli, id))
 ```
@@ -74,3 +75,4 @@ add wait timeout to fix:
 ```text
 status, text = sh.run("{} inspect -f '{{.Mounts}}' {}".format(container_cli, id), wait_timeout=3)
 ```
+{% endraw %}

@@ -14,7 +14,8 @@ sometimes, the atime/mtime of files in git repo is changed by some process,
 which make all the timestamps in disorder state. our application might rely on time comparison
 to determine which app/apk need to be build/rebuild, with disordered timestamps the wrong result is got.
 
-e.g. gitlab ci/cd job bug after git clone/fetch src repo in a mounted volume for gitlab runner.
+e.g. gitlab ci/cd job bug after git clone/fetch src repo in a mounted volume for gitlab runner.  
+see blog post: issues when mount src project into gitlab-runner.
 
 <hr>
 
