@@ -753,7 +753,7 @@ clean:
 <hr>
 
 ### # dependencies
-```txt
+```text
 g++ on macos
 Apple clang version 11.0.3 (clang-1103.0.32.62)
 Target: x86_64-apple-darwin20.6.0

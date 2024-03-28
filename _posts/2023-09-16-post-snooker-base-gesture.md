@@ -18,12 +18,22 @@ tags:
 1 heel of right foot should be on the aim line, and slightly deviate to right in direction.  
 2 left foot line and the aim line are parallel.  
 3 when lying down to aim, left leg naturally bends, while the right leg keep straight.  
-4 always keep the cue close to the chest.  
-5 always keep the cue under chin.  
+4 always keep the cue rely on your chest (the pressure to chest should be consistent).  
+5 always keep the cue under chin (the pressure may vary).  
 
 <hr>
 
-### # personal checkpoint for cue direction
+### # hand gesture to hold the cue
+1 all the fingers are used to hold the cue, no extra strengh on, but only lift the stick.  
+2 the middle finger is main responsible for hold the stick,
+the thumb is 2nd, then the index.  
+3 the first 3 fingers should always hold the stick, the rest fingers naturally hold the cue,
+when pulling back, the rest fingers naturally spread, when pulling forward, the first 3
+fingers is main actor.
+
+<hr>
+
+### # checkpoint for cue direction
 1 1st & 2nd finger of left hand, form a tight point.  
 2 chin bottom.  
 3 chest.  
@@ -47,7 +57,7 @@ which will keep the shot line consistent with which you aim at.
 
 <hr>
 
-### # how to generate your cue power
+### # how to develop your cue power
 1 make sure to relex the right hand, just use the mini strengh to hold the weight of the cue.  
 2 after post stop, gradually add power to the cue.  
 3 dont use brutal power, just add linear growing power to the cue.  

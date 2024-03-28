@@ -20,11 +20,11 @@ tags:
               └────+───┬────┘                       kernel space
                    │   │
          ┌─────────┴───+──────────┐
-         │  virtual file system   │   
+         │  virtual file system   │
          ├────────────────────────┤
-         │         driver         │   
+         │         driver         │
          ├────────────────────────┤
-         │        hardware        │   
+         │        hardware        │
          └────────────────────────┘
 ```
 

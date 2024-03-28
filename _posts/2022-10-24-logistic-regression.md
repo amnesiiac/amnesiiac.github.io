@@ -7,6 +7,7 @@ categories: "2022"
 tags:
   - math
 ---
+
 ### # Logistic Distribution
 Let X as a continuous random variable, and obedient to Logistic Distribution, then the X's cumulative distribution function is as follows:
 

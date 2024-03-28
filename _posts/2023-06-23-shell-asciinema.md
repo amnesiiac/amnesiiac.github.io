@@ -34,7 +34,7 @@ $ asciinema play https://asciinema.org/a/difqlgx86ym6emrmd8u62yqu8
 
 <hr>
 
-### # asciinema --help
+### # asciinema \--help
 ```text
 $ asciinema --help
 usage: asciinema [-h] [--version] {rec,play,cat,upload,auth} ...

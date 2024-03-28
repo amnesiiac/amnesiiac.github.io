@@ -10,5 +10,5 @@ tags:
 
 ### # difference between eval, exec, source
 1 eval: execute a cmd.  
-2 exec execute a cmd in new proc, with currrent proc terminated.  
+2 exec: execute a cmd in new proc, with currrent proc terminated.  
 3 source: execute script in current proc.

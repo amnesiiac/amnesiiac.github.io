@@ -137,7 +137,7 @@ The division does not depend on how much RAM is available. Each user space proce
 ### # memory mappings
 • Mappings are also used directly in the kernel when implementing device drivers. The input and output areas of peripheral devices can be mapped into virtual address space; reads and writes to these areas are then redirected to the devices by the system, thus greatly simplifying driver implementation.  
 • ioremap: a function in linux kernel to map physical memory(hardware register/other I/O devices) into kernel virtual address space.  
-• mmap: a system call to map files/devices into memory, which allows a process to acess the contents of file/devices as if in RAM.  
+• mmap: a system call to map files/devices into memory, which allows a process to access the contents of file/devices as if in RAM.  
 • code example to illustrate ioremap usages:
 ```c
 # AUTHOR: GPT-3.5 turbo
@@ -206,7 +206,7 @@ MODULE_DESCRIPTION("Example driver using ioremap");
 • allocating memory: search for approprite size of free block to use, if the block size is larger then twice the required, split it to halfs, return one of them and add the left to memory pool.  
 • free memory: when a block of memory is free, check the existence of if its buddy, if existed, merge them and add back to memory pool.  
 • coalescing(merge): if two adjacent blocks of memory are both free, they can be merged into a single larger block.  
-• splitting: when a block of memroy is splitted into 2 halfs, each half is assigned an identifier encoding its size/address in memory.  
+• splitting: when a block of memory is splitted into 2 halfs, each half is assigned an identifier encoding its size/address in memory.  
 #### (3) slab cache
 • use slab cache for memory blocks much smaller than a whole page frame, it cannot invoke userspace stdlib.  
 • not only performs allocation but also implements a generic cache for frequently used small objects.  

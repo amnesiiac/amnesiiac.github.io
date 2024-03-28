@@ -106,7 +106,7 @@ major bootstrap related dir are mounted from gitlab-runner host to job runtime c
 $ sudo cat /etc/gitlab-runner/config.toml
 [[runners]]
   name = "cloud-server-1"
-  url = "https://gitlabe1.ext.net.nokia.com/"
+  url = "https://gitlabe1.ext.net.xxxxx.com/"
   token = "q2SyArbaxwrh_joKBVp7"
   executor = "docker"
   pre_get_sources_script = "git config --global http.proxy $HTTP_PROXY; git config --global https.proxy $HTTPS_PROXY"
@@ -340,12 +340,16 @@ will modify the mtime for the src code tree.
 
 <hr>
 
-### # solution
-1 discard the mount src code tree action, just use tag for runner for specific job, to re-use the cache,
-thus after each git fetch (not the first) all timestamp will preserved to unchanged file.  
-see https://docs.gitlab.com/ee/ci/caching for details about gitlab ci/cd job caching tricks
+### # solutions
+◆ method-1 use tag for runner for specific job to re-use the cache, let gitlab cache to manage src code tree & timestamp.
 
-2 mount src code tree repo into gitlab runner, add a hook function after each default git operation,
+test result: even with named cache for designated dir, the built apks still need to be rebuilt again among different pipeline after each commit.
+
+see https://docs.gitlab.com/ee/ci/caching for details about gitlab ci/cd job caching tricks.  
+see blog post gitlab cache for understanding of gitlab shared cache in different level.
+
+
+◆ method-2 mount src code tree repo into gitlab runner, add a hook function after each default git operation,
 before bootstrap stage of ci/cd job.  
 the gitlab-ci.yml is like:
 ```text
@@ -365,7 +369,7 @@ variables:
 
 .init:
   image:
-    name: rebornlinux-docker-local.artifactory-blr1.int.net.nokia.com/rebornlinux/basedev:latest
+    name: rebornlinux-docker-local.artifactory-blr1.int.net.xxxxx.com/rebornlinux/basedev:latest
     entrypoint: [""]
   when: manual
   stage: bootstrap
@@ -383,9 +387,9 @@ init-aarch64:
 the restore_repo_time_as_last_commit.sh could be found at blog post: restore git repo file mtime.
 after changing all rebornlinux/aport timestamps, it reported all apk up to date, and the needless rebuilt is skipped.
 
-3 set the GIT_STRATEGY as none, manually clone / fetch the utilized aport repo before each job starts.
-check the corresponding persistent dir on gitlab runner host: whether the timestamp changed to the time of gitlab ci job?
-even this fix the bug, but will not pretain the tag given by gitlab ci/cd pipeline like follows:
+◆ method-3 discard the gitlab build-in git operation by setting the GIT_STRATEGY as none,
+manually clone / fetch the utilized aport repo before each job starts.  
+this method can fix the bug, but will not pretain the tag of each gitlab ci/cd pipeline:
 ```text
 $ git log --oneline
 fff51afa (HEAD, origin/reborn, refs/pipelines/3089452) bootstrap: debugging
@@ -397,3 +401,8 @@ fff51afa (HEAD, origin/reborn, refs/pipelines/3089452) bootstrap: debugging
 ...
 ```
 the tag named pipeline/* is recorded for each pipeline history to trigger job for certain rev of code repo.
+
+<hr>
+
+### # code in action (method #3)
+todo

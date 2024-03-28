@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "dockerized nvim bootstrap script (shell)"
-author: "twistfatezz"
+title: "dockerized nvim bootstrap script (neovim)"
+author: "melon"
 date: 2023-05-24 23:11
 categories: "2023"
 tags:
-  - nvim
+  - vim
   - ongoing
 ---
 

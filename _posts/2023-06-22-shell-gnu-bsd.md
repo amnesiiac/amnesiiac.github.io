@@ -12,14 +12,17 @@ tags:
 linux gnu sed:
 ```shell
 # read file & delete the last line if it is \n
-sed '/^[[:blank:]]*$/{$d;}' tmp
+$(linux) sed '/^[[:blank:]]*$/{$d;}' tmp
 ```
+
 macos bsd sed:  
 ```shell
-sed -i '' '/^[[:blank:]]*$/{$d;}' tmp
+$(macos) sed -i '' '/^[[:blank:]]*$/{$d;}' tmp
 ```
+
 if use gnu sed on macos, will result in:
-```txt
+```text
+$(macos) sed '/^[[:blank:]]*$/{$d;}' tmp
 sed: -I or -i may not be used with stdin
 ```
 

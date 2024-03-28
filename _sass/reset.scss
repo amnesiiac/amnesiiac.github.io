@@ -87,13 +87,42 @@ iframe{
   margin: 10px;
 }
 
+
 details{
+  margin-left: -1px;
   margin-bottom: 10px;
 }
 
 details summary b{
+  margin-left: -3px;
   font-weight: normal;
-  font-size: 14px;
+  font-size: 13px;
+}
+
+details>summary::-webkit-details-marker {
+  display: none;
+}
+
+details>summary::before {
+  content: '+ ';
+}
+
+details[open]>summary::before {
+  content: '- ';
+}
+
+.mjx-chtml.MJXc-display {
+  text-align: center !important;
+  line-height: 14px;
+  margin: 10px 0;
+  padding: 3px 100px 3px 10px;
+  // border: 1px dashed #000;
+  overflow-x: auto;
+  font-size: 10px;
+  font-family: Courier New;
+  text-indent: 0px;
+  background-color: #f0f0f0;
+  // box-shadow: 3px 3px rgba(0, 0, 0, 0.1);
 }
 
 .mjx-math *{
@@ -103,4 +132,3 @@ details summary b{
 .container-posts{
   font-size: 14px;
 }
-

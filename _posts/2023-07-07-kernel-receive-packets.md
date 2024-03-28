@@ -481,7 +481,7 @@ the procedure of accepting network packets:
                               └──────────────────────────────────────────────────────────────┘
 --------------------------->  -------------------------------> tcpdump ---> netfilter ----------->
 ```
-the procedure of accepting network packets:
+the procedure of sending network packets:
 ```txt
                                          (kernel mode)
                   ┌──────────────────────────────────────────────────────────┐
