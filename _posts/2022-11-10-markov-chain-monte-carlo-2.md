@@ -1,48 +1,58 @@
 ---
 layout: post
-title: "Markov Chain Monte Carlo II"
+title: "markov chain monte carlo (II)"
 author: "melon"
 date: 2022-11-10 21:59
 categories: "2022"
 tags:
   - math
 ---
-### # Detailed Balance Condition of Markov Chain
-Definition: Given aperiodic Markov Chain state transition matrix $$P$$, the probability distribution $$\pi(x)$$, the state set $$S$$, for all $$i,j$$, the following equation holds:
 
-$$ \pi_i P_{ij} = \pi_j P_{ji},\; for\ all\ i,j\in S$$
-
-then the $$\pi$$ is the stationary distribution of transition state matrix $$P$$:
-
-$$\pi P=\pi$$
-
-The condition is a sufficient condition.
+this article is a follow-up to the previous MCMC I, which will cover the topic
+that how to find the formular of markov chain transition matrix P to converge to the desired
+stationary distribution $$\pi_(x)$$, and finally get samples of the desired distribution.
 
 <hr>
 
-### # Proofs for Detailed Balanced Condition
+### # detailed balance condition of markov chain
+definition: given aperiodic markov chain state transition matrix P,
+the probability distribution $$\pi(x)$$, the state set S, for all i, j,
+the following equation holds:
 
-sum both side up:
+$$ \pi_i P_{ij} = \pi_j P_{ji},\; for\ all\ i,j\in S$$
+
+then the $$\pi$$ is the stationary distribution of state transition matrix $$P$$:
+
+$$\pi P=\pi$$
+
+the condition is a sufficient condition.
+
+<hr>
+
+### # why detailed balanced condition is sufficient condition?
+sum both side of the detailed balanced equation up:
 
 $$ \sum_i\pi_i P_{ij} = \sum_i\pi_j P_{ji} \quad \Rightarrow \quad \sum_i\pi_i P_{ij} = \pi_j \sum_i P_{ji}$$
 
-Obviously, $$ \sum_i P_{ji}=1 $$, thus we have:
+obviously, $$ \sum_i P_{ji}=1 $$, thus we have:
 
 $$ \sum_i\pi_i P_{ij} = \pi_i \quad \Rightarrow \quad \pi P=\pi$$
 
 try explain this in details, for each j in state set:
 
-$$ \sum_i\pi_i P_{i1} = \pi_1, \sum_i\pi_i P_{i2}=\pi_2,...,\sum_i\pi_i P_{iN}=\pi_N $$
+$$ \sum_i\pi_i P_{i1} = \pi_1, \; \sum_i\pi_i P_{i2}=\pi_2\; ... \; \sum_i\pi_i P_{iN}=\pi_N $$
 
 which is typically another form of $$\pi P=\pi$$.
 
 <hr>
 
-### # Sufficient and Necessary Condition
-The detailed balance condition of Markov Chain is a sufficient and necessary condition when it's applyed to 2D distribution.
+### # sufficient and necessary condition
+the detailed balance condition is a sufficient and necessary condition
+only when it's applyed to 2D distribution.
+proof of the necessity of detailed balanced conditon to a stationary markov distribution is
+concluded as following equations.
 
-Proofs:
-Given initial state vector (2D): 
+given initial state vector (2D) as:
 
 $$v=[v_1, v_2]$$
 
@@ -56,7 +66,7 @@ p_{21} & p_{22}
 \end{array}\right]
 $$
 
-when reaches the stationary condition, we have $$v^t = v^{t+1}$$:
+when reaching the stationary condition, we have $$v^t = v^{t+1}$$:
 
 $$ 
 v^tP = [v_1^t,v_2^t]
@@ -64,7 +74,7 @@ v^tP = [v_1^t,v_2^t]
 p_{11} & p_{12} \\
 p_{21} & p_{22}
 \end{array}\right]
-= [v_1^tp_{11}+v_2^tp_{21}, v_1^tp_{12}+v_2^tp_{22}] = [v_1^{t+1}, v_2^{t+1}]
+= [v_1^tp_{11}+v_2^tp_{21}, \; v_1^tp_{12}+v_2^tp_{22}] = [v_1^{t+1}, v_2^{t+1}]
 $$
 
 equivalent to:
@@ -75,85 +85,109 @@ when reaching stationary condition, plug $$v_1^{t}=v_1^{t+1}$$ and $$v_2^{t}=v_2
 
 $$ v_1^tp_{11}+v_2^tp_{21} = v_1^t, \quad v_1^tp_{12}+v_2^tp_{22} = v_2^t $$
 
-simplify by $$ p_{11}+p_{12}=1$$ and $$p_{21}+p_{22}=1$$, we found that:
+simplify the above formular using $$ p_{11}+p_{12}=1$$ and $$p_{21}+p_{22}=1$$, found that:
 
 $$ v_1^t(1-p_{11}) = v_2^tp_{12} \quad \Rightarrow \quad v_1^tp_{12}=v_2^tp_{12} $$
 
 $$ v_2^t(1-p_{22}) = v_1^tp_{12} \quad \Rightarrow \quad v_2^tp_{21}=v_1^tp_{12} $$
 
-which conform to the detailed balanced condition of Markov Chain.
+which conform to the detailed balanced condition of markov chain.
 
 <hr>
 
-### # Sufficient Condition
-The detailed balance condition of Markov Chain is a sufficient condition when it's applyed in a distribution>=2D.
+### # sufficient condition
+the detailed balance condition of markov chain is a sufficient condition when it's applyed in a distribution>=2D.
 
 <hr>
 
-### # Markov Chain Monte Carlo Sampling
-Thus the MCMC sampling can be narrowed down to the method: try to find a matrix conform to detailed stationary condition, thus we have $$\pi P=\pi$$ which denotes the stationary Markov distribution, finally we could use the derived matrix to generate sampling points.
+### # markov chain monte carlo sampling
+given detailed balanced condition above, MCMC sampling can be narrowed down to:  
+try find a matrix conform to detailed stationary condition, by which $$\pi P=\pi$$ denotes
+the stationary markov distribution. then the derived matrix can be used to generate sampling points.
 
-Unfortunately, hardly can we found matrix $$P$$ which conforms to detailed stationary condition. 
+unfortunately, hardly can we found matrix $$P$$ which conforms to detailed stationary condition.
+we can resort to the idea of acceptance-rejection sampling, to derive the final result by
+optimizing a easy-to-get transition matrix.
 
-In general, a certain Markov Chain state transition matrix $$Q$$ with target stationary distribution $$\pi$$, does not meet the detailed balance condition:
+in general cases, a certain markov chain state transition matrix $$Q$$ with
+target stationary distribution $$\pi$$, does not meet the detailed balance condition:
 
 $$ \pi_iQ_{ij} \ne \pi_jQ_{ji},\ for\ all\ i,j \in S $$
 
-Possibly, we could repair the above formula with $$\alpha$$:
+possibly, we can repair the above formula with $$\alpha$$:
 
 $$ \pi_iQ_{ij}\alpha_{ij} = \pi_jQ_{ji}\alpha_{ji} $$ 
 
+it's quite easy to conclude that the following scheme meet the need:
+
 $$ \alpha_{ij}=\pi_jQ_{ji}, \; \alpha_{ji}=\pi_iQ_{ij} $$
 
-Let Markov Chain state transition matrix $$P_{ij} = Q_{ij}\alpha_{ij}$$, thus we could build up the matrix conform to the detailed balance condition. 
+thus, let markov chain state transition matrix $$P_{ij} = Q_{ij}\alpha_{ij}$$,
+thus we can build up the matrix conform to the detailed balance condition.  
+moreover, the $$\alpha_{ij}$$ can be seen as "acceptance-rejection rate" in the range of
+$$[0,1]$$.
+hence, we could derive markov chain state transition matrix $$P$$ by accepting or rejecting
+a common markov chain state transition matrix $$Q$$ at certain possibility.
 
-Moreover, the $$\alpha_{ij}$$ can be viewed as "acceptance-rejection rate" in the range of $$[0,1]$$. Hence, we could derive Markov Chain state transition matrix $$P$$ by accepting or rejecting a common markov Chain state transition matrix $$Q$$ at certain possibility.
-
-The Markov Chain Monte Carlo sampling method are as follows: <br>
-\- input any given Markov Chain state transition matrix $$Q$$, target stationary distribution $$\pi_x$$, maximum transition times $$n$$, number of samples to get $$m$$. <br>
-\- derive initial state $$x_0$$ from arbitary simple distribution. <br>
-\- for $$t=0$$ to $$n+m-1$$ <br>
-&emsp; - sample from condition distribution $$Q(x\mid x_t)$$ to get $$x_*$$ <br>
-&emsp; - sample from uniform distribution to get $$u$$ <br>
-&emsp; - if $$u<\alpha(x_t,x_*) = \pi(x_*)Q(x_*,x_t)$$, then accept $$x_t \to x_*$$, which denotes $$x_{t+1} = x_*$$ <br>
-&emsp; - else reject the transition, $$t=max\{t-1,0\}$$ <br>
+the markov chain monte carlo sampling method are as follows:  
+(1) input any given markov chain state transition matrix $$Q$$, target stationary distribution $$\pi(x)$$,
+maximum transition times $$n$$, number of samples to get $$m$$.  
+(2) derive initial state $$x_0$$ from arbitary simple distribution.  
+(3) for $$t=0$$ to $$n+m-1$$:  
+(3.1) sampling from condition distribution $$Q(x\mid x_t)$$ to get $$x_*$$  
+(3.2) sampling from uniform distribution to get $$u$$  
+(3.3) if $$u<\alpha(x_t,x_*) = \pi(x_*)Q(x_*,x_t)$$, then accept $$x_t \to x_*$$, which denotes $$x_{t+1} = x_*$$  
+(3.4) else reject the transition, $$x_{t+1}=x_t$$ ($$t=max\{t-1,0\}$$).  
 
 <hr>
 
-### # Metropolis-Hastings Sampling
-The drawbacks of the above sampling method is that: usually, $$\alpha(x_t,x_*)$$ is extremelly small so that the accept rate of the sampling is fairly small, which may lead to failure in Markov Chain convergence.
+### # metropolis-hastings sampling
+the drawbacks of the above sampling method is that:
+usually, $$\alpha(x_t,x_*)$$ is extremely small, thus the accept rate of the sampling
+is fairly small, which makes it hard for markov chain to convergence.
 
-We could just ajust the following equation by adding a multiply factor on both side:
+recall the MCMC sampling equation:
 
 $$ \pi_iQ_{ij} \alpha_{ij} = \pi_jQ_{ji} \alpha_{ji} $$ 
 
-the multiplier is as follows to make the above equation holds, and let acceptance rate not that small:
+by adding a multiply factor on both side, the M-H sampling alleviate the MCMC drawbacks:
 
 $$ \alpha_{ij}=min\{\frac{\pi_jQ_{ji}}{\pi_iQ_{ij}},1\}, \quad \alpha_{ji}=min\{\frac{\pi_iQ_{ij}}{\pi_jQ_{ji}},1\} $$
 
-The Metropolis-Hastings sampling method are as follows: <br>
-\- input any given Markov Chain state transition matrix $$Q$$, target stationary distribution $$\pi_x$$, maximum transition times $$n$$, number of samples to get $$m$$. <br>
-\- derive initial state $$x_0$$ from arbitary simple distribution. <br>
-\- for $$t=0$$ to $$n+m-1$$ <br>
-&emsp; - sample from condition distribution $$Q(x\mid x_t)$$ to get $$x_*$$ <br> 
-&emsp; - sample from uniform distribution $$U(0,1)$$to get $$u$$ <br>
-&emsp; - if $$u<\alpha(x_t,x_*) = min\{\frac{\pi_*Q(x_*,x_t)}{\pi_tQ(x_t,x_*)}\quad ,1\}$$, then accept $$x_t \to x_*$$, which denotes $$x_{t+1} = x_*$$ <br> 
-&emsp; - else reject the transition, $$t=max\{t-1,0\}$$ <br>
+the multiplier above is designed to make the detailed balanced condition holds,
+and to make sure the acceptance rate considerable.
 
-In most cases, the chosen Markov Chain transition matrix is symmetrical, the acceptance rate can be written as:
+the metropolis-hastings sampling method are as follows:  
+(1) input any given markov chain state transition matrix $$Q$$, target stationary distribution
+$$\pi_x$$, maximum transition times $$n$$, number of samples to get $$m$$.  
+(2) derive initial state $$x_0$$ from arbitary simple distribution.  
+(3) for $$t=0$$ to $$n+m-1$$:  
+(3.1) sampling from condition distribution $$Q(x\mid x_t)$$ to get $$x_*$$  
+(3.2) sampling from uniform distribution $$U(0,1)$$to get $$u$$  
+(3.3) if $$u<\alpha(x_t,x_*) = min\{\frac{\pi_*Q(x_*,x_t)}{\pi_tQ(x_t,x_*)}\quad ,1\}$$,
+then accept $$x_t \to x_*$$, which denotes $$x_{t+1} = x_*$$  
+(3.4) else reject the transition, $$x_{t+1}=x_t$$ ($$t=max\{t-1,0\}$$).
+
+in most cases, the chosen markov chain transition matrix is symmetrical:
+
+$$*Q(x_*,x_t) = Q(x_t,x_*)$$
+
+thus, according to (3.3), the acceptance rate can be re-written as:
 
 $$\alpha_{ij} = min\{\frac{\pi_j}{\pi_i}, 1\}$$
 
-Moreover, the detailed balance condition can be generalized in vectorized mode:
+moreover, the detailed balance condition can be generalized in vectorized mode:
 
 $$\pi(I)P(I,J) = \pi(J)P(J,I)$$
 
-in which $$I$$ and $$J$$ are vector of multi-dimension.
+in which $$I$$ and $$J$$ are multi-dimension vectors.
 
 <hr>
 
-### # M-H sampling python example
-Assuming that target distribution as $$N(\mu=3, \sigma=2)$$, the chosen Markov Chain state transition matrix $$Q(i,j)=N(\mu=i,\sigma=1)$$, thus we could using the following python snippet to mimic M-H sampling algorithm.
+### # metropolis-hastings sampling code (python) 
+assuming target distribution as $$N(\mu=3, \sigma=2)$$,
+the chosen markov chain state transition matrix $$Q(i,j)=N(\mu=i,\sigma=1)$$,
+thus the following python snippet can be used to mimic M-H sampling algorithm.
 ```text
 import matplotlib.pyplot as plt
 from scipy.stats import norm
@@ -168,10 +202,10 @@ sigma = 1
 t = 0
 while t < T-1:
     t = t + 1
-    u = random.uniform(0, 1)                                                  # u from U(0,1)
-    x_star = norm.rvs(loc=pi[t - 1], scale=sigma, size=1, random_state=None)  # x_* from Q(x|x_t)
+    u = random.uniform(0, 1)                                                  # u ~ U(0,1)
+    x_star = norm.rvs(loc=pi[t - 1], scale=sigma, size=1, random_state=None)  # x_* ~ Q(x|x_t)
     alpha = min((norm_dist_prob(x_star[0])/norm_dist_prob(pi[t-1])), 1)       # alpha(x_t,x_*)
-    pi[t] = x_star[0] if u<alpha else pi[t-1]                                 # iteration
+    pi[t] = x_star[0] if u<alpha else pi[t-1]                                 # accept or reject
 
 plt.scatter(pi, norm.pdf(pi, loc=3, scale=2), label='')                       # target distribution
 plt.hist(pi, num_bins=50, normed=1, facecolor='red', alpha=0.7, label='')     # sample distribution
@@ -181,49 +215,63 @@ plt.show()
 
 <hr>
 
-### # Gibbs Sampling
-M-H sampling has 2 drawbacks: <br>
-<1> Generally, the feature dimension of the sample points are large, which makes the computing of acceptance formula $$min\{\pi_jQ_{ij}/\pi_iQ_{ji}, 1\}$$ time-consuming, moreover, $$\alpha_{ij}<1$$ is a waste of resources. Can we design a method without rejection? <br>
-<2> Due to the curse of dimensionality, hardly can we derive the joint distribution of all features, but marginal condition distribution are commonly easy to get. Can we design a sampling method from the known marginal distributions?
+### # drawbacks of M-H sampling
+(1) generally, the feature dimension of the sample points are large,
+which makes the computing of acceptance formula $$min\{\pi_jQ_{ij}/\pi_iQ_{ji}, 1\}$$ time-consuming,
+moreover, $$\alpha_{ij}<1$$ is a waste of resources.
+can we design a method without rejection?
 
-Thus, we should find another way to the defailed balance condition.
+(2) due to the curse of dimensionality, hardly can we derive the joint distribution of all features,
+but marginal condition distribution are commonly easier to get.
+can we design a sampling method from the known marginal distributions?
+
+that is to say, we should find another way to conform to the defailed balance condition, and optimize
+the MC sampling steps.
 
 <hr>
 
-### # 2-D Gibbs Sampling Proofs
-Assuming $$\pi(x,y)$$ as 2-d joint distribution, observing two points $$A(x_1,y_1)$$ and $$B(x_1,y_2)$$, the following equation holds:
+### # gibbs sampling
+analysis can be started on simple 2d joint distribution $$\pi(x,y)$$.
+observations can be made on two points $$A(x_1,y_1)$$ and $$B(x_1,y_2)$$ (the first dimension are the same),
+then the following equation holds:
 
 $$
-\pi(x_1, y_1) \pi(y_2 \mid x_1) = \pi(x_1) \pi(y_1 \mid x_1) \pi(y_2 \mid x_1) \\
-\pi(x_1, y_2) \pi(y_1 \mid x_1) = \pi(x_1) \pi(y_2 \mid x_1) \pi(y_1 \mid x_1) 
+\pi(A)\; \pi(y_2 \mid x_1) = \pi(x_1, y_1)\; \pi(y_2 \mid x_1) = \pi(x_1) \pi(y_1 \mid x_1)\; \pi(y_2 \mid x_1) \\
+\pi(B)\; \pi(y_2 \mid x_1) = \pi(x_1, y_2)\; \pi(y_1 \mid x_1) = \pi(x_1) \pi(y_2 \mid x_1)\; \pi(y_1 \mid x_1) 
 $$
 
-judging by the right side's equality, which gives us:
+re-organize the above rightmost part of the above equation:
 
-$$
-\pi(x_1, y_1) \pi(y_2 \mid x_1) = \pi(x_1, y_2) \pi(y_1 \mid x_1) \\
-\pi(A)\pi(y_2 \mid x_1) = \pi(B)\pi(y_1 \mid x_1) \; \Leftrightarrow \; \pi_iP_{ij}=\pi_jP_{ji}
-$$
+$$ \pi(x_1, y_1)\; \pi(y_2 \mid x_1) = \pi(x_1, y_2)\; \pi(y_1 \mid x_1) $$
 
-thus, if the Markov Chain state transition matrix $$P_{i\to j}$$ denotes $$\pi(y\mid x_1)$$, $$i=A,\; j=B$$, the transition between any two points on the line $$x=x_1$$ conforms to the defailed balance condition.
+there is no harm in setting markov chain state transition matrix ($$P_{i\to j}$$) as $$\pi(y\mid x_1)$$,
+the start & end state as $$i=A,\; j=B$$, which gives:
 
-Similarly, given the points $$C(x_2,y_1)$$ with $$A(x_1,y_1)$$, the following equation holds:
+$$ \pi(A)\; \pi(y_2 \mid x_1) = \pi(B)\; \pi(y_1 \mid x_1) \; \Leftrightarrow \; \pi_iP_{ij}=\pi_jP_{ji} $$
+
+the transition between any 2 points on the line $$x=x_1$$
+conforms to the defailed balance condition.  
+similarily, given the points $$C(x_2,y_1)$$ with $$A(x_1,y_1)$$, the following equation holds:
 
 $$
 \pi(x_1, y_1) \pi(x_2 \mid y_1) = \pi(y_1) \pi(x_1 \mid y_1) \pi(x_2 \mid y_1) \\
 \pi(x_2, y_1) \pi(x_1 \mid y_1) = \pi(y_1) \pi(x_2 \mid y_1) \pi(x_1 \mid y_1) 
 $$
 
-judging by the right side's equality, which gives us:
+re-organize the above rightmost part of the above equation:
 
-$$
-\pi(x_1, y_1) \pi(x_2 \mid y_1) = \pi(x_2, y_1) \pi(x_1 \mid y_1) \\
-\pi(A)\pi(x_2 \mid y_1) = \pi(C)\pi(x_1 \mid y_1) \; \Leftrightarrow \; \pi_iP_{ij}=\pi_jP_{ji}
-$$
+$$ \pi(x_1, y_1) \pi(x_2 \mid y_1) = \pi(x_2, y_1) \pi(x_1 \mid y_1) $$
 
-thus, if the Markov Chain state transition matrix $$P_{i\to j}$$ denotes $$\pi(x\mid y_1)$$, $$i=A,\; j=C$$, the transition between any two points on the line $$y=y_1$$ conforms to the defailed balance condition.
+there is no harm in setting markov chain state transition matrix ($$P_{i\to j}$$) as $$\pi(x\mid y_1)$$,
+the start & end state as $$i=A,\; j=C$$, which gives:
 
-To sum-up the above observations, we can concluded a way to derive the Markov Chain state transition matrix $$P$$ as:
+$$ \pi(A)\pi(x_2 \mid y_1) = \pi(C)\pi(x_1 \mid y_1) \; \Leftrightarrow \; \pi_iP_{ij}=\pi_jP_{ji} $$
+
+the transition between any 2 points on the line $$y=y_1$$
+conforms to detailed balance condition.
+
+finally, a shortcut transition path is concluded to always fullfil the detailed balanced condition,
+thus providing a algorithm to derive the markov chain state transition matrix P:
 
 $$
 P(A\to B) = \pi(y_B\mid x_1), \; if\ x_A=x_B=x_1 \\
@@ -233,25 +281,29 @@ $$
 
 <hr>
 
-### # 2-D Gibbs Sampling Algorithm
-\- input stationary distribution $$\pi(x,y)$$, maximum transition times $$n$$, number of samples to get $$m$$. <br>
-\- initialize start values $$x_1, y_1$$ randomly. <br>
-\- for $$t=0$$ to $$t=n+m-1$$: <br>
-&emsp; - sampling from condition distribution $$\pi(y\mid x_t)$$ to get $$y_{t+1}$$. <br>
-&emsp; - sampling from condition distribution $$\pi(x\mid y_{t+1})$$ to get $$x_{t+1}$$. <br>
-\- during the sampling, the Markov Chain transition are along the 2 axis: $$(x_1,y_1)\to(x_1,y_2)\to(x_2,y_2)...(x_{n+m-1},y_{n+m-1})$$. <br>
-\- the derived sample points $$\{(x_{n},y_{n}),(x_{n+1},y_{n+1}),...(x_{n+m-1},y_{n+m-1}) \}$$ is the 2-D Gibbs sampling results. <br>
+### # 2d gibbs sampling algorithm
+(1) input stationary distribution $$\pi(x,y)$$, maximum transition times $$n$$, number of samples to get $$m$$.  
+(2) initialize startup values $$x_1, y_1$$ randomly.  
+(3) for $$t=0$$ to $$t=n+m-1$$:  
+(3.1) sampling from condition distribution $$\pi(y\mid x_t)$$ to get $$y_{t+1}$$.  
+(3.2) sampling from condition distribution $$\pi(x\mid y_{t+1})$$ to get $$x_{t+1}$$.  
+(4) during the sampling, the markov chain transition are along the 2 axis:  
+
+$$(x_1,y_1)\to(x_1,y_2)\to(x_2,y_2)...(x_{n+m-1},y_{n+m-1})$$
+
+(5) the derived sample points $$\{(x_{n},y_{n}),(x_{n+1},y_{n+1}),...(x_{n+m-1},y_{n+m-1}) \}$$
+are results of gibbs sampling.
 
 <hr>
 
-### # 2-D Gibbs Sampling Applied in Guassian Distribution
-According to chapter 2.3 of PRML, the 1D form of Guassian distribution are as follows:
+### # 2d gibbs sampling applied in guassian distribution
+according to chapter 2.3 of PRML, the 1D form of gaussian distribution are as follows:
 
 $$
 \mathcal{N}\left(x \mid \mu, \sigma^2\right)=\frac{1}{\left(2 \pi \sigma^2\right)^{1 / 2}} \exp \left\{-\frac{1}{2 \sigma^2}(x-\mu)^2\right\}
 $$
 
-without loss of generality, the multi-variate Gaussian distribution takes the form:
+without loss of generality, the multi-variate gaussian distribution takes the form:
 
 $$
 \mathcal{N}(\mathbf{x} \mid \boldsymbol{\mu}, \boldsymbol{\Sigma})=\frac{1}{(2 \pi)^{D / 2}} \frac{1}{|\boldsymbol{\Sigma}|^{1 / 2}} \exp \left\{-\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^{\mathrm{T}} \boldsymbol{\Sigma}^{-1}(\mathbf{x}-\boldsymbol{\mu})\right\}
@@ -259,22 +311,22 @@ $$
 
 in which the $$\boldsymbol{\mu}$$ is mean vector, $$\boldsymbol{\Sigma}$$ is a $$D\times D$$ covariance matrix, and the $$\mid\boldsymbol{\Sigma}\mid$$ denotes its determinant.
 
-Moreover, the Gaussian distribution can be characterized by the `Mahalanobis distance` of $$\mathbf{x}$$ to $$\boldsymbol{\mu}$$:
+moreover, the gaussian distribution can be characterized by the mahalanobis distance of $$\mathbf{x}$$ to $$\boldsymbol{\mu}$$:
 
 $$
 \Delta^2=(\mathbf{x}-\boldsymbol{\mu})^{\mathrm{T}} \boldsymbol{\Sigma}^{-1}(\mathbf{x}-\boldsymbol{\mu})
 $$
 
-<details>
-    <summary><b>The descriptor for 2D Guassian distribution</b></summary>
-    <center><img src="/assets/images/2022/markov-chain-monte-carlo/3.png" width="60%"></center>
-</details>
+the descriptor of 2d gaussian distribution is as:
+
+<img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/mcmc3.pdf" width="320"/>
 
 <details>
-    <summary><b>The procedure of gibbs sampling applied to Guassian distribution</b></summary>
+    <summary><b>the procedure of gibbs sampling applied to gaussian distribution</b></summary>
     <center><img src="/assets/images/2022/markov-chain-monte-carlo/2.gif" width="80%"></center>
 </details>
 
+python code for generating the above gif:
 ```text
 import numpy as np
 import matplotlib.pyplot as plt
@@ -427,33 +479,36 @@ gif.save(frames, "/Users/mac/desktop/gibbs.gif", duration=150)            # GIF
 
 <hr>
 
-### # n-D Gibbs Sampling
-\- input stationary distribution $$\pi(x,y,z)$$, set state transition threshold $$n$$, num of samples $$m$$. <br>
-\- initialize start values $$(x_1, y_1, z_1)$$. <br>
-\- for $$t=0$$ to $$t=n+m+1$$: <br>
-&emsp; - sampling from condition distribution $$p(x\mid y_t,z_t)$$ to get $$x_{t+1}$$. <br>
-&emsp; - sampling from condition distribution $$p(y\mid x_{t+1},z_{t})$$ to get $$y_{t+1}$$. <br>
-&emsp; - sampling from condition distribution $$p(z\mid x_{t+1}, y_{t+1})$$ to get $$z_{t+1}$$. <br>
-\- the derived samples $$\{(x_n,y_n,z_n),(x_{n+1},y_{n+1},z_{n+1})...(x_{n+m-1},y_{n+m-1},z_{n+m-1})\}$$ is the n-D Gibbs sampling results. <br>
+### # n-dimension gibbs sampling
+(1) input stationary distribution $$\pi(x,y,z)$$, set state transition threshold $$n$$, num of samples $$m$$.  
+(2) initialize start values $$(x_1, y_1, z_1)$$.  
+(3) for $$t=0$$ to $$t=n+m+1$$:  
+(3.1) sampling from condition distribution $$p(x\mid y_t,z_t)$$ to get $$x_{t+1}$$.  
+(3.2) sampling from condition distribution $$p(y\mid x_{t+1},z_{t})$$ to get $$y_{t+1}$$.  
+(3.3) sampling from condition distribution $$p(z\mid x_{t+1}, y_{t+1})$$ to get $$z_{t+1}$$.  
+(4) the derived samples $$\{(x_n,y_n,z_n),(x_{n+1},y_{n+1},z_{n+1})...(x_{n+m-1},y_{n+m-1},z_{n+m-1})\}$$
+is the n-d gibbs sampling results.
 
 <hr>
 
-### # Reference
-> https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo <br>
-> https://zhuanlan.zhihu.com/p/37121528
-> https://mr-easy.github.io/2020-05-21-implementing-gibbs-sampling-in-python/
-> https://houbb.github.io/2020/01/28/math-01-markov-chain <br>
-> https://www.zhihu.com/question/63305712 <br>
-> https://www.cnblogs.com/pinard/p/6632399.html <br>
-
-> https://chaoli.club/index.php/2066/0
+### # reference
+https://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo  
+https://zhuanlan.zhihu.com/p/37121528  
+https://mr-easy.github.io/2020-05-21-implementing-gibbs-sampling-in-python/
+https://houbb.github.io/2020/01/28/math-01-markov-chain  
+https://www.zhihu.com/question/63305712  
+https://www.cnblogs.com/pinard/p/6632399.html  
 
 <hr>
 
-### # Keyword Desc
-`Aperiodic Markov Chain`: The transition state are not in a loop. A periodic Markov Chain is non-convergent.
-For any state $$i$$, let $$d$$ denotes the greatest common divisor of set $$\{n\mid n>=1, P_{ii}^n>0\}$$, if $$d=1$$, then this Markov Chain is aperiodic.
+### # keyword desc
+aperiodic Markov Chain: the transition state are not in a loop. aperiodic markov cHain is non-convergent.
+for any state $$i$$, let $$d$$ denotes the greatest common divisor of set $$\{n\mid n>=1, P_{ii}^n>0\}$$,
+if $$d=1$$, then this markov chain is aperiodic.
 
-`Any two of Markov Chain State are connected`: The possiblility start from arbitary state to any end state within limited steps is non-zero.
+any two of markov chain state are connected:
+the possiblility start from arbitary state to any end state within limited steps is non-zero.
 
-`The number of states in Markov Chain`: The number can be infinite of finite, used for continuous probability distribution and discrete probability distribution separately.
+The number of states in markov chain:
+the number can be infinite of finite,
+used for continuous probability distribution and discrete probability distribution separately.

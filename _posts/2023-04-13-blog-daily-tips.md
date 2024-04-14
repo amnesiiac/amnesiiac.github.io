@@ -1,12 +1,11 @@
 ---
 layout: post
 title: "daily writing tips (blog)"
-author: "twistfatezz"
+author: "melon"
 date: 2023-04-13 20:42
 categories: "2023"
 tags:
   - blog
-  - ongoing
 ---
 
 ### # raw tag to disable liquid processing
@@ -15,6 +14,7 @@ consider the following blog code snippet:
 ```cpp
 vector<int> vec = {{1,3}, {1,2}, {2,4}};
 ```
+
 which will result in:
 ```text
 Error: Liquid syntax error (line 6): Variable '{{1,3}' was not properly terminated with regexp: /\}\}/
@@ -38,6 +38,18 @@ insert graph with toggle button:
 </details>
 ```
 
+insert math graph hosted on https://www.desmos.com/calculator:
+```text
+<details>
+    <summary><b>Solve the Integral From a to b</b></summary>
+    <center>
+    <iframe src="https://www.desmos.com/calculator/vvpzvriqdq?embed" width="400" height="180"
+            style="border: 1px solid #ccc" frameborder=0>
+    </iframe>
+    </center>
+</details>
+```
+
 using github cdn repo as graph registry, with width set:
 ```text
 <img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/autoencoder.pdf" width="350"/>
@@ -57,6 +69,7 @@ just use the svg tag:
     <circle cx="150" cy="100" r="10" fill="blue"/>
 </svg>
 ```
+
 the following are not necessary:
 ```text
 {::nomarkdown}

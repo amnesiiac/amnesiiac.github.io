@@ -1,27 +1,40 @@
 ---
 layout: post
-title: "Linear Regression"
-author: "twistfatezz"
+title: "linear regression"
+author: "melon"
 date: 2022-10-29 09:52
 categories: "2022" 
 tags:
   - math
 ---
-### # Introduction
-In statistics, linear regression is a linear approach for modelling the relationship between a scalar response and one or more explanatory variables (dependent and independent variables). 
 
-### # Variants
-The case of one explanatory variable is called `simple linear regression`: $$y=f(x)$$.
-For more than one explanatory variables, the process is called `multiple linear regression`: $$y=f(x_1,x_2...,x_n)$$. 
-For more then one response variables, the process is called `multivariate linear regression`: $$y_i=f_i(x)$$.
-Finally, we have `multivariate multiple regression`: $$y_i=f_i(x_1,x_2...,x_n)$$.
+### # introduction
+in statistics, linear regression is a linear approach for modelling the relationship
+between a scalar response and one or more explanatory variables (dependent and independent
+variables). 
 
-<details>
-    <summary><b>Simple Linear Regression</b></summary>
-    <center><img src="/assets/images/2022/linear-regression/1.png" width="50%"></center>
-</details>
+<hr>
 
-Generalization form using matrix: 
+### # variants
+the case of one explanatory variable is called simple linear regression:
+
+$$y=f(x)$$
+
+<img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/lr2.pdf" width="300"/>
+
+for more than one explanatory variables, the process is called multiple linear regression:
+
+$$y=f(x_1,x_2...,x_n)$$
+
+for more then one response variables, the process is called multivariate linear regression:
+
+$$y_i=f_i(x)$$
+
+finally, we have multivariate multiple regression:
+
+$$y_i=f_i(x_1,x_2...,x_n)$$
+
+the linear expression in matrix form:
 
 $$ Y=XW+\epsilon $$
 
@@ -56,26 +69,33 @@ w_o \\ w_1 \\ \vdots \\ w_p
 \end{array}\right)
 $$
 
-where Y is a matrix with series of multivariate measurements, X is a matrix of observations on independent variables, W is a matrix containing parameters to be estimated and epsilon is a matrix containing errors (noise). 
+where Y is a matrix with series of multivariate measurements,
+X is a matrix of observations on independent variables,
+W is a matrix contains parameters to be estimated,
+and epsilon is a matrix contains errors (noise).
 
-### # Regression in Math
-Given linear regression model as following formula:
+<hr>
+
+### # math solution of 2d linear regression
+given linear regression model as following formula:
 
 $$ y = H_w(x) = w_1 + w_2 \times x $$
 
-To find the best formula paramters which fits the given sample data points $$(x_1,y_1), (x_2,y_2)...,(x_n,y_n)$$ best, given the loss function (MSE) below, then the best fitting line problem is equivalent to:
+to find the best formula paramters which fits the given sample data points
+$$(x_1,y_1), (x_2,y_2)...,(x_n,y_n)$$ best, given the loss function (MSE) below,
+then the best fitting line problem is equivalent to:
 
 $$ Minimize\ J(w_1,w_2) = \frac{1}{n}\sum_{i=1}^n(pred_i-y_i)^2 $$
 
-There is no harm in adding a multiplier factor:
+there is no harm in adding a multiplier factor:
 
 $$ Minimize\ J(w_1,w_2) = \frac{1}{2n}\sum_{i=1}^n(pred_i-y_i)^2 $$
 
-The equivalent form of the formula above is as follows: 
+the equivalent form of the formula above is as follows:
 
 $$ Minimize\ J(w_1, w_2) = \frac{1}{2n}\sum_{i=1}^n(H_w(x_i)-y_i)^2 $$
 
-By `gradient descent method`, the parameter updating is as follows: 
+by gradient descent method, the parameter updating is as follows:
 
 $$ w_t = w_t - \alpha\frac{\partial}{\partial w_t}J(w_1,w_2) $$
 
@@ -85,11 +105,12 @@ $$
 
 $$ Finally \quad w_t = w_t - \frac{\alpha}{n}\sum_{i=1}^n[(H_w(x_i)-y_i)x_i] $$
 
-### # Example
+<hr>
+
+### # example
 todo
 
-### # Reference
-> https://en.wikipedia.org/wiki/Linear_regression <br>
+<hr>
 
-### # Keyword Desc
-
+### # reference
+https://en.wikipedia.org/wiki/Linear_regression  

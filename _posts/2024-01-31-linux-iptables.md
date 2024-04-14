@@ -68,8 +68,8 @@ handle the packet path accordingly.
 ### # build-in tables & chains in iptables
 the iptables rules cover 3 level of concepts: tables, chain and rules.
 
-different tables are generally used for various purposes:  
-e.g. NAT is used for handling network address translation (port forwarding, port mapping\.\.\.),
+different tables are generally used for various purposes:
+e.g. NAT is used for handling network address translation (ip addr translation, port forwarding, port mapping\...),
 FILTER table is used for judging whether packets can be passed ro filtered out.
 
 the inner rules combination within each table is form into a chain, in which all the packets

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Monte Carlo Method"
+title: "monte carlo method"
 author: "melon"
 date: 2022-10-30 22:14
 categories: "2022" 
@@ -8,134 +8,168 @@ tags:
   - math
 ---
 
-### # Introduction
-Monte Carlo was originally the name of a casino, probably because the Monte Carlo method is a random simulation method, much like the process of throwing dice in a casino.
+monte carlo was originally the name of a casino, probably because
+the monte carlo method is a random simulation method,
+much like the process of throwing dice in a casino.
 
-Monte Carlo methods are a broad class of computational algorithms that rely on `repeated random sampling` to obtain numerical results.
-The underlying concept is to use randomness to solve problems that might be deterministic in principle.  
+monte carlo methods are a broad class of computational algorithms that rely on
+repeated random sampling to obtain numerical results.
+the underlying concept is to use randomness to solve problems that
+might be deterministic in principle.  
 
-Monte Carlo methods are mainly used in three problem classes: optimization, numerical integration, and generating draws from a probability distribution.
+monte carlo methods are mainly used in three problem classes: optimization,
+numerical integration, and generating samples from a probability distribution.
 
-In principle, Monte Carlo methods can be used to solve any problem having a probabilistic interpretation.
-According to `the law of large numbers`, the expected value of some random variable in the form of integrals can be approximated by taking the empirical mean of independent samples of the variable.
+in principle, monte carlo methods can be used to solve any problem
+with probabilistic interpretation.
+according to large-numbers-law, the expected value of some random variable
+in the form of integrals can be approximated by taking the empirical mean of
+independent samples of the variable.
 
 <hr>
 
-### # Mento Carlo Process
-\- Pick a space of possible samples. <br>
-\- Randomly sample in the space above by its probability distribution. <br>
-\- Perform defined operations on the random samples. <br>
-\- Aggregate the data.
+### # mento carlo process
+(1) pick a space of possible samples.  
+(2) randomly sample in the space above by its probability distribution.  
+(3) perform defined operations on the random samples.  
+(4) aggregate the data.
 
 <hr>
 
-### # Estimating Pi: A Preliminary Exploration 
-\- The space of possible samples should be the physical space of the circle inscribed within a square. <br>
-\- The space is then randomly sampled by throwing needles into it. <br>
-\- A defined operation is performed: counting the needles. <br>
-\- And finally, a ratio is calculated for those needles.
+### # estimating pi: a preliminary exploration 
+(1) possible sample space should be the circle inscribed within a square.  
+(2) the space is then randomly sampled by throwing needles into it.  
+(3) a defined operation is performed: counting the needles.  
+(4) and finally, a ratio is calculated for those needles.
 
-Given the formula as follows, we can estimate the ratio between the circle and the square by throwing needles randomly.
+given the formula as follows, we can estimate the ratio between the circle and
+the square by throwing needles randomly.
 
 $$ \frac{Area\_circle}{Area\_square} = \frac{\pi r^2}{r^2} = \pi $$
 
-<details>
-    <summary><b>Throwing the Needles</b></summary>
-    <center><img src="/assets/images/2022/monte-carlo/1.gif" width="35%"></center>
-</details>
+throwing the needles, with needles number growing, the estimation result is approaching $$\pi$$.
 
-The random sampling of the above experiment can be reproduced with python.
-```python
+<img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/mc.pdf" width="600"/>
+
+python code for the above experiment.
+```text
 from random import random
 from math import pow, sqrt
 
 trial=1000000; hits = 0; throws = 0
 for i in range (1, trial):
     throws += 1
-    x = random()  # [0-1]
-    y = random()  # [0-1]
+    x = random()                        # [0-1]
+    y = random()                        # [0-1]
     dist = sqrt(pow(x, 2) + pow(y, 2))
     if dist <= 1.0:
         hits = hits + 1.0
 
-# hits/throws = 1/4 Pi
-pi = 4 * (hits / throws)
+pi = 4 * (hits / throws)                # hits/throws = 1/4 Pi
 print(f'pi={pi}')
 ```
 
 <hr>
 
-### # Estimating Integration: Example to Principle 
-Sometimes, it's difficult to calculate the original function of f(x), thus we could use Monte Carlo Method to mimic the approximate value.
+### # estimating function integrals: from example to principle 
+sometimes, it's hard to get the math formula of f(x),
+and make it impossible to compute integral,
+thus we could use monte carlo Method to mimic the approximate value.
 
 $$ \theta=\int_a^b f(x) dx $$
 
-<details>
-    <summary><b>Solve the Integral From a to b</b></summary>
-    <center>
-    <iframe src="https://www.desmos.com/calculator/vvpzvriqdq?embed" width="400" height="180" style="border: 1px solid #ccc" frameborder=0></iframe>
-    </center>
-</details>
 
-The first attempt: to roughly estimate the integral above, we could just choose one $$x_0$$ between $$a$$ and $$b$$, the result can be estimated as follows:
+(1) attempt 1:
+to roughly estimate the integral above, we could just choose one $$x_0$$ between $$a$$ and $$b$$,
+the result can be estimated as follows:
 
 $$ \theta=(b-a)f(x_0)$$
 
-The second attempt: the 1st attempt seldom meet our need prescision, try more sample points, and using the average value of the sample points to approach the average value of all the points between $$a$$ and $$b$$:
+<img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/mc2.pdf" width="400"/>
+
+(2) attempt 2:
+the 1st attempt seldom meet the need prescision, try more sampling points, and use the average
+value of them to approach to the truth avg value of all the points between $$a$$ and $$b$$:
 
 $$ \theta=(b-a)\times \frac{1}{n}\sum_{i=0}^{n-1}f(x_i)$$
 
-The third attempt: the 2nd attempt may get closer, but the 'average operation' above implies the assumption that the independent variables follow a uniform distribution. To generalize the uniform distribution as arbitary distribution, we can solve the integral as follows:
+(3) attempt 3:
+the 2nd attempt may get closer, but the average operation above implies that
+the independent variables follow a uniform distribution.
+generalize the uniform distribution to arbitary distribution,
+we can solve the integral as follows:
 
 $$ \theta=\int_a^b f(x)dx = \int_a^b \frac{f(x)}{g(x)} g(x)dx = E[\frac{f(x)}{g(x)}] $$
 
-in which $$g(x)$$ denotes the distribution of $$x$$. <br>
-According to the `law of large numbers`: when the sample size $$n\to \infty$$, sample observation average approches the mathemetical expectation, which gives us:
+in which $$g(x)$$ denotes the distribution of $$x$$.  
+according to the law-of-large-numbers:
+the above expectation can be approximated by sampling, when the sample size $$n\to \infty$$,
+the average of sampling observation approches to the mathemetical expectation, which gives us:
 
 $$ \frac{1}{n}\sum_{i=0}^{n}h(x_i) \to \mathbb{E}[h(x)]$$
 
-Thus, let $$h(x)=\frac{f(x)}{g(x)}$$, the solution of integral above is as follows:
+thus, let $$h(x)=\frac{f(x)}{g(x)}$$, the solution of integral above is as follows:
 
-$$\frac{1}{n}\sum_{i=0}^{n-1}\frac{f(x_i)}{g(x_i)} \to E[\frac{f(x)}{g(x)}] = \int_a^b \frac{f(x)}dx = \theta $$
+$$\frac{1}{n}\sum_{i=0}^{n-1}\frac{f(x_i)}{g(x_i)} \to E[\frac{f(x)}{g(x)}] = \int_a^b \frac{f(x)}{g(x)}g(x)dx = \theta $$
 
-Since $$f(x)$$ is known function, now the issue depends on how to sampling from the distribution of $$x$$. 
-
-<hr>
-
-### # Sampling From Distribution 
-For normal distribution like uniform 0-1 distribution, the samples(pseudo random numbers) can be generated by `Linear congruential generator` easily. 
-
-Moreover, other distributions like: 2D normal distribution, t-distribution, F-distribution, Beta-distribution, Gamma-distribution can be derived from the transformation of the samples derived from uniform 0-1.
-
-However, not all distribution can be dervied as above, we need other methods to get over it.
-A feasible approach is to use `acceptance-rejection sampling` to obtain samples of the distribution.
-
-If $$g(x)$$ is too complicated for sampling directly, we can first examine a feasible distribution $$q(x)$$(e.g. Gaussian), then sampling in Gaussian and reject the samples according to some criteria to approach $$g(x)$$.
-
-<details>
-    <summary><b>Relationship between feasible q(x) and approaching g(x)</b></summary>
-    <center>
-    <iframe src="https://www.desmos.com/calculator/bnadquye07?embed" width="400" height="180" style="border: 1px solid #ccc" frameborder=0></iframe>
-    </center>
-</details>
-
-\- 1 given $$q(x)$$ as a "easy-to-sample" distribution, and a constant $$k$$ that enables $$kq(x)$$ always appear above of $$g(x)$$. <br>
-\- 2 sampling from $$q(x)$$ to get a sample $$z_0$$ by `Linear congruential generator`. <br>
-\- 3 sampling from uniform distribution $$(0,kq(z_0))$$ to get a sample $$u$$. <br>
-\- 4 if $$u$$ appear in the grey part of the above graph, reject the sample, else accept it. <br>
-\- 5 repeat the step 4 to get n accepted sample $$z_0, z_1...,z_{n-1}$$. <br>
-\- 6 finally, the Monte Carlo method result can be estimated with $$\frac{1}{n}\sum_{i=0}^{n-1}\frac{q(z_i)}{g(z_i)}$$
+since $$f(x)$$ is known function, now the solution narrow down to
+hwo to perform sampling from the distribution of $$x$$.
 
 <hr>
 
-### # Variants
-\- Monte Carlo Tree Search: for games like: go game. MCTS is a heuristic search algorithm for some kinds of decision processes, most notably those employed in software that plays board games. In that context MCTS is used to solve the game tree. <br>
-\- Markov chain Monte Carlo Method: When the probability distribution of the variable is parameterized, mathematicians often use a Markov chain Monte Carlo (MCMC) sampler. The idea is to design a Markov chain model with a prescribed stationary probability distribution. Subject to the limit, the samples being generated by the MCMC method will be samples from the desired distribution. By the ergodic theorem, the stationary distribution is approximated by the empirical measures of the random states of the MCMC sampler.
+### # sampling from abnormal distribution: acceptance-rejection-sampling
+for normal distribution like uniform 0-1 distribution, the samples (pseudo random numbers)
+can be generated by linear-congruential-generator easily.
+
+moreover, other distributions like: 2D normal distribution, t-distribution, f-distribution,
+beta-distribution, gamma-distribution can be derived from the transformation of
+the samples derived from uniform 0-1.
+
+however, not all distribution can be dervied as above, we need other methods to get over it.
+a feasible approach is to use acceptance-rejection-sampling, which is used to obtain
+samples of certain distribution.
+
+if $$g(x)$$ is too complicated for sampling directly,
+we can first examine a feasible distribution $$q(x)$$(e.g. gaussian),
+then sampling in gaussian distribution and reject the samples according to some criteria
+to approach $$g(x)$$.
+
+<img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/mc3.pdf" width="400"/>
+
+(1) given $$q(x)$$ as a "easy-for-sampling" distribution,
+a constant $$k$$ to enable $$kq(x)>g(x)$$ for all x.  
+(2) sampling from $$q(x)$$ to get a sample $$z_0$$ by linear-congruential-generator.  
+(3) sampling from uniform distribution $$(0,kq(z_0))$$ to get a sample $$u0$$.  
+(4) if $$u0$$ appear in the grey part of the above graph, reject the sample, else accept it.  
+(5) repeat the step 4 to get n accepted sample: $$z_0, z_1...,z_{n-1}$$.  
+(6) finally, the monte carlo method result can be estimated with $$\frac{1}{n}\sum_{i=0}^{n-1}\frac{q(z_i)}{g(z_i)}$$
+
+drawbacks of acceptance-rejection-sampling:  
+(1) for 2d distribution $$p(x,y)$$, sometimes it's only practical to get its conditional
+format: $$p(x\mid y)$$ or $$p(y\mid x)$$. so it's impossible to adopt acceptance-rejection
+sampling to get samples for $$p(x,y)$$.  
+(2) for some complicated & abnormal distributions $$p(x1,x2...xn)$$, hardly can we find
+suitable q(x) and k for perform acceptance-rejection-sampling.
 
 <hr>
 
-### # Reference
-> https://en.wikipedia.org/wiki/Monte_Carlo_method <br>
-> https://en.wikipedia.org/wiki/Monte_Carlo_tree_search <br>
-> https://www.cnblogs.com/pinard/p/6625739.html
+### # variants of monte carlo method
+(1) monte carlo tree search (MCTS) used in go game:  
+MCTS is a heuristic search algorithm for some kinds of decision processes,
+most notably those employed in software that plays board games.
+in that context MCTS is used to solve the game tree.
 
+(2) markov chain monte carlo method (MCMC):  
+when the probability distribution of the variable is parameterized,
+mathematicians often use a MCMC sampler,
+which idea is to design a markov chain model with a prescribed stationary probability distribution.
+subject to the limit, the samples generated by MCMC will conform to the desired distribution.
+by the ergodic theorem, the stationary distribution is approximated by
+the empirical measures of the random states of the MCMC sampler.
+
+<hr>
+
+### # reference
+https://en.wikipedia.org/wiki/Monte_Carlo_method  
+https://en.wikipedia.org/wiki/Monte_Carlo_tree_search  
+https://www.cnblogs.com/pinard/p/6625739.html
