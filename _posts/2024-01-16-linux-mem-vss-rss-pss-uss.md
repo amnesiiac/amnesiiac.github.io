@@ -9,7 +9,6 @@ tags:
   - ongoing
 ---
 
-### # intro
 generally, the relationship between 4 memory statistics are as: vss >= rss >= pss >= uss.
 
 <hr>

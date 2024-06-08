@@ -58,14 +58,14 @@ pkts    bytes     target          prot    opt     in              out           
 <hr>
 
 ### # find out which iptables rules are responsible for dropping certain packets
-(1) live monitoring  
+1) live monitoring  
 before sending packets, print filter table every 1s, drop pkts chains lines, sort from high to low
 ```text
 $ watch -n1 -d "iptables -nvxL -t filter | grep -vE 'pkts|Chains' | sort -nk1r"
 ```
 then send the packets, the rules dropping the packets will incremented.
 
-(2) method-2: diff comparation  
+2) method-2: diff comparation  
 before sending the packets, record statics output:
 ```text
 $ iptables -vnL > sample1
@@ -81,27 +81,30 @@ compare the snapshot statistics, the rules that drop the packets pkts count will
 $ diff sample1 sample2
 ```
 
-(3) using iptables trace extension  
+3) using iptables trace extension  
 append a output rule to raw table, trace all packets output to ip/subnet:port using tcp protocol:
 ```text
 $ iptables -t raw -A OUTPUT -p tcp --destination 192.168.0.0/24 --dport 80 -j TRACE
 Warning: Extension TRACE revision 0 not supported, missing kernel module?
 iptables: No chain/target/match by that name.
 ```
+
 the output above means no necessary iptables extension installed, try:
 ```text
 $ apt list | grep iptables-extension-trace
 ```
+
 or can use to check the installation status:
 ```text
 $ yum list | grep iptables-extensions
 ```
+
 install the track extension by:
 ```text
 $ sudo modprobe ip_conntrack_trace
 ```
 
-after config & run, the output result(/var/log/kern.log):
+after config & run, the output result (/var/log/kern.log):
 ```text
 $ cat /var/log/kern.log | grep 'TRACE:'
 Mar 24 22:41:52 enterprise kernel: [885386.325658] TRACE: raw:PREROUTING:policy:2 IN=eth0 OUT=

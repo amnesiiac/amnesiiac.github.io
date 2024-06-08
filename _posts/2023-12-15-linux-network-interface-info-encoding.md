@@ -9,24 +9,35 @@ tags:
   - network
 ---
 
-### # background
-a application scenarios of nested containers in device simulation is to setup
-some veth pairs for network connectivity between multiple netns. imagine a scenario as follows:
+a usecase of nested containers in device simulation can include the network connection setup
+between multiple netns. given a typical scenario for connecting two container by veth pair:
 
-from the parent netns, we can get the basic info of a certain interface like:
-topo connection, functionalities of the itf, etc.
+```txt
+               ┌───────────────────────────────────┐
+               │ host machine                      │
+               │                                   │
+               │   ┌───────────────────────────┐   │
+               │   │ container#1               │   │
+               │   │                [veth1]    │   │
+               │   └───────────────────│───────┘   │
+               │                       │           │
+               │   ┌───────────────────│───────┐   │
+               │   │ container#2    [veth2]    │   │
+               │   │                           │   │
+               │   └───────────────────────────┘   │
+               │                                   │
+               └───────────────────────────────────┘
+```
 
-however, in the child netns (container), the info cannot be retrieved. thus the applications
-inside the child netns cannot get enough info to startup.
-
-here are some basic methods to implement this.
+sometimes, the application on host machine responsible for create the veth pair try to encode
+some info along with the veth interface in container#1/2, e.g., pass some source device port info.  
+how to achieve this? the following are some ideas for this.
 
 <hr>
 
 ### # method-1: use simple interface name for encoding
 use veth interface naming to encode the functionality of each interface in olt container,
-then scan all available interface inside ihub container & dynamic assign to qemu process,
-hence the image inside ihub could decode.
+then scan all available interface inside ihub container & dynamic assign to qemu process.
 
 see code in devtools/hostfw before this changset:
 ```text
@@ -35,6 +46,7 @@ user:        metung <melon.tung@xxxxx-sbell.com>
 date:        Thu Jan 04 09:40:19 2024 +0800
 summary:     hostfw: fix chassis reset, ihub with marvell connection are lost
 ```
+
 files to check: devtools/hostfw/models/setup/ihub.yaml, devtools/hostfw/dockerfile/ihub/docker-entrypoint.sh.
 the itf name scanning logic:
 ```text
@@ -87,16 +99,10 @@ $ ip -o -d link show my_veth_itf
     link/ether 62:3c:b2:3a:9a:cd brd ff:ff:ff:ff:ff:ff promiscuity 0 veth addrgenmode eui64 numtxqueues 1 numrxqueues 1
     gso_max_size 65536 gso_max_segs 65535 alias this_is_a_alias_for_my_veth_itf
 ```
-however, the alias name cannot be used as a replica of the real net device name: this alias name cannot
-be used in iproute cmd for interface operations.  
-ref https://unix.stackexchange.com/a/391547
+however, the alias name cannot be used as a replica of the netdev name in iproute cmd
+for interface operations. please see ref: https://unix.stackexchange.com/a/391547.
 
 related doc in kernel: https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-net
-
-code in action, see the hostfw version after this changset:
-```text
-todo Maxime
-```
 
 <hr>
 

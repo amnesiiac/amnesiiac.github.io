@@ -8,7 +8,7 @@ tags:
   - blog
 ---
 
-### # raw tag to disable liquid processing
+### # disable liquid processing by raw tag
 consider the following blog code snippet:
 {% raw %}
 ```cpp
@@ -21,16 +21,15 @@ Error: Liquid syntax error (line 6): Variable '{{1,3}' was not properly terminat
 Error: Run jekyll build --trace for more information.
 ```
 {% endraw %}
-jekyll blog first using liquid to resolve the markdown, then the markdown interpretor itself.
-
+jekyll blog first using liquid to resolve the markdown, then the markdown interpretor itself.  
 when there's conflicts in blog with liquid, use the "raw" tag defined in
 [liquid doc](https://shopify.github.io/liquid/tags/template/#raw),
 can bypass the liquid resolving process.
 
 <hr>
 
-### # insert graph in markdown
-insert graph with toggle button:
+### # insert graph in blog post
+__$__ insert graph with toggle button:
 ```text
 <details>
     <summary><b>state transition model</b></summary>
@@ -38,7 +37,7 @@ insert graph with toggle button:
 </details>
 ```
 
-insert math graph hosted on https://www.desmos.com/calculator:
+__$__ insert math graph hosted on https://www.desmos.com/calculator:
 ```text
 <details>
     <summary><b>Solve the Integral From a to b</b></summary>
@@ -50,47 +49,36 @@ insert math graph hosted on https://www.desmos.com/calculator:
 </details>
 ```
 
-using github cdn repo as graph registry, with width set:
+__$__ using github cdn repo as graph registry, with width set:
 ```text
 <img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/autoencoder.pdf" width="350"/>
 ```
 
 <hr>
 
-### # usefull elements in tui picture 
-see gui element for guidance.
+### # usefull elements in tui picture
+search for tui in blog post for guidance.
 
 <hr>
 
-### # how to embed svg inside jekyll blog
-just use the svg tag:
+### # embed svg in blog post
 ```text
 <svg width="400" height=300>
     <circle cx="150" cy="100" r="10" fill="blue"/>
 </svg>
 ```
 
-the following are not necessary:
-```text
-{::nomarkdown}
-<svg width="400" height=300>
-    <circle cx="150" cy="100" r="10" fill="blue"/>
-</svg>
-{:/}
-```
-
 <hr>
 
-### # insert a null line between the first & second blog line
-the first blog line.
-<br/>
-
-the second blog line.
-
-which is implementated as:
+### # control the division null line height
+1 use special escape character
 ```text
 the first blog line.
-<br/>
-
+&nbsp;
 the second blog line.
+```
+
+2 use null text block with margin customized:
+```text
+<p style="margin-bottom: 20px;"></p>
 ```

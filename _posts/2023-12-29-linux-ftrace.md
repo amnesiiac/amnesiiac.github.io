@@ -68,27 +68,34 @@ todo
 
 <hr>
 
-### # tracer usages pipeline
-general way to trace
+### # kernel function tracer usages
+1 generic way to perform trace debug
 ```text
-echo 1 > tracing_on; SETUP TRACER OPTIONS; echo 0 > tracing_on; RUN APP; echo 1 > tracing_on;
+echo 1 > tracing_on  && \
+setup_tracer_options && \
+echo 0 > tracing_on  && \
+startup app          && \
+echo 1 > tracing_on
 ```
-the above method will output many things to trace buffer, its hard to pick out our interest part.
+the above method will output huge bulk of things to trace buffer, which is hard to
+safari to our interested part.
 
-more precise way: enable kernel function tracer in our interested code segment to enable precise tracing:
-userspace programs could enable trace when entering into function body, and disable it right before leaving.
+2 precise way to perform trace debug
+enable kernel function tracer in our interested code segment to enable precise tracing.  
+the userspace programs src can handle the trace debugfs system by:
+enable trace when entering into function body, and disable it right before leaving.
 
 <hr>
 
-### # trace marker usages (todo)
-to make search easier to focus on the 'wanted' part:
+### # trace marker (todo: add practical example)
+the marker is used to make search easier to focus on the interested part:
 ```text
-$ echo 'melon_trace'> trace_marker
+$ echo 'melon_trace' > trace_marker
 ```
 
 <hr>
 
-### # check up per_cpu trace
+### # per_cpu trace debug
 per cpu info are in debugfs path as follows (including the trace):
 ```text
 $ ls /sys/kernel/debug/tracing/per_cpu/cpu$i
@@ -99,21 +106,21 @@ $ cat /sys/kernel/debug/tracing/per_cpu/cpu$i/trace
 
 <hr>
 
-### # tracing some function call inside kernel code
-the principle is the same as above user space code methods, but kernel donot need echo,
-functions: tracing_on() and tracing_off() can be used.
-trace_printk() can be used to 'interactively' generate wanted output.
+### # tracing certain function call inside kernel code
+the principle is the same as above user space code trace part, but kernel dont use echo.
+the functions tracing_on() and tracing_off() can be used for switch on/off.
+trace_printk() is flexible to print out the interested info.
+
+
+printk vs trace_printk:
+printk write output to console, which consuming a mount of cpu cycle (a few ms),
+trace_printk write output to ringbuffer, which cost less cpu cycles (1/10 us),
+result in less performance impact.
+the output from trace_printk will write to tracer, which can be derived by cat trace.
 
 <hr>
 
-### # printk vs trace_printk
-printk will write output to console, which consuming a mount of cpu cycle (a few ms),
-trace_printk write output to ringbuffer, which cost less cpu cycles (1/10 us), so the impact to performance is smaller.
-the output from trace_printk will write to tracer, which could be derived by 'cat trace'.
-
-<hr>
-
-### # function tracer (ftrace) usages
+### # ftrace usages
 ```text
 $ echo function > /sys/kernel/debug/tracing/current_tracer
 $ cat /sys/kernel/debug/tracing/current_tracer
@@ -144,8 +151,9 @@ $ cat trace | head -n 20
           <idle>-0       [034] d... 6368755.192330: __switch_to_xtra <-__switch_to
           <idle>-0       [034] d... 6368755.192330: finish_task_switch <-__schedule
 ```
-from each call tracepoint line:
-taks name, pid, execution cpu num, timestamp for the function call, function call as A <- B (func B invoke func A)
+some explainations of the ftrace log columns:
+taks name, pid, execution cpu num, timestamp for the function call,
+function call as A <- B (func B invoke func A)
 
 <hr>
 
@@ -184,9 +192,8 @@ ps cmd find nothing, which means the pid in kernel space is different from the u
 <hr>
 
 ### # kernel pid vs userspace pid
-kernel pid is actually 'thread id', userspace pid is process id.
-the tgid of kernel is the same meaning as userspace pid.
-
+kernel pid is actually thread id, userspace pid is process id.
+the tgid of kernel is the same meaning as userspace pid.  
 ref: https://stackoverflow.com/a/9306150
 
 try checking the ftrace options, enable it if closed:
@@ -226,6 +233,7 @@ $ cat trace | head -n 20
 ### # function_graph tracer usages
 ```text
 $ echo function_graph > /sys/kernel/debug/tracing/current_tracer
+
 $ cat /sys/kernel/debug/tracing/current_tracer
 function_graph
 ```
@@ -257,35 +265,31 @@ cpu     duration              function calls
  34)   0.944 us    |    }
  34) ! 317.132 us  |  } /* vcpu_enter_guest [kvm] */
 ```
-if the duration more than 100us, then a ! is added.
+if the duration more than 100us, then ! is added.
 
 <hr>
 
 ### # stack tracing usages
 ```text
-# check status
-$ cat /proc/sys/kernel/stack_tracer_enabled
+$ cat /proc/sys/kernel/stack_tracer_enabled        # check stack tracer status
 0
 
-# enable
-$ echo 1 > /proc/sys/kernel/stack_tracer_enabled
+$ echo 1 > /proc/sys/kernel/stack_tracer_enabled   # enable it
 
-# show (stack depth, stack size)
-$ cat /sys/kernel/debug/tracing/stack_trace
-        Depth    Size   Location    (5 entries)
-        -----    ----   --------
-  0)     3792      64   __accumulate_pelt_segments+0x5/0x90
-  1)     3728     160   __update_load_avg_se+0x23b/0x320
-  2)     3568      72   enqueue_entity+0x5e/0x6a0
-  3)     3496    2088   return_to_handler+0x0/0x36
-  4)     1408    1408   __writeback_single_inode+0x40/0x300
+$ cat /sys/kernel/debug/tracing/stack_trace        # show stack depth, size
+      Depth    Size   Location    (5 entries)
+      -----    ----   --------
+0)     3792      64   __accumulate_pelt_segments+0x5/0x90
+1)     3728     160   __update_load_avg_se+0x23b/0x320
+2)     3568      72   enqueue_entity+0x5e/0x6a0
+3)     3496    2088   return_to_handler+0x0/0x36
+4)     1408    1408   __writeback_single_inode+0x40/0x300
 
-# check the max stack size used
-$ cat stack_max_size
+$ cat stack_max_size                               # check the max stack size used
 3968
 
-# clear
-$ echo 0 > /sys/kernel/debug/tracing/stack_trace
+$ echo 0 > /sys/kernel/debug/tracing/stack_trace   # clear the tracer
 ```
-note: if certain kernel code segment using its own stack, then stack tracer will not able to follow it,
-e.g. INTs has its own stack, which common stack tracer can not follow.
+
+if certain kernel code segment using its own stack, then the common stack tracer wont be
+able to follow it. e.g., INTs has its own stack, which common stack tracer can not follow.

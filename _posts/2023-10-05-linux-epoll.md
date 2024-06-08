@@ -23,7 +23,7 @@ The epoll networking IO model is a way out.
 <hr>
 
 ### # todo
-0) sample code for epoll networking IO model (todo: add detailed client-end code):
+sample code for epoll networking IO model (todo: add detailed client-end code):
 ```text
 int main(){
     listen(fd, ...);
@@ -153,7 +153,8 @@ in epoll model, a single user process could listen for many sockets, the mechani
    in order to manage all the socket connections added by user process.
 
 3) rdllist: a linked list of file descriptors from the socket connections in ready state, 
-   thus the user process only need to traversal this list to find out which connection is in ready state, without search into the rbtree.
+   thus the user process only need to traversal this list to find out which connection is in ready state,
+   without search into the rbtree.
 ```
 
 <hr>
@@ -234,7 +235,7 @@ in epoll model, a single user process could listen for many sockets, the mechani
                               ┌──────┴─────┐
                               │another proc│
                               └────────────┘
- 1) epoll_ctl and epoll_wait create a waique both, but the difference is that: the wait que (wq) is
+ 1) epoll_ctl and epoll_wait create a waitque both, but the difference is that: the wait que (wq) is
     attached to the eventpoll obj, the wait que(for socket) created by epoll_ctl is attached to socket obj.
  
  2) wait que of eventpoll is used to connect a single eventpoll obj and all processes blocking on.

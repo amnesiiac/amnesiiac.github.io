@@ -8,29 +8,31 @@ tags:
   - math
 ---
 
-MLE(maximum likelihood estimation) and MAP(maximum a posteriori) are all point estimations,
+MLE (maximum likelihood estimation) and MAP (maximum a posteriori) are all point estimations,
 which are used for estimating values of variables in probability distributions & graphical models.
 
 MLE and MAP are rough the same, for both are used for computing a single estimate, rather than
 getting the full distribution.
 
-while, the MLE is view from Frequency, MAP is view from Bayesian.
+while, the MLE is view from frequency, MAP is view from bayesian.
 
 <hr>
 
 ### # coin test: difference between MLE & MAP
-a coin toss game repeat 5 times, result in 1 head 4 tails.
+playing a coin toss game repeat 5 times, result in 1 head 4 tails.
 
-(1) in the view of MLE: each time the result of a coin toss is a random variable,
-and the PDF of this game var should conform to 0-1 distribution.  
-hence, MLE view is to directly use the observed result as ref, then compute the param p
-in 0-1 distribution, which can reproduce the ref result to the max extend.
+1) view of MLE: each time the result of a coin toss is a random variable,
+and the PDF of this game var should conform to 0-1 distribution.
 
-(2) in the view of MAP: the coin is only tossed 5 times, which is not fully convincible,
-therefore, we want to gain some prior knownledge: whether the coin is balanced & symmetrical\...
-investigation shows: the coin is made by a mint, ideally the coin is perfect, and param p = 0.5,
-however, we want to believe: the coin can be perfect on 1000 factory tests, combining
-prior knowledge & local test, the param p can be computed as:
+hence, MLE view is to directly use the observed result as the true distribution,
+then compute the param p in 0-1 distribution, through which to .
+
+2) view of MAP: the coin is only tossed 5 times, which is not fully convincible,
+thus, we want to gain some prior knownledge: whether the coin is balanced & symmetrical\...
+investigation shows: the coin is made by a mint, ideally the coin is perfect with param p = 0.5,
+but, we choose to believe: the coin can only be perfect on 1000 factory tests.
+
+combining prior knowledge & local test, the param p can be computed as:
 
 $$ (0.2*5 + 0.5*1000) / (1000+5) = 0.4985 $$
 
@@ -82,7 +84,6 @@ quality, then there's no need to do factory test before release.
 
 ### # reference
 https://wiseodd.github.io/techblog/2017/01/01/mle-vs-map/  
-https://en.wikipedia.org/wiki/Maximum_likelihood_estimation
-
+https://en.wikipedia.org/wiki/Maximum_likelihood_estimation  
 cumulative distribution function: CDF  
 propability density function: PDF

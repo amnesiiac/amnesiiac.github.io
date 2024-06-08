@@ -8,7 +8,7 @@ tags:
   - machine learning
 ---
 
-BN is known as batch normalization, is a very important technique for deep learning models
+batch normalization (BN), is a very important technique for deep learning models
 (especially vision related models). It can speed up training, accelerate convergence, and
 can be used for anti-overfitting. with BN, the training of network models can use a larger
 batch size with larger learning rate.
@@ -112,53 +112,50 @@ $$y^{(k)}=\gamma^{(k)} \hat{x}^{(k)}+\beta^{(k)}$$
 <hr>
 
 ### # code in action
-(1) api:tf.nn.moments() & tf.nn.batchnormalization() to implement BN:
+1 api:tf.nn.moments() & tf.nn.batchnormalization() to implement BN:
 ```text
 import tensorflow as tf
 
 def bn_layer(x, is_training, name='BatchNorm', moving_decay=0.9, eps=1e-5):
-    # get input dimension
-    shape = x.shape
-    assert len(shape) in [2, 4]  # 2: fc, 4: conv
+    shape = x.shape                                                                        # input dimension
+    assert len(shape) in [2, 4]                                                            # 2: fc, 4: conv
     param_shape = shape[-1]
 
-    # init gamma & beta
-    gamma = tf.get_variable('gamma', param_shape, initializer=tf.constant_initializer(1))
-    beta  = tf.get_variable('beat', param_shape, initializer=tf.constant_initializer(0))
+    gamma = tf.get_variable('gamma', param_shape, initializer=tf.constant_initializer(1))  # gamma
+    beta  = tf.get_variable('beat', param_shape, initializer=tf.constant_initializer(0))   # beta
 
-    # compute mean & var of mini-batch
-    axes = list(range(len(shape)-1))
+    axes = list(range(len(shape)-1))                                # compute mean & variance of mini-batch
     batch_mean, batch_var = tf.nn.moments(x, axes, name='moments')
 
-    # using moving avg of training to compute mean & var
-    ema = tf.train.ExponentialMovingAverage(moving_decay)
-
+    ema = tf.train.ExponentialMovingAverage(moving_decay)           # using moving avg of training to compute mean & var
     def mean_var_with_update():
         ema_apply_op = ema.apply([batch_mean, batch_var])
         with tf.control_dependencies([ema_apply_op]):
             return tf.identity(batch_mean), tf.identity(batch_var)
 
-    # train: update mean & var, test: using mean & var computed from train set
-    mean, var = tf.cond(tf.equal(is_training, True), mean_var_with_update,
-                        lambda: (ema.average(batch_mean), ema.average(batch_var)))
+    mean, var = tf.cond(
+        tf.equal(is_training, True), mean_var_with_update           # train: update mean & var
+        lambda: (ema.average(batch_mean), ema.average(batch_var))   # test: use cached mean & var computed by train set
+    )
     return tf.nn.batch_normalization(x, mean, var, beta, gamma, eps)
 ```
 
-
-(2) tf.contrib.layers.batch_norm() to implement BN:
+2 tf.contrib.layers.batch_norm() to implement BN:
 ```text
 import tensorflow as tf
 
 def batch_norm(x, epsilon=1e-5, momentum=0.9, train=True, name="batch_norm"):
     with tf.variable_scope(name):
         epsilon=epsilon, momentum=momentum, name=name
-    return tf.contrib.layers.batch_norm(x,
-                                        decay=momentum,              # moving avg method
-                                        updates_collections=None,    # tf.GraphKeys.UPDATE_OPS or None
-                                        epsilon=epsilon,             # 1e-5
-                                        scale=True,                  # enable gamma
-                                        is_training=train,           # train or test (compute or restore)
-                                        scope=name)
+        return tf.contrib.layers.batch_norm(
+            x,
+            decay=momentum,              # moving avg method
+            updates_collections=None,    # tf.GraphKeys.UPDATE_OPS or None
+            epsilon=epsilon,             # 1e-5
+            scale=True,                  # enable gamma
+            is_training=train,           # train or test (compute or restore)
+            scope=name
+        )
 ```
 
 <hr>

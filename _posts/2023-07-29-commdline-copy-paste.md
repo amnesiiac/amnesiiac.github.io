@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "commandline copy and paste (linux)"
+title: "cmdline copy and paste (linux)"
 author: "melon"
 date: 2023-07-29 07:09
 categories: "2023"
@@ -11,12 +11,14 @@ tags:
 ### # pbcopy & pbpaste (macos)
 todo
 
+<hr>
 
 ### # xclip & xsel (centos)
 install the xclip & xsel on centos 7:
 ```text
 sudo yum install xclip xsel   # need root for this
 ```
+
 setup alias for same handle for copy/paste:
 ```text
 $ which pbcopy

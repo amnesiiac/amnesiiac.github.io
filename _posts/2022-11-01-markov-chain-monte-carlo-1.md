@@ -33,7 +33,7 @@ the stock model has 3 states: bear_market(0), bull_market(1), stagnant-market(2)
 let $$P(j\mid i)$$ represents the probability from state $$i$$ to state $$j$$.
 the state transition model is as:
 
-<img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/mcmc.pdf" width="360"/>
+<img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/mcmc.pdf" width="320"/>
 
 the state transition matrix represents the above model is as follows:
 

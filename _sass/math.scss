@@ -1,0 +1,11 @@
+.MathJax_SVG {                    // math text block config
+  text-align: center !important;
+  font-size: 12px !important;
+}
+
+.MathJax_SVG_Display {            // math background block config
+  text-align: center !important;  // make the math text center in shadow block
+  text-indent: -72px !important;  // make the math text in shadow block a bit left than center
+  font-size: 12px !important;
+  background-color: #f0f0f0;
+}

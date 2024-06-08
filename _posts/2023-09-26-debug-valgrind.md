@@ -5,7 +5,7 @@ author: "melon"
 date: 2023-09-26 08:18
 categories: "2023"
 tags:
-  - debug
+  - code insight
 ---
 
 ### # invalid read detection
@@ -25,12 +25,12 @@ int main(void){
     return 0;
 }
 ```
-compile the program:
+
+compile & debug the program:
 ```text
 $ gcc -Wall invalid_read.c -g -o out
+
 $ valgrind --tool=memcheck --leak-check=full -s ./out
-```
-```txt
 ==15713== Memcheck, a memory error detector
 ==15713== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
 ==15713== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
@@ -86,12 +86,12 @@ int main(void){
     return 0;
 }
 ```
+
 compile & debug the program:
 ```text
 $ gcc -Wall invalid_write.c -g -o out
+
 $ valgrind --tool=memcheck --leak-check=full ./out
-```
-```txt
 ==5804== Memcheck, a memory error detector
 ==5804== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
 ==5804== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
@@ -148,11 +148,12 @@ int main(void){
     return 0;
 } 
 ```
+
+compile & debug the program:
 ```text
 $ gcc -Wall morefree.c -g -o out
+
 $ valgrind --tool=memcheck --leak-check=full ./out
-```
-```txt
 ==4420== Memcheck, a memory error detector
 ==4420== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
 ==4420== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
@@ -194,10 +195,10 @@ Memory Allocated at: /n==4420==
 ==4420== For lists of detected and suppressed errors, rerun with: -s
 ==4420== ERROR SUMMARY: 3 errors from 3 contexts (suppressed: 0 from 0)
 ```
+
+execute the program
 ```text
 $ ./out
-```
-```txt
 *** Error in `./out': double free or corruption (fasttop): 0x00000000012e9010 ***
 ======= Backtrace: =========
 /lib64/libc.so.6(+0x81329)[0x7f0bca50b329]
@@ -248,11 +249,12 @@ int main(void){
     return 0;            // memory leak: definitely lost due to p no free
 }
 ```
+
+compile & debug the program:
 ```text
 $ gcc -Wall memleak.c -g -O out
+
 $ valgrind --tool=memcheck --leak-check=full ./out
-```
-```txt
 ==2863== Memcheck, a memory error detector
 ==2863== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
 ==2863== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info

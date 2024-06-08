@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "ANSI color pallete (terminal)"
-author: "twistfatezz"
+author: "melon"
 date: 2023-05-30 08:31
 categories: "2023"
 tags:
@@ -9,7 +9,7 @@ tags:
 ---
 
 ### # python script to show ANSI colors
-```python
+```text
 #!/usr/bin/env python3
 
 def print_color_palette():
@@ -32,7 +32,7 @@ print_color_palette()
 <hr>
 
 ### # shell script to show ANSI colors
-```shell
+```text
 #!/bin/bash
 
 print_color_palette() {

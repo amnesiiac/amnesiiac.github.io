@@ -5,8 +5,7 @@ author: "melon"
 date: 2023-12-25 21:23
 categories: "2023"
 tags:
-  - linux
-  - debug
+  - code insight
 ---
 
 ### # syscall stack trace

@@ -24,24 +24,20 @@ tags:
 <hr>
 
 ### # hand gesture to hold the cue
-1 all the fingers are used to hold the cue, no extra strengh on, but only lift the stick.  
-2 the middle finger is main responsible for hold the stick,
-the thumb is 2nd, then the index.  
-3 the first 3 fingers should always hold the stick, the rest fingers naturally hold the cue,
-when pulling back, the rest fingers naturally spread, when pulling forward, the first 3
-fingers is main actor.
+
+<img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/snooker.pdf" width="720"/>
 
 <hr>
 
 ### # checkpoint for cue direction
 1 1st & 2nd finger of left hand, form a tight point.  
-2 chin bottom.  
+2 chin under.  
 3 chest.  
-4 composition of first 3 or 4 fingers of right hand.  
+4 composition of middle & ring of right hand.  
 5 junction of thumb and index finger of right hand.
 
-all the checkpoint need to be under a soft, consistent and relex mode from pre-shot to after-shot,
-which will keep the shot line consistent with which you aim at.
+all the checkpoint need to be under a soft, consistent and relex mode from pre-shot to
+after-shot, which will keep the shot line consistent with which you aim at.
 
 <hr>
 

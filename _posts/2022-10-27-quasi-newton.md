@@ -1,21 +1,24 @@
 ---
 layout: post
-title: "Quasi-Newton Method"
-author: "twistfatezz"
+title: "quasi-newton method"
+author: "melon"
 date: 2022-10-27 22:53
 categories: "2022" 
 tags:
   - math
   - todo
 ---
-### # Introduction
-Quasi-Newton methods are methods used to either find zeroes or local maxima and minima of functions, as an alternative to Newton's method. They can be used if the Jacobian or Hessian is unavailable or is too expensive to compute at every iteration. 
 
-The "full" Newton's method requires the Jacobian in order to search for zeros, or the Hessian for finding extrema.
+quasi-newton methods are methods used to either find zeroes or local maxima and minima of functions,
+as an alternative to Newton's method.
 
-### # Reference
-> https://en.wikipedia.org/wiki/Newton%27s_method <br>
-> https://en.wikipedia.org/wiki/Quasi-Newton_method
+they can be used if the jacobian or hessian is unavailable or is too expensive to compute at every iteration.
 
-### # Keyword Desc
+the "full" newton's method requires the jacobian in order to search for zeros,
+or the hessian for finding extrema.
 
+<hr>
+
+### # reference
+https://en.wikipedia.org/wiki/Newton%27s_method  
+https://en.wikipedia.org/wiki/Quasi-Newton_method
