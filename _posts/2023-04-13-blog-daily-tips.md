@@ -82,3 +82,15 @@ the second blog line.
 ```text
 <p style="margin-bottom: 20px;"></p>
 ```
+
+<hr>
+
+### # blog link remote url format
+1 markdown remote link anchor implicitly  
+this is a url which allow actual hidden url at bottom of blog: [url anchor][id].
+[id]: http://groups.google.com/group/celluloid-ruby
+
+```text
+remote link anchor to enable set long url at bottom of blog [url anchor][id].
+[id]: http://groups.google.com/group/celluloid-ruby
+```

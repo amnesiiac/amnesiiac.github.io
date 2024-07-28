@@ -9,7 +9,6 @@ tags:
   - ncurses
 ---
 
-### # TUI program ouput
 ```txt
   ┌──────────────────────────────────────────────────────────────────────────────┐
   │F1 to quit, ENTER to print fields content                                     │
@@ -26,7 +25,7 @@ tags:
 
 ### # code
 {% raw %}
-```cpp
+```text
 #include <ncurses.h>
 #include <form.h>
 #include <assert.h>

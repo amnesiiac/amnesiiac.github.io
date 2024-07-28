@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "special addresses (linux)"
+title: "special ip addresses (linux, network)"
 author: "melon"
 date: 2023-12-20 20:45
 categories: "2023"
@@ -28,14 +28,15 @@ which allows a network connection to loop back on itself.
 on almost every machine, the localhost and 127.0.0.1 are functionally the same.
 
 1 the difference between localhost & 127.0.0.1  
-1) the localhost is proto indenpendant, both for ipv4 and ipv6.  
-2) the localhost tend to be slower than 127.0.0.1 cause the ip resolution of
-localhost need to go through a DNS lookup table.
+a) the localhost is proto indenpendant, both for ipv4 and ipv6.  
+b) the localhost tend to be slower than 127.0.0.1 cause the ip resolution of localhost need to
+go through a DNS lookup table.
 
 <p style="margin-bottom: 20px;"></p>
 
 2 major config files for DNS host lookup  
-1) /etc/hosts is the host lookup table:
+a) /etc/hosts is the host lookup table:
+
 ```text
 $ cat /etc/hosts
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
@@ -45,15 +46,17 @@ $ cat /etc/hosts
 135.251.206.229 asblx29
 ```
 
-2) /etc/host.conf is the central file that controls the resolver setup.
+b) /etc/host.conf is the central file that controls the resolver setup.
 it tells the resolver which services to use, and in what order.
 more options please ref: https://tldp.org/LDP/nag/node82.html.
+
 ```text
 $ cat /etc/host.conf
 multi on
 ```
 
-3) /etc/hostname is for domain definition for host machine:
+c) /etc/hostname is for domain definition for host machine:
+
 ```text
 $ cat /etc/hostname
 spine.novalocal
@@ -63,7 +66,8 @@ spine.novalocal
 
 ### # hostfw network connectivity check problem
 1 buildup the testcase env:  
-check all sub container (netns) in wrapper container olt:
+a) check all sub container (netns) in wrapper container olt:
+
 ```text
 $(olt) ip netns list
 nt_2 (id: 1)
@@ -74,14 +78,16 @@ nt_1 (id: 3)
 lt_2 (id: 4)
 ```
 
-create veth pair named vethtest, vethtest_p:
+b) create veth pair named vethtest, vethtest_p:
+
 ```text
 $(olt) ip link add vethtest type veth peer name vethtest_p
 $(olt) ip link set vethtest up
 $(olt) ip link set vethtest_p up
 ```
 
-check the state of the created veth pair:
+c) check the state of the created veth pair:
+
 ```text
 $(olt) ip -c link | grep vethtest
 101: vethtest_p@vethtest: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode
@@ -90,11 +96,13 @@ $(olt) ip -c link | grep vethtest
      DEFAULT group default qlen 1000
 ```
 
-put the peer into certain sub container netns:
+d) put the peer into certain sub container netns:
+
 ```text
 $(olt) ip link set vethtest_p netns ihub_1 
 
-$(olt) ip -c link | grep vethtest   # only one end left in current olt container
+# only one end left in current olt container
+$(olt) ip -c link | grep vethtest
 102: vethtest@if101: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state LOWERLAYERDOWN
      mode DEFAULT group default qlen 1000
 ```
@@ -102,7 +110,8 @@ $(olt) ip -c link | grep vethtest   # only one end left in current olt container
 <p style="margin-bottom: 20px;"></p>
 
 2 test the traffic connectivity with 0.0.0.0  
-send icmp echo to any addr inside olt container from itf vethtest:
+a) send icmp echo to any addr inside olt container from itf vethtest:
+
 ```text
 $(olt) ping -I vethtest 0.0.0.0
 PING 0.0.0.0 (0.0.0.0): 56 data bytes
@@ -111,7 +120,8 @@ PING 0.0.0.0 (0.0.0.0): 56 data bytes
 126 packets transmitted, 0 packets received, 100% packet loss
 ```
 
-capture pkts inside sub container ihub_1, nothing deliverd:
+b) capture pkts inside sub container ihub_1, nothing delivered:
+
 ```text
 $(ihub_1) tcpdump -n -i vethtest_p -vvnnXX
 tcpdump: listening on vethtest_p, link-type EN10MB (Ethernet), capture size 262144 bytes
@@ -124,7 +134,8 @@ tcpdump: listening on vethtest_p, link-type EN10MB (Ethernet), capture size 2621
 <p style="margin-bottom: 20px;"></p>
 
 3 test the traffic connectivity with 1.1.1.1  
-send icmp echo to specific addr inside olt container from itf vethtest:
+a) send icmp echo to specific addr inside olt container from itf vethtest:
+
 ```text
 $(olt) ping -I vethtest 1.1.1.1
 PING 1.1.1.1 (1.1.1.1): 56 data bytes
@@ -133,7 +144,8 @@ PING 1.1.1.1 (1.1.1.1): 56 data bytes
 36 packets transmitted, 0 packets received, 100% packet loss
 ```
 
-capture pkts inside sub container ihub_1, only arp delivered:
+b) capture pkts inside sub container ihub_1, only arp delivered:
+
 ```text
 $(ihub_1) tcpdump -n -i vethtest_p -vvnnXX
 tcpdump: listening on vethtest_p, link-type EN10MB (Ethernet), capture size 262144 bytes
@@ -157,7 +169,6 @@ tcpdump: listening on vethtest_p, link-type EN10MB (Ethernet), capture size 2621
 
 <hr>
 
-### # todo analysis
+### # todo ping analysis
 1 the major difference behaviour among ping 0.0.0.0 vs ping 1.1.1.1 is that:  
-2 the root cause for that is: todo  
-3 the ping operation flow
+2 the ping operation flow: ref to blog post ping-work-principle

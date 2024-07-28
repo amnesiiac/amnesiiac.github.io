@@ -4,6 +4,9 @@ title: "setup llm env (autodl, gpu)"
 author: "melon"
 date: 2024-04-09 21:01
 categories: "2024"
+tags:
+  - llm
+  - todo
 ---
 
 script for autodl instance config for llm:

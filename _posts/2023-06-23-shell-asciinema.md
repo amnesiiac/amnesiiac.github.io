@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "asciinema: record terminal actions (shell)"
+title: "asciinema: record terminal actions (terminal)"
 author: "melon"
 date: 2023-06-23 22:26
 categories: "2023"
 tags:
-  - shell
+  - terminal
 ---
 
 ### # asciinema usages on macos
@@ -84,4 +84,3 @@ online converter tool: https://dstein64.github.io/gifcast/
 ### # reference
 https://asciinema.org  
 https://asciinema.org/docs
-

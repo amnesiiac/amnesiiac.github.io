@@ -65,8 +65,11 @@ after-shot, which will keep the shot line consistent with which you aim at.
 
 ### # actions for hitting the cueball close to poolside
 1 first need to aim horizontally, then lift the cue bottom a bit higher.  
-2 the right hand need to grip a bit ahead, and grip the cue a bit tighter.  
-3 at the moment before hitting the cue ball, release the cue out in that short time period.
+2 the right hand need to grip a bit ahead, with all fingers hold the cue, and grip the cue a bit tighter.  
+3 at the moment before hitting the cue ball, release the cue out in that short time period.  
+4 dont pull the cue back & forth too much before hitting, take more time checking the aim line, them shot resolutely.
+5 use thumb & index finger to add pos restriction of the cue lean on snooker table, not too tight or too losse;
+sometimes just the index finger is enough.
 
 <hr>
 

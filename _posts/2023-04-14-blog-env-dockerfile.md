@@ -37,8 +37,10 @@ RUN gem install jekyll bundler && \
 	cd /paper/ && \
 	bundle install
 ```
+
 note: need to config docker daemon.json proxy or will meet timeout in connection.  
 cmd to buildup the image:
+
 ```text
 $ docker build -f ./dockerfile -t blog:latest .
 ```
@@ -46,10 +48,12 @@ $ docker build -f ./dockerfile -t blog:latest .
 <hr>
 
 ### # jekyll blog startup
+
 ```text
 $ docker run -it --rm -p 3000:4000 -w=/paper -v /Users/mac/paper/blog/:/paper \ 
 -h melon blog bundle exec jekyll serve --host 0.0.0.0
 ```
+
 which will start a blog instance with 3000 port on localhost exposed.
 
 <hr>

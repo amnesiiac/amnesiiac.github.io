@@ -8,15 +8,17 @@ tags:
   - container
 ---
 
-### # issue: shell log listener
+### # issus using shell for log listening & redirection
 given a nginx container started by nerdctl cli:
+
 ```text
 $(nerdctl alpine container) nerdctl ps -a
 CONTAINER ID  IMAGE         COMMAND                  CREATED     STATUS  PORTS                  NAMES
 82d31060b102  nginx:latest  "/docker-entrypoint..."  6 days ago  Up      0.0.0.0:49155->80/tcp  nginx-82d31
 ```
 
-in shell env, the following log redirection operation will result in err:
+in shell env, the following log redirection operation failed:
+
 ```text
 $(nerdctl alpine container) nerdctl logs -ft 82d31060b102 &>> ./log
 sh: syntax error: unexpected redirection
@@ -24,8 +26,9 @@ sh: syntax error: unexpected redirection
 
 <hr>
 
-### # solution: bash log listener
-to fix this, simply switch to bash:
+### # solution: use bash for log listening & redirection
+the above issue can be solved by using bash instead:
+
 ```text
 $(nerdctl alpine container) apk add bash
 fetch https://dl-cdn.alpinelinux.org/alpine/v3.18/main/x86_64/APKINDEX.tar.gz
@@ -39,15 +42,20 @@ $(nerdctl alpine container) bash                                    # switch to 
 $(nerdctl alpine container) nerdctl logs -ft 82d31060b102 &>> .log  # try listening container log & redirection
 ^C
 ```
-the nerdctl alpine container can be setup using github repo: containerized_nerdctl.
+
+the nerdctl alpine container setup can refer to containerized-nerdctl (github) for guidance.
+
 <hr>
 
-### # code in action (an example illustrate how to listen & redirect container logs)
-after device reaches ready state, the hostfw will hang on listening the docker log output & redirect to workdir
+### # log listener & redirector in python
+the following provides an example illustrating how to listen & redirect container logs:
+
 ```text
 def logs_to_file(self, file):
     self.log_file = file
     sh.run("{} logs -ft {} &>> {}".format(self.container_cli, self.id, self.log_file))
     return 0
 ```
-ref: hostfw/pkg_host/sandbox/sb_docker.py
+
+after device reaches ready state, the platform hostfw will continue listening the docker log output,
+and redirect the log to workdir.

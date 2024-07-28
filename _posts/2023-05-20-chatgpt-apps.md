@@ -1,15 +1,15 @@
 ---
 layout: post
-title: "chatgpt (resources)"
-author: "twistfatezz"
+title: "chatgpt (llm, chatgpt, tool)"
+author: "melon"
 date: 2023-05-20 11:20
 categories: "2023"
 tags:
-  - chatgpt
+  - llm
 ---
 
-### # chatgpt for terminal: aichat
-The Dockerfile:
+### # aichat: chatgpt in terminal
+the dockerfile:
 ```text
 # ref: https://github.com/sigoden/aichat
 FROM rust
@@ -21,10 +21,11 @@ RUN cargo install --force aichat && \
 # todo: copy local config.yaml to replace default /root/.config.yaml
 # given a cmd or entrypoint to make this script work as cmd
 ```
-need paied chatgpt account for api key tokens.
+need paid chatgpt account for api key tokens.
 ```text
 docker build -t aichat .
 ```
+
 <hr>
 
 ### # poe
@@ -32,5 +33,5 @@ https://poe.com/, using google account to login.
 
 <hr>
 
-### # forfront.ai
+### # forefront.ai
 http://forefront.ai, using google account to login.

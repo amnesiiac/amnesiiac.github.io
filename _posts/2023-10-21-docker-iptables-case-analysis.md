@@ -9,8 +9,8 @@ tags:
   - network
 ---
 
-### # introduction
-an experiment for building up the connection between two containers of different subnets.  
+this article mainly covers an experiment for building up l3 connection between two containers
+of different subnets.
 each subnet is created & isolated using docker default bridge driver.
 
 <hr>
@@ -24,8 +24,8 @@ $(host) docker network ls
   97392a75e5a1   bridge     bridge    local
   11789d7cb259   host       host      local
   8c7ae9ad8eb5   none       null      local
-  4f0537e1b2cd   testnet1   bridge    local  <--- newly created
-  149d732ffd90   testnet2   bridge    local  <--- newly created
+  4f0537e1b2cd   testnet1   bridge    local                                 # newly created
+  149d732ffd90   testnet2   bridge    local                                 # newly created
 
 $ docker run --rm -it --network testnet1 --name test1 ubuntu:22.04 bash     # container1 attached to subnet1
 $ docker run --rm -it --network testnet2 --name test2 ubuntu:22.04 bash     # container2 attached to subnet2

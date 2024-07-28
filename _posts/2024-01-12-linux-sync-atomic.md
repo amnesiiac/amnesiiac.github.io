@@ -76,4 +76,5 @@ atomic instrcution.
 <hr>
 
 ### # kernel implementation of atomic
-ref: https://github.com/torvalds/linux/blob/master/arch/x86/include/asm/atomic.h
+ref: https://github.com/torvalds/linux/blob/master/arch/x86/include/asm/atomic.h  
+ref: https://dslztx.github.io/blog/2020/07/21/原子操作与锁/

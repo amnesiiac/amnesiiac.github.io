@@ -10,9 +10,11 @@ tags:
 ---
 
 {% raw %}
-### # issue
-using nerdctl 1.5.0 as hostfw outmost container cli, 
-after hostfw reaches ready state, try ssh to the exposed port, but returned err:
+
+### # issue: no route to host when ssh to port exposed by nerdctl hostfw container
+using nerdctl 1.5.0 as hostfw outmost container cli, after hostfw reaches ready state,
+try ssh to the exposed port, but returned err:
+
 ```text
 $ ssh root@127.0.0.1 -p 49156
 ssh: conect to host 127.0.0.1 port 49156: No route to host
@@ -23,6 +25,7 @@ ssh: conect to host 127.0.0.1 port 49156: No route to host
 ### # issue analysis
 1 check the sshd and ssh state, ssh work fine.  
 2 by no route to host, first check the layer 2 connectivity by:
+
 ```text
 $ ping 127.0.0.1
 PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
@@ -35,15 +38,16 @@ PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
 4 packets transmitted, 4 received, 0% packet loss, time 3060ms
 rtt min/avg/max/mdev = 0.053/0.066/0.078/0.010 ms
 ```
-which seems localhost is working well.
 
-3 check is certain proc is listening ssh connection on port 49156
+thus the localhost is in fine state.  
+3 check is certain proc is listening ssh connection on port 49156:
+
 ```text
 $ netstat -tuln   # show all the listening port list
 ...
 ```
-from the result, we cannot find the listening port named 49156, which is weird.
 
+from the result, we cannot find the listening port named 49156, which is weird & abnormal.  
 4 check machine networking function by nginx server, then ping itself:
 
 ```text
@@ -74,32 +78,32 @@ Commercial support is available at
 </body>
 </html>
 ```
-the result shows that local server's layer3 networking function is fine.
 
-5 by no route to host, seems a routing problem, check the NAT table which is responsible for port mapping by:
+the result shows that local server's layer3 networking function is fine.  
+5 by err reported as no route to host, which seems a routing problem, thus need to check the NAT table:
+
 ```text
 $ iptables -L -n -t nat
 ```
+
 the rules are configured by nerdctl and kalico cni plugin for k8s pod.
 the kalico rules can work well with nerdctl together, but docker cannot work with nerdctl,
-which will cause iptables rules conflicts. the iptables from the issue env seems fine.
+which will cause iptables rules conflicts.
+howevere, the iptables from the issue env seems fine with no flaws.
 
 <hr>
 
-### # root cause for container failed to bringup
-another nerdctl container which already launched in env has the same port mappings,
+### # a bit closer to the fact: nerdctl container to host the port mapping has failures
+the problematic nerdctl container seems failed to establish the ssh port correctly, meantime,
+another nerdctl container which already launched in env has port mappings overlapped with the failed one,
 which make current nerdctl hostfw instance failed to launch correctly.
-the old & new instance are exposing duplicated ports. so the newer nerdctl container is failed to listen on the port.
-
-<hr>
-
-### # why the nerdctl:1.5.0 failed to align the a different port for startup
-try startup nerdctl 1.5.0 inside alpine docker container failed -> pending on this to reproduce the error.
+the old & new instance are exposing duplicated ports, so the newer nerdctl container failed to listen on the port.
 
 <hr>
 
 ### # expected behavior (tested with nerdctl source code 1.7.2, fix delivered version)
 startup nginx container with port 80 and 90 exposed to host:
+
 ```text
 $ nerdctl run -p :80 -p 90 -d nginx
 docker.io/library/nginx:latest:    resolved       |++++++++++++++++++++++++++++++++++++++|
@@ -115,6 +119,7 @@ $ nerdctl run -p :80 -p 90 -d nginx
 ```
 
 check the port mapping from nerdctl nginx container to host:
+
 ```text
 $ nerdctl ps -a
 CONTAINER ID  IMAGE         COMMAND         CREATED    STATUS  PORTS                                         NAMES
@@ -123,6 +128,7 @@ CONTAINER ID  IMAGE         COMMAND         CREATED    STATUS  PORTS            
 ```
 
 inspect some ip settings of the started containers:
+
 ```text
 $ nerdctl inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 34b5172ec43
 10.4.0.3
@@ -146,16 +152,19 @@ $ brctl show
 bridge name     bridge id               STP enabled     interfaces
 nerdctl0        8000.6e43e7d62d10       no              veth9c455e0d
 ```
-we could conclude that the automatically generated host ports are not overlapped, which can be judge using iptables commands also:
 
-the 1st chain is a pre-routing chain, will deal with all pkts and redirect them.
+we could conclude that the automatically generated host ports are not overlapped, which can be confirmed
+using iptables commands as following steps.  
+1) the 1st chain is a pre-routing chain, will deal with all pkts and redirect them.
+
 ```text
 $ iptables -n -v -L -t nat
 Chain PREROUTING (policy ACCEPT 1 packets, 67 bytes)
  pkts bytes target             prot opt in  out  source     destination
     2   104 CNI-HOSTPORT-DNAT  0    --  *   *    0.0.0.0/0  0.0.0.0/0    ADDRTYPE match dst-type LOCAL
 ```
-all matched pkts from any itf in to any itf out, from any src ip:port to any dest ip:port (type=LOCAL),
+
+2) then all matched pkts from any itf in to any itf out, from any src ip:port to any dest ip:port (type=LOCAL),
 will be pre-route to CNI_HOSTPORT_DNAT chain.
 
 ```text
@@ -166,7 +175,8 @@ Chain CNI-HOSTPORT-DNAT (2 references)
     0     0 CNI-DN-ffe9de0bbb4c99ef35271  6    --  *   *    0.0.0.0/0  0.0.0.0/0
     /* dnat name: "bridge" id: "default-34b..." */ multiport dports 49155,49156
 ```
-all pkts from from any itf to any itf out, from any src ip:port to any ip with dports in 49153,49154
+
+3) all pkts from from any itf to any itf out, from any src ip:port to any ip with dports in 49153,49154
 will be route to CNI_DB_xxxx chain (e.g. 1st container).
 
 ```text
@@ -188,11 +198,12 @@ Chain CNI-DN-ffe9de0bbb4c99ef35271 (1 references)
     0     0 CNI-HOSTPORT-SETMARK  6    --  *    *     127.0.0.1     0.0.0.0/0     tcp dpt:49156
     0     0 DNAT                  6    --  *    *     0.0.0.0/0     0.0.0.0/0     tcp dpt:49156 to:10.4.0.3:90
 ```
-take the first chain rule #1 as a case:  
+
+3.1) take the #1 rule inside the first chain (CNI-DN-394b84dda006836f40db7) for illustration:  
 all pkts from any itf to any itf out, from src subnet 10.4.0.0/24 or 127.0.0.1
 to any dest ip with port=49153 will be route to CNI_HOSTPORT_SETMARK chain.
 
-take the first chain rule #3 as a case:  
+3.2) take the #3 rule inside the first chain (CNI-DN-394b84dda006836f40db7) for illustration:  
 all pkts from any itf to any itf out, from src ip:port will be send to DNAT chain for
 translation to ${ip_container1}:80. that is a port mapping enablement rule.
 
@@ -200,6 +211,7 @@ translation to ${ip_container1}:80. that is a port mapping enablement rule.
 
 ### # actual behavior (tested with nerdctl 1.5.0)
 check the container running state:
+
 ```text
 $ nerdctl ps -a
 CONTAINER ID  IMAGE         COMMAND        CREATED   STATUS  PORTS                                         NAMES
@@ -208,6 +220,7 @@ c4ae9168d1d5  nginx:latest  "/entrypo..."  4min ago  Up      0.0.0.0:49153->80/t
 ```
 
 check the port mapping of each container:
+
 ```text
 $ nerdctl container port c4ae91
 80/tcp -> 0.0.0.0:49153
@@ -218,6 +231,7 @@ $ nerdctl container port 33bc62
 ```
 
 try to curl the nginx server, which returned err:
+
 ```text
 $(alpine) curl 0.0.0.0:49155
 <!-- IE friendly error message walkround.
@@ -235,6 +249,7 @@ $(alpine) curl 0.0.0.0:49155
 ```
 
 check the ip of the container started:
+
 ```text
 $ nerdctl inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 33bc62
 10.4.0.3
@@ -243,6 +258,7 @@ $ nerdctl inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 
 ```
 
 check the nat (port mapping) tables of current live container instances:
+
 ```text
 $ iptables -n -v -L -t nat
 Chain PREROUTING (policy ACCEPT 2 packets, 134 bytes)
@@ -252,6 +268,7 @@ Chain PREROUTING (policy ACCEPT 2 packets, 134 bytes)
 ```
 
 then we turn to chain CNI_HOSTPORT_DNAT for details of port alignment:
+
 ```text
 Chain CNI-HOSTPORT-DNAT (2 references)
  pkts bytes target        prot opt in  out  source     destination
@@ -260,12 +277,13 @@ Chain CNI-HOSTPORT-DNAT (2 references)
     0     0 CNI-DN-83...     6  --  *    *  0.0.0.0/0  0.0.0.0/0
     /* dnat name: "bridge" id: "default-33bc..." */ multiport dports 49154,49155
 ```
+
 hence, we can see that the dport rule for pkts dest is overlapped, the rules is established
 by nerdctl.
 it's likely when nerdctl try to add the second port mapping rules, which neglect the multiple
-port allocated by the existed container.
-
+port allocated by the existed container.  
 to make it clear, we could try launch 2 container each with only 1 port exposed:
+
 ```text
 $ nerdctl run -p :80 -d nginx
 3b3ca23b527b2f1de6eab8485dd58a7f3c741050c8cc934feb5b640164886517
@@ -278,7 +296,9 @@ CONTAINER ID  IMAGE         COMMAND       CREATED         STATUS  PORTS         
 3b3ca23b527b  nginx:latest  "/entryp..."  50 seconds ago  Up      0.0.0.0:49153->80/tcp  nginx-3b3ca
 6949ed37ae36  nginx:latest  "/entryp..."  34 seconds ago  Up      0.0.0.0:49154->80/tcp  nginx-6949e
 ```
+
 check related iptable rules:
+
 ```text
 $ iptables -n -v -L -t nat
 Chain PREROUTING (policy ACCEPT 0 packets, 0 bytes)
@@ -381,8 +401,8 @@ func TestParseIPTableRules(t *testing.T) {
         {
             name: "Single rule with multiple ports",    // manually add this edging case
             rules: []string{
-                "-A CNI-HOSTPORT-DNAT -p tcp -m comment" +
-              " --comment \"dnat name: \"bridge\" id: \"some-id\"\" -m multiport --dports 8080,9090 -j CNI-DN-some-hash",
+            "-A CNI-HOSTPORT-DNAT -p tcp -m comment" +
+            " --comment \"dnat name: \"bridge\" id: \"some-id\"\" -m multiport --dports 8080,9090 -j CNI-DN-some-hash",
             },
             want: []uint64{8080, 9090},
         },

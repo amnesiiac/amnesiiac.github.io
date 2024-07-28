@@ -1,13 +1,14 @@
 ---
 layout: post
 title: "port mapping && port publishing (docker)"
-author: "twistfatezz"
+author: "melon"
 date: 2023-04-25 22:01
 categories: "2023" 
 tags:
   - container
   - ongoing
 ---
+
 ### # check port mapping of containers
 {% raw %}
 ```text
@@ -29,7 +30,8 @@ $ docker inspect --format="{{json .Config.ExposedPorts}}" blog:v1
 null
 ```
 {% endraw %}
-the null output due to no "EXPOSE ${port}" in blog:v1 Dockerfile, even the running container is configured with port mapping dynamically.
+the reason for the null output: there's no items as "EXPOSE ${port}" in blog:v1 Dockerfile, even the container
+is configured to run with port mapping using docker run -p option.
 
 <hr>
 

@@ -21,8 +21,10 @@ pseudorandomness but not truly random (can be predicted by seed), seed selection
 ### # random vs urandom
 the main distinction between random(PRNG) and urandom(system RNG) is one of use cases.
 
-random implements deterministic PRNGs (pseudo-random number generators), there are scenarios where you want exactly those.
-for instance when you have an algorithm with a random element which you want to test, and there's need to make the test to be repeatable.
+random implements deterministic PRNGs (pseudo-random number generators), there are scenarios where
+you want exactly those.
+for instance when you have an algorithm with a random element which you want to test, and there's
+need to make the test to be repeatable.
 in that case you want a deterministic PRNG which you can seed.
 
 urandom on the other hand cannot be seeded and draws its source of entropy from many unpredictable sources,
@@ -54,7 +56,6 @@ def get_int(len=5, fro=None, to=None):
         ret = random.randint(fro, to)
     return int(ret)
 
-
 if __name__ == "__main__":
     s = get_str(8, "0123456789ABCDEF")
     print(s)                           # AD6A1198
@@ -63,4 +64,3 @@ if __name__ == "__main__":
     l = get_int(len=2)
     print(l)                           # 82
 ```
-ref: hostfw/pkg_host/utils/myrandom.py

@@ -9,6 +9,7 @@ tags:
 ---
 
 a simple tricky bit-wise printf formatter with testcase:
+
 ```text
 #include <stdio.h>
 // __int8_t are available both on macos & linux
