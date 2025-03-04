@@ -50,14 +50,13 @@ once the CPU runtime quantum of the current thread has been exceeded.
 
 <p style="margin-bottom: 20px;"></p>
 
-3 why a spinlock can be enabled in a ISR, but mutex & sleep cannot?  
-sleep or mutex will block (execution got stuck & sleep, schedule other thread),
-but spinlock wont.
+3 why a spinlock can be enabled in a interrupt service routine (isr), but mutex & sleep cannot?  
+sleep or mutex will block (execution got stuck & sleep, schedule other thread), but spinlock wont.
 
 code running in interrupt context is unable to sleep, or block, because interrupt context
 does not have a backing process associated to reschedule, so there is nothing for
 the scheduler to put to sleep or wake up.
-if you sleep or block in ISR, you are slower the whole machine, which is insane.
+if you sleep or block in isr, you are slower the whole machine, which is insane.
 
 as a result, interrupt context cannot perform actions to let the kernel putting
 current context to sleep: e.g., downing semaphore, copying to/from userspace memory or

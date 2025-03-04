@@ -113,13 +113,14 @@ DirectMap1G:        3145728 kB
 <hr>
 
 ### # dirty mem
-dirty memory is memory representing data on disk that has been changed but has not yet been written out to disk.
+dirty memory is memory representing data on disk that has been changed but has not yet been written out to disk,
 including:  
-1 Memory containing buffered writes that have not been flushed to disk yet.  
-2 Regions of memory mapped files that have been updated but not written out to disk yet.  
-3 Pages that are in the process of being written to swap space but have changed since the system started writing them to swap space.
+1 memory containing buffered writes that have not been flushed to disk yet.  
+2 regions of memory mapped files that have been updated but not written out to disk yet.  
+3 pages that are in the process of being written to swap space but have changed since the system started
+writing them to swap space.
 
 having a few MB of dirty memory is normal on any reasonably busy system,
 and even spikes up to a few hundred MB are not unusual.  
-The only time to really be worried about it is if it's consistently very high,
+the only time to really be worried about it is if it's consistently very high,
 which is usually a sign that your disks are a performance bottleneck for your system.

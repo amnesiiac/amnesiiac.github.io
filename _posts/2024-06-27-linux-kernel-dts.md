@@ -47,14 +47,15 @@ dts file is designed to describe the device layout info on the development board
 taking led driver as a instance, if want to change the gpio pin for led, then you should modify
 the led driver src, recompile the driver and reload the driver.
 
-however, the board with the same chip can rely on different hw resources, i.e. board-A choose
-gpio-a for led, board-B choose grio-b. kernel gpio driver support both gpio-a and gpio-b,
-then bus/device c code need to take care of the pin usage info.
+however, the board with the same chip can rely on different hw resources, i.e. board-A choose gpio-a for led,
+board-B choose gpio-b for led.
+gpio kdrv is implemented to support both gpio-a and gpio-b, then bus/device c code will need to take care
+of the pin usage info for different platforms.
 as a result, the kernel device src get ugly and bloated.
 
-by introducing dts info as a separate config, the device src code wont be botherred by the
-annoying hardcode: when board is bringing up, uboot get executed to load kernel & dts files
-into memory, then start the kernel with dts addr in mem pass to it.
+the correct way to integrate "data-driven" framework is to: introducing dts info as a separate config,
+the device src code wont be botherred by the annoying hardcode: when board is bringing up, uboot is executed
+to load kernel & dts files into memory, then start the kernel with dts addr in mem pass to it.
 
 check the /sys/firmware/devicetree:
 
@@ -90,7 +91,7 @@ check the /sys/firmware/devicetree:
 <hr>
 
 ### # modify the dts using uboot tool fdt
-1 background  
+$ 1 background  
 sometimes there's need to test a driver with different dts settings,
 one way is to rebuild the uboot or dtb (from dts) and flash to nor-flash.
 however, the above method is bit overkill for testing small modifications, alternatively,
@@ -98,7 +99,8 @@ we can modify the running config of device-tree by uboot command fdt.
 
 the following will introduce how to create & modify & delete device tree setting in uboot.
 
-2 get the address of fdt
+$ 2 get the address of fdt
+
 ```text
 => bdinfo
 boot_params = 0x0000000000000000
@@ -122,12 +124,14 @@ fdt_size    = 0x000000000002ef60
 we could get the addr of fdt by new_fdt = 0x00000004ffb90e80.
 
 
-3 set fdt address
+$ 3 set fdt address
+
 ```text
 => fdt addr 4ffb90e80
 ```
 
-4 show all fdt commands
+$ 4 show all fdt commands
+
 ```text
 => fdt
 fdt - flattened device tree utility commands
@@ -157,8 +161,9 @@ fdt chosen [<start> <end>]          - Add/update the /chosen branch in the tree
 NOTE: Dereference aliases by omitting the leading '/', e.g. fdt print ethernet0.
 ```
 
-5 list fdt
-```text
+$ 5 list fdt
+
+```blurtext
 => fdt list /
 / {
         model = "DFMB-C";
@@ -178,7 +183,7 @@ NOTE: Dereference aliases by omitting the leading '/', e.g. fdt print ethernet0.
         };
 ```
 
-```text
+```blurtext
 => fdt list /cpld@0/misc@0
 misc@0 {
         compatible = "nokia,cpld-misc";
@@ -197,7 +202,8 @@ misc@0 {
 };
 ```
 
-6 read fdt
+$ 6 read fdt
+
 ```text
 => fdt get value var1 /cpld@0/misc@0 uio-name
 => fdt get size var2 /cpld@0/misc@0 uio-name
@@ -207,8 +213,9 @@ var1=cdpu-cpld
 var2=0x0000000A
 ```
 
-7 modify fdt
-```text
+$ 7 modify fdt
+
+```blurtext
 => fdt set /cpld@0/misc@0 version-reg <0x10000006>
 
 => fdt list /cpld@0/misc@0
@@ -220,9 +227,11 @@ misc@0 {
         regmap-name = "cdpu-cpld";
         version-reg = <0x10000006>;
 ```
+
 after the fdt set clause, the value of version-reg was modified.
 
-8 create fdt
+$ 8 create fdt
+
 ```text
 => fdt mknode /cpld@0 test@1
 
@@ -241,9 +250,11 @@ cpld@0 {
 test@1 {
 };
 ```
+
 as can be seen that an empty node of "test@1" was created.
 
 now add some properties:
+
 ```text
 => fdt set /cpld@0/test@1 test-flag-no-value
 => fdt set /cpld@0/test@1 test-flag-string "string"
@@ -257,7 +268,7 @@ test@1 {
 };
 ```
 
-9 delete fdt
+$ 9 delete fdt
 ```text
 => fdt rm /cpld@0/test@1 test-flag-no-value
 test@1 {
@@ -270,3 +281,8 @@ test@1 {
 
 ### # kernel code for dts manuplation
 todo
+
+<hr>
+
+### # todo
+further conclude dts from doulos video

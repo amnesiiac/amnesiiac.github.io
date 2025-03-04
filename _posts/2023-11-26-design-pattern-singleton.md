@@ -8,17 +8,16 @@ tags:
   - design pattern
 ---
 
-◆ what is thread safety?  
+$ 1 what is thread safety?  
 in programs where multiple threads share data and are executed in parallel,
 thread-safe code will ensure that each thread can be executed correctly
 by the synchronization mechanism to avoid data pollution.
 
-◆ how to ensure thread safety?  
-(1) add lock for shared resources, to ensure the resource variables are only taken up
-by one thread each time.  
-(2) provide exclusive resources for each thread, rather than shared one.
-e.g. thread_local can alleviate race condition by maintaining exclusive variable
-for each thread, a cpp example illustraing this is as:
+$ 2 how to ensure thread safety?  
+@1 add lock for shared resources, to ensure shared variable are only taken up by one thread each time.  
+@2 provide exclusive resources for each thread, rather than shared one.
+e.g. thread_local can alleviate race condition by maintaining exclusive variable for each thread,
+a cpp example illustraing this is as:
 
 ```text
 #include <iostream>
@@ -39,17 +38,17 @@ void increase_rage(const std::string &thread_name){
  
 int main(){
     std::thread a(increase_rage, "a"), b(increase_rage, "b");  // create thread with associated func
- 
     {
         std::lock_guard<std::mutex> lock(cout_mutex);          // lock the mutex for this separate scope
         cout << "rage counter for main: " << rage << endl;     // ensure following code block exec exclusively
     }
- 
     a.join();                                                  // wait for thread a finishing
     b.join();                                                  // wait for thraed b finishing
 }
 ```
+
 the output can be like:
+
 ```text
 rage counter for main: 1
 rage counter for b: 2
@@ -57,6 +56,7 @@ rage counter for a: 2
 ```
 
 examine the usage of brackets arround std::lock_guard in main, try get rid of it by:
+
 ```text
 #include <iostream>
 #include <mutex>
@@ -86,6 +86,7 @@ int main(){
     b.join();                                                  // wait for thraed b finishing
 }
 ```
+
 that is, the bracket arround std::lock_guard is like the with statement in python, which
 enable automatically releasing lock the end of the scope.
 
@@ -97,24 +98,24 @@ in the printer system, but only one is for executing.
 <hr>
 
 ### # singleton pattern
-◆ definition of singleton  
-(1) a singleton can only have one instance.  
-(2) a singleton must create the instance by itself.  
-(3) a singleton must maintain method for exposing the instance to outside.
+$ 1 definition of singleton  
+@1 a singleton can only have one instance.  
+@2 a singleton must create the instance by itself.  
+@3 a singleton must maintain method for exposing the instance to outside.
 
-◆ categories of singleton  
+$ 2 categories of singleton  
 the singleton can be classified into lazy mode and hungry mode.
-(1) lazy mode: there's no instance existed in thread context, the instance is only created
+@1 lazy mode: there's no instance existed in thread context, the instance is only created
 when a thread need to; extra effort is needed to make it thread-safe.  
-(2) hungry mode: init the instance at the thread context, when a thread need it,
+@2 hungry mode: init the instance at the thread context, when a thread need it,
 just use the instance in the thread context; naturally thread-safe method.
 
-◆ feature of singleton  
-(1) ctor and dtor are private, prevent construct & destory instance out of class context.  
-(2) copy-ctor and value-assign-ctor are private, prevent instance creation by them out of class.  
-(3) a static method to access the instance, which is accessible out of the class.
+$ 3 feature of singleton  
+@1 ctor and dtor are private, prevent construct & destory instance out of class context.  
+@2 copy-ctor and value-assign-ctor are private, prevent instance creation by them out of class.  
+@3 a static method to access the instance, which is accessible out of the class.
 
-◆ application scenarios of lazy & hungry mode  
+$ 4 application scenarios of lazy & hungry mode  
 lazy singleton: suitable to be applied in low-access traffic scenarios; the local static version is
 preferred among other lock/unlock methods.  
 hungry singleton: suitable to be applied in high-access traffic scenarios.
@@ -122,6 +123,7 @@ hungry singleton: suitable to be applied in high-access traffic scenarios.
 <hr>
 
 ### # lazy singleton pattern (thread-unsafe)
+
 ```text
 #include <iostream>
 #include <pthread.h>
@@ -173,6 +175,7 @@ SingleInstance::~SingleInstance(){                               // dtor
 ```
 
 the lazy singleton class usecase, which introduce memory leakage in concurrency:
+
 ```text
 void* printhello(void *thread_id_p){
     pthread_detach(pthread_self());                       // thread start as detached mode (no care of its end state)
@@ -209,6 +212,7 @@ int main(){
 ```
 
 possible output of above program can be:
+
 ```text
 main function start
 main(): create threads: [0]
@@ -232,16 +236,17 @@ thread id: [4]
 invoking ctor
 instance memory address: 0x7fcbd4504080    // 5 (addr same as 2)
 ```
+
 the above program intend to create a singleton, but typically 2 instances are created
 (only got 2 kinds of addr), obj creation from other threads is failed with std::bad_alloc,
 but the exception is handled by std::nothrow version of new.
 finally, the program try release the singleton resource, leading to memory leak.
 
-◆ why lazy mode singleton is not thread-safe?  
+$ 1 why lazy mode singleton is not thread-safe?  
 if the concurrently running thread access the ptr==nullptr judging at the same time,
 then some of them might think as no singleton created yet, leading to duplicate obj creation.
 
-◆ how to avoid resource leaking?  
+$ 2 how to avoid resource leaking?  
 RAII (resource aquisition is initialization) can avoid memory leak in the above program:
 when creating objects, the ctor is responsible for resource aquisition, e.g.
 allocating memory, opening files, connecting to a network, etc.
@@ -251,17 +256,18 @@ during normal exit, exception, or early return.
 another way to avoid memory leak is conducted in above program: claim the thread as
 detached, thus left the recycle operation to os.
 
-◆ linux pthread state: detached or joinable?  
+$ 3 linux pthread state: detached or joinable?  
 there are 2 state of linux pthread: joinable and detached. when thread is set/created as
 joinable, then no recycle of thread stack & thread id at the time of exec return or
 pthread_exit() to exit. when thread is set/created as detached, the thread resouce will
 be released by os when exit.
 
-◆ which linker option to use for managing threads: pthread or lpthread?  
+$ 4 which linker option to use for managing threads: pthread or lpthread?  
 both can be used for compilation of above program, but lpthread is only worked for linker,
 while the pthread can worked on both pre-processor & linker. thus the pthread is recommended.
 
 the makefile for the above program can be:
+
 ```text
 CXX=g++
 CFLAGS=-g -Wall -std=c++11 -pthread -w
@@ -289,6 +295,7 @@ clean:
 
 ### # lazy singleton pattern with lock (thread-safe)
 singleton with lock class definition:
+
 ```text
 #include <iostream>
 #include <pthread.h>
@@ -347,6 +354,7 @@ SingleInstance::~SingleInstance(){
 
 the lazy singleton class usecase code is the same as the example above.  
 possible output of above program can be:
+
 ```text
 main function start
 main(): create threads: [0]
@@ -368,13 +376,14 @@ invoking dtor
 invoking ctor
 instance memory address: main function end0x7fa46dd04080
 ```
+
 all the object are created with the same addr, so definitely only one instance is created.
 
-◆ why the lazy mode singleton pattern with lock is thread safe?  
+$ 1 why the lazy mode singleton pattern with lock is thread safe?  
 use double-check-lock to avoid race condition to operate on the ptr to singleton,
 which ensure the "check & instance creation" is only accessed by 1 process.
 
-◆ drawbacks of lazy singleton pattern with lock?  
+$ 2 drawbacks of lazy singleton pattern with lock?  
 in high concurrency scenarios, tons of threads will try check the ptr_single_instance==nullptr
 at the meantime, they will pass the if clause, result in fierce lock contention, leading to
 lower performance.
@@ -383,6 +392,7 @@ lower performance.
 
 ### # lazy singletion pattern with local static variable (c++11 thread-safe)
 using local static variable as singleton, the lazy mode class definition:
+
 ```text
 #include <iostream>
 #include <mutex>
@@ -453,6 +463,7 @@ int main(){
 ```
 
 possible output of above program can be:
+
 ```text
 main function start
 main(): create threads: [0]
@@ -472,6 +483,7 @@ main(): create threads: [4]
 main function end
 invoking dtor
 ```
+
 static variables typically stored in data or bss segment (initialized or un-initialized).
 
 local static variable has local scope (within get_instance function body), but its lifetime
@@ -482,6 +494,7 @@ care of the resource recycling.
 
 ### # hungry singleton pattern (thread-safe)
 initialized the instance variable as soon as the class got defined, the hungry mode class is as:
+
 ```text
 #include <iostream>
 #include <mutex>
@@ -530,6 +543,7 @@ SingleInstance::~SingleInstance(){
 ```
 
 the hungry singleton class usecase is as:
+
 ```text
 void* printhello(void *thread_id_p){
     pthread_detach(pthread_self());
@@ -563,6 +577,7 @@ int main(){
 ```
 
 possible output of above program can be:
+
 ```text
 invoking ctor
 main function start
@@ -582,6 +597,7 @@ instance memory address: 0x7ffd15c05a80
 invoking dtor
 main function end
 ```
+
 that is, all the obj returned by get_instance are located at the same address, only
 one instance is actually created.
 
@@ -595,6 +611,4 @@ and search for keyword: static data members.
 <hr>
 
 ### # reference
-cpp design pattern(GOF) chapter 1  
-https://zhuanlan.zhihu.com/p/83539039  
-https://refactoringguru.cn/design-patterns/singleton
+cpp design pattern(GOF) chapter 1

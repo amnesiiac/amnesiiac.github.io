@@ -27,6 +27,9 @@ ref: https://jekyllcodex.org/without-plugin/lightbox/#
 # todo: add copy code button
 ref: https://clipboardjs.com  
 
+# issue: when typing in search menu, whole page shift right if scroll bar suddenly occur,
+and it shift back if the scrollbar not need anymore.
+solution: apple -> system preference -> general -> when scrolling -> show scrollbar only when scrolling
 
 # directory
 .

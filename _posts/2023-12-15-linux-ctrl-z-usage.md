@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "exit jobs that cannot accept SIGINT to exit (linux)"
+title: "terminate jobs that cannot handle sigint & exit (linux, signal)"
 author: "melon"
 date: 2023-12-15 20:56
 categories: "2023"
@@ -17,6 +17,7 @@ $ sudo vim /etc/gitlab-runner/config.toml | tail -n 21
 
   <the program hangs, even ctrl+c signal cannot terminate it>
 ```
+
 more details about judging whether a fd of current process is connected to a terminal,
 please search 'connect to terminal' in blog.
 
@@ -57,4 +58,3 @@ however, some times we could not remember exactly all the way back, here's a sho
 ```text
 vim file => edit lines => ctrl+z to make it background => do some test => fg %1 && undo the changes by typing 'u'
 ```
-

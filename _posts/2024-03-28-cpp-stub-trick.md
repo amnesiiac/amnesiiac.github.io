@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "a cpp stub trick sample analysis (cpp, stub trick, reverse engineering)"
+title: "cpp stub trick toy code analysis (cpp, stub trick, reverse engineering)"
 author: "melon"
 date: 2024-03-28 21:23
 categories: "2024"
@@ -255,7 +255,7 @@ call foo before set stub -> this is code in foo function
 call foo after set stub -> this is code in stub of foo function
 call foo after reset stub -> this is code in foo function
 ```
-the func is stubed and then reset successfully.
+the func is stubbed and then reset successfully.
 
 <hr>
 

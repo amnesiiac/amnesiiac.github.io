@@ -9,8 +9,9 @@ tags:
 ---
 
 ### # personal preference of snooker cue
-1 a cue which is lighter than normal one fit me better: too much weight cue make it diffcult to pull forth and abck.  
-2 a cue which is shorter than normal one fit me better: I like to grip relative closer to the center of gravity, and the back pull distance is short to make it stable.  
+1 a cue which is lighter than normal one fit me better: too much weight cue make it diffcult to pull forth and back.  
+2 a cue which is shorter than normal one fit me better: I like to grip relative closer to the center of gravity,
+and the back pull distance is short to make it stable.
 
 <hr>
 
@@ -19,7 +20,7 @@ tags:
 2 left foot line and the aim line are parallel.  
 3 when lying down to aim, left leg naturally bends, while the right leg keep straight.  
 4 always keep the cue rely on your chest (the pressure to chest should be consistent).  
-5 always keep the cue under chin (the pressure may vary).  
+5 always keep the cue under chin (the pressure may vary).
 
 <hr>
 
@@ -49,7 +50,7 @@ after-shot, which will keep the shot line consistent with which you aim at.
 4 always relax your wrist joint.  
 5 make sure to pre stop, check the aim point during this.  
 6 pull back and forth in short distance repeatedly, check the aim line & point again.  
-7 make sure to post stop, determine the speed of cue.  
+7 make sure to post stop, determine the speed of cue.
 
 <hr>
 
@@ -78,4 +79,4 @@ sometimes just the index finger is enough.
 2 directy find out the "goal point" aiming method.  
 3 the pockets two corner and the target ball form two parallel lines, observe the parallels to detemine the range of "imaginary ball".  
 4 aiming by your first sight to determine the aim direction.  
-5 just combination of all the methods above to make sure you find the real "goal direction".  
+5 just combination of all the methods above to make sure you find the real "goal direction".

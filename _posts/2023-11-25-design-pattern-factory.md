@@ -8,15 +8,12 @@ tags:
   - design pattern
 ---
 
-the factory pattern is a creational pattern that provides an optimized form of
-object creation, which is mainly used in complicated class hierarchy scenarios for
-object creation.
+factory pattern is a creational pattern that provide an optimized way of object creation,
+which is mainly used in complicated class hierarchy scenarios: each class obj creation is simple,
+but complexity lies in the hierarchy dependency.
 
-(usually each class object creation itself is very simple,
-but the complexity of the hierarchy depends on a number of),
-
-using an extra base class responsible for object creation of complex class
-hierarchies, can make the construction of the object more manageable.
+using an extra base class responsible for object creation of complex class hierarchies,
+can make the construction of the object more manageable.
 
 <hr>
 
@@ -27,31 +24,35 @@ abstract factory pattern.
 <hr>
 
 ### # simple factory pattern
-the UML chart for the simple factory pattern:
+the uml chart for the simple factory pattern:
+
 ```txt
+                              (abstract product class)
                                    ┌───────────┐
-                                   │   Shoes   │ (abstract product class)
+                                   │   Shoes   │
                                    ├───────────┤
-                                   │ + show()  │
-                                   └─+───+───+─┘
-                           inherited │   │   │ inherited
-                      ┌──────────────┘   │   └──────────────┐
-                      │                  │                  │
+                      ┌------------+ + show()  +------------┐
+                      | inherited  └─────+─────┘  inherited |
+                      |                  │                  |
+                      |                  │                  |
+                      |                  │                  |
                 ┌─────┴─────┐     ┌──────┴──────┐     ┌─────┴─────┐
-                │ PumaShoes │     │ AdidasShoes │     │ NikeShoes │ (concrete product class)
-                ├───────────┤     ├─────────────┤     ├───────────┤
-                │ + show()  │     │ + show()    │     │ + show()  │
+                │ PumaShoes │     │ AdidasShoes │     │ NikeShoes │
+                ├───────────┤     ├─────────────┤     ├───────────┤ (concrete product class)
+                │ + show()  │     │  + show()   │     │ + show()  │
                 └─────+─────┘     └──────+──────┘     └─────+─────┘
-                      |    create        |        create    |
-                      └------------┐     |     ┌------------┘
-                                ┌──┴─────┴─────┴──┐
-                                │   ShoesFactory  │
-                                ├─────────────────┤ (factory class)
+                      |                  |                  |
+                      |                  |                  |
+                      | create  ┌────────┴────────┐  create |
+                      └---------┤   ShoesFactory  ├---------┘
+                                ├─────────────────┤
                                 │ + createshoes() │
                                 └─────────────────┘
+                                  (factory class)
 ```
 
 product class hierachy code: concrete product class inherited from a abstract base class.
+
 ```text
 using std::cout;
 using std::endl;
@@ -112,29 +113,28 @@ the application code of simple factory pattern:
 ```text
 int main(){
     ShoesFactory putian;                                      // use simple factory pattern to create product obj
-    Shoes *nike_shoes_ptr = putian.createshoes(Nike);         // create nike product shoes
+    Shoes* nike_shoes_ptr = putian.createshoes(Nike);         // create nike product shoes
     if(nike_shoes_ptr != nullptr){
         nike_shoes_ptr->show();
         delete nike_shoes_ptr;                                // release nike product obj resources
         nike_shoes_ptr = nullptr;                             // reset pointer
     }
-    Shoes *adidas_shoes_ptr = putian.createshoes(Adidas);     // create Adidas product shoes
+    Shoes* adidas_shoes_ptr = putian.createshoes(Adidas);     // create Adidas product shoes
     ...
 }
 ```
+
 simple factory pattern actually solves the problem:  
-(1) for a specific product class with complicated hierarchy,
+@1 for a specific product class with complicated hierarchy,
 the object creation for certain series of product is very confusing:
 object naming scheme and the interface for object creation are of great diversity.
 by adopting simple factory pattern, all objects are created by the same factory,
 which can unify the object creation path and make the created objects to be manuplative.  
-(2) the core idea of the factory pattern is:
+@2 the core idea of the factory pattern is:
 the product hierarchy definition and the product obj creation are separated from each other
 to make the program logic clearer.
 
 <hr>
 
 ### # reference
-cpp design pattern (GOF) chapter 1  
-https://zhuanlan.zhihu.com/p/83535678  
-https://refactoringguru.cn/design-patterns/factory-method
+cpp design pattern (gof) chapter 1

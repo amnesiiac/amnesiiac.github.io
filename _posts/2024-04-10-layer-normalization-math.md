@@ -5,6 +5,7 @@ author: "melon"
 date: 2024-04-10 21:05
 categories: "2024"
 tags:
+  - machine learning
   - math
   - llm
   - todo
@@ -23,7 +24,7 @@ $$
 <hr>
 
 ### # layernorm backpropagation
-the layernorm inference typically lie in following form:
+the layernorm inference typically take in following form:
 
 $$
 \text{LayerNorm}(x) = w \odot \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} + b

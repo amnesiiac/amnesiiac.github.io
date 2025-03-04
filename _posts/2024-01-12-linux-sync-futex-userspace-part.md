@@ -73,7 +73,7 @@ void wait_on_futex_value(const char* proc, int* futex_addr, int val, int block){
     while(1){
         int futex_rc;
         if(block){
-            futex_rc = futex(futex_addr, FUTEX_WAIT, val, NULL, NULL, 0); // block wait ret when futex word=val
+            futex_rc = futex(futex_addr, FUTEX_WAIT, val, NULL, NULL, 0);     // block wait ret when futex word=val
         }
         else{
             futex_rc = futex(futex_addr, FUTEX_WAIT, val, &timeout, NULL, 0); // non-block wait with timeout
@@ -101,7 +101,7 @@ void wake_futex(const char* proc, int* futex_addr, int block){
     while(1){
         int futex_rc;
         if(block){
-            futex_rc = futex(futex_addr, FUTEX_WAKE, 1, NULL, NULL, 0); // block wakeup futex, ret if succeed
+            futex_rc = futex(futex_addr, FUTEX_WAKE, 1, NULL, NULL, 0);     // block wakeup futex, ret if succeed
         }
         else{
             futex_rc = futex(futex_addr, FUTEX_WAKE, 1, &timeout, NULL, 0); // non-block wakeup futex with timeout
@@ -307,6 +307,7 @@ int main(int argc, char** argv){
 
 compile & execute the above program in blocking mode, set interval as 4s between
 setup futex word and the wakeup action, the blocking behavior can be observed:
+
 ```text
 $ gcc -o out test.c && ./out
 [par] set futex word as 10

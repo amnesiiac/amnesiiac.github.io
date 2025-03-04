@@ -10,7 +10,8 @@ tags:
 ---
 
 ### # introduction to flamegraph
-The manual form flamegraph.pl:
+the manual form flamegraph.pl:
+
 ```text
 USAGE: ./flamegraph.pl [options] infile > outfile.svg
 $ ./flamegraph.pl --title="Flame Graph: malloc()" trace.txt > graph.svg
@@ -91,7 +92,9 @@ $ perf script | ./stackcollapse-perf.pl | ./flamegraph.pl > data.svg
 ```text
 $ perf record -g -p ${pid} -- sleep ${time_to_record}
 ```
-Use perf script output data and perl script to generate flamegraph in svg format:
+
+use perf script output data and perl script to generate flamegraph in svg format:
+
 ```text
 $ perf script | ./stackcollapse-perf.pl | ./flamegraph.pl --width 720 > out.svg
 ```

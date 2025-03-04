@@ -9,8 +9,7 @@ tags:
   - kernel
 ---
 
-### # ftrace: a powerfull function tracer
-ftrace: a tracer framework (part of debugfs), used for tracing linux kernel funciton callstacks.
+ftrace is a tracer framework (part of debugfs), used for tracing linux kernel funciton callstacks.
 
 <hr>
 
@@ -183,20 +182,22 @@ $ cat trace | grep '\[034\]' | head -n 20
 ```
 
 try to get the process info using the pid printed:
+
 ```text
 $ ps -p 13267
   PID TTY          TIME CMD
 ```
+
 ps cmd find nothing, which means the pid in kernel space is different from the user space one shown by top.
 
 <hr>
 
-### # kernel pid vs userspace pid
-kernel pid is actually thread id, userspace pid is process id.
-the tgid of kernel is the same meaning as userspace pid.  
-ref: https://stackoverflow.com/a/9306150
+### # enable tgid display when using ftrace
+kernel pid is actually thread id, userspace pid is process id (thread group id).
+see blog post tid vs tgid for more details.
 
 try checking the ftrace options, enable it if closed:
+
 ```text
 $ cat /sys/kernel/debug/tracing/options/record-tgid
 0
@@ -204,6 +205,7 @@ $ echo 1 > /sys/kernel/debug/tracing/options/record-tgid
 ```
 
 problem: the col tgid is shown, but no actual digits in it:
+
 ```text
 $ cat trace | head -n 20
 # tracer: function

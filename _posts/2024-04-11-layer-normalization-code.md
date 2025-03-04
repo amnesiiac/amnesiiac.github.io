@@ -6,7 +6,7 @@ date: 2024-04-11 22:05
 categories: "2024"
 tags:
   - llm
-  - math
+  - machine learning
 ---
 
 @[gpt2][1] picked up the same architecture as the @[transformer][2], but the position of the

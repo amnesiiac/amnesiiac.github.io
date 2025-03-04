@@ -1,0 +1,102 @@
+---
+layout: post
+title: "filesystem hierarchy standard (linux, filesys)"
+author: "melon"
+date: 2022-10-23 11:10
+categories: "2022" 
+tags:
+  - linux
+---
+
+filesystem hierarchy standard (fhs) is a specification for the fs layout of a unix system.
+more infomation for fhs can resort to "man hier".
+
+<hr>
+
+### # root
+
+```text
+# /
+# Primary hierarchy root and root directory of the entire file system hierarchy
+```
+
+```text
+# /root
+# Home directory for root user.
+```
+
+```text
+# /home
+# Home directory for normal users: saved files, personal settings...
+```
+
+<hr>
+
+### # bins
+
+```text
+# /bin
+# Essential command binaries that need to be available in single-user mode
+  including to bring up the system or repair it: cat ls cp ... For all users
+```
+
+```text
+# /sbin
+# Essential system binaries: fsck, init, route...
+```
+
+```text
+# /usr/bin
+# Non-essential command binaries not needed in single-user mode. For all users.
+  Most programs executed by normal users which are not needed for booting or 
+  for repairing the system and which are not installed locally should be here.
+```
+
+```text
+# /usr/sbin
+# Non-essential system binaries: daemons for various network services...
+```
+
+```text
+# /usr/local/bin
+# Contains binaries of third-party apps installed, Any local executable that
+  didnt come with the linux may get its place here.
+```
+
+```text
+# /usr/local/sbin
+# Same is the case with /usr/local/bin, which contains binaries for root.
+```
+
+<hr>
+
+### # vars
+
+```text
+# /var
+# Variable files: files whose content is expected to continually change during
+  normal operation of the system: logs, spool files, temporary e-mail files.
+```
+
+```text
+# /var/run
+# Run-time variable data. This directory contains system information data 
+  describing the system since it was booted.
+# In FHS 3.0, /var/run is replaced by /run: a system should provide a 
+  /var/run or provide a symbolic link from /var/run to /run for compatibility.
+```
+
+<hr>
+
+### # others
+
+```text
+# /mnt
+# Temporarily mounted file systems.
+```
+
+<hr>
+
+### # reference
+https://en.wikipedia.org/wiki/Filesystem\_Hierarchy\_Standard  
+https://man7.org/linux/man-pages/man7/hier.7.html

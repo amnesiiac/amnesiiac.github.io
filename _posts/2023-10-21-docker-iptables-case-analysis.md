@@ -9,40 +9,43 @@ tags:
   - network
 ---
 
-this article mainly covers an experiment for building up l3 connection between two containers
-of different subnets.
+this article focus the steps to buildup layer 3 network connection between two containers of different subnets,
 each subnet is created & isolated using docker default bridge driver.
 
 <hr>
 
-### # setup the case experiment ENV
+### # experiment env setup
+a) setup basic subnet & container instance, attach each container to their own subnet for isolation:
+
 ```text
-$(host) docker network create testnet1                                      # subnet1
-$(host) docker network create testnet2                                      # subnet2
-$(host) docker network ls
-  NETWORK ID     NAME       DRIVER    SCOPE
-  97392a75e5a1   bridge     bridge    local
-  11789d7cb259   host       host      local
-  8c7ae9ad8eb5   none       null      local
-  4f0537e1b2cd   testnet1   bridge    local                                 # newly created
-  149d732ffd90   testnet2   bridge    local                                 # newly created
+$(host) docker network create testnet1                                      # create subnet1
+$(host) docker network create testnet2                                      # create subnet2
+
+$(host) docker network ls                                                   # validation
+NETWORK ID     NAME       DRIVER    SCOPE
+97392a75e5a1   bridge     bridge    local
+11789d7cb259   host       host      local
+8c7ae9ad8eb5   none       null      local
+4f0537e1b2cd   testnet1   bridge    local                                   # *
+149d732ffd90   testnet2   bridge    local                                   # *
 
 $ docker run --rm -it --network testnet1 --name test1 ubuntu:22.04 bash     # container1 attached to subnet1
 $ docker run --rm -it --network testnet2 --name test2 ubuntu:22.04 bash     # container2 attached to subnet2
 ```
 
-check the default config info of isolated docker subnet1 & corresponding container1:
-```text
-$(host) docker inspect test1                                                # info from container1
-  "Gateway": "172.18.0.1",
-  "IPAddress": "172.18.0.2",
-  "IPPrefixLen": 16,
-  "IPv6Gateway": "",
-  "GlobalIPv6Address": "",
-  "GlobalIPv6PrefixLen": 0,
-  "MacAddress": "02:42:ac:12:00:02",
+b) show default config info of the subnet testnet1 & the corresponding container test1:
 
-$(host) docker network inspect testnet1                                     # info from network1 
+```text
+$(host) docker inspect test1                                                # show container test1 info
+ "Gateway": "172.18.0.1",
+ "IPAddress": "172.18.0.2",
+ "IPPrefixLen": 16,
+ "IPv6Gateway": "",
+ "GlobalIPv6Address": "",
+ "GlobalIPv6PrefixLen": 0,
+ "MacAddress": "02:42:ac:12:00:02",
+
+$(host) docker network inspect testnet1                                     # show network testnet1 info
 [
     {
         "Name": "testnet1",
@@ -57,7 +60,7 @@ $(host) docker network inspect testnet1                                     # in
             "Config": [
                 {
                     "Subnet": "172.18.0.0/16",
-                    "Gateway": "172.18.0.1"
+                    "Gateway": "172.18.0.1"                                 # the gateway ip
                 }
             ]
         },
@@ -83,9 +86,10 @@ $(host) docker network inspect testnet1                                     # in
 ]
 ```
 
-check the container1 related docker subnet1 bridge name:
+c) show the docker gateway bridge info by its ip (for isolatation of the container test1):
+
 ```text
-$(host) ip addr show | grep -C 5 172.18.0.1          # check the interface created by docker for container1
+$(host) ip addr show | grep -C 5 172.18.0.1
 148: br-4f0537e1b2cd: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default
     link/ether 02:42:6b:73:de:a0 brd ff:ff:ff:ff:ff:ff
     inet 172.18.0.1/16 brd 172.18.255.255 scope global br-4f0537e1b2cd
@@ -94,19 +98,20 @@ $(host) ip addr show | grep -C 5 172.18.0.1          # check the interface creat
        valid_lft forever preferred_lft forever
 ```
 
-check the default config info of isolated docker subnet2 & corresponding container2:
+d) show default config info of the subnet testnet2 & the corresponding container test2:
+
 ```text
-$(host) docker inspect test2                         # info from container2
-  "Gateway": "172.19.0.1",
-  "IPAddress": "172.19.0.2",
-  "IPPrefixLen": 16,
-  "IPv6Gateway": "",
-  "GlobalIPv6Address": "",
-  "GlobalIPv6PrefixLen": 0,
-  "MacAddress": "02:42:ac:13:00:02",
+$(host) docker inspect test2                                                # show container test2 info
+ "Gateway": "172.19.0.1",
+ "IPAddress": "172.19.0.2",
+ "IPPrefixLen": 16,
+ "IPv6Gateway": "",
+ "GlobalIPv6Address": "",
+ "GlobalIPv6PrefixLen": 0,
+ "MacAddress": "02:42:ac:13:00:02",
 
 
-$(host) docker network inspect testnet2              # info from network2
+$(host) docker network inspect testnet2                                     # show network testnet2 info
 [
     {
         "Name": "testnet2",
@@ -147,7 +152,8 @@ $(host) docker network inspect testnet2              # info from network2
 ]
 ```
 
-check the container2 related docker subnet2 bridge name:
+e) show the docker gateway bridge info by its ip (for isolatation of the container test2):
+
 ```text
 $(host) ip addr show | grep -C 5 172.19.0.1          # check the interface created by docker for container2
 149: br-149d732ffd90: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default
@@ -158,7 +164,8 @@ $(host) ip addr show | grep -C 5 172.19.0.1          # check the interface creat
        valid_lft forever preferred_lft forever
 ```
 
-check if ip_forward is enabled on host machine
+f) confirm the ip_forward is enabled on host machine:
+
 ```text
 $(host) cat /proc/sys/net/ipv4/ip_forward
 1
@@ -166,17 +173,18 @@ $(host) cat /proc/sys/net/ipv4/ip_forward
 
 <hr>
 
-### # problem: steps to config the iptables rules, but cannot buildup the connection
-1) try to ping container2 ip inside container1:  
-currently, there's no iptables rules to config the redirection from testnet1 to testnet2.
+### # failed attempt: config the redirection iptables, but still no connection between
+a) ping container test2 ip inside container test1, currently there's no iptable rules established
+for packet redirection from testnet1 to testnet2 yet:
+
 ```text
-$(container1) ping 172.19.0.2                        # inside container test1 to ping container2
+$(container1) ping 172.19.0.2                           # ping container test2 from container test1
   PING 172.19.0.2 (172.19.0.2) 56(84) bytes of data.
   ^C
   --- 172.19.0.2 ping statistics ---
   81 packets transmitted, 0 received, 100% packet loss, time 81916ms
 
-$(host) tcpdump -n -i br-4f0537e1b2cd -vvnnXX        # capture pkts on docker network test1, the icmp is captured
+$(host) tcpdump -n -i br-4f0537e1b2cd -vvnnXX           # capture pkts on docker network test1, the icmp got catched
 tcpdump: listening on br-4f0537e1b2cd, link-type EN10MB (Ethernet), capture size 262144 bytes
 17:26:33.598357 IP (tos 0x0, ttl 64, id 13327, offset 0, flags [DF], proto ICMP (1), length 84)
     172.18.0.2 > 172.19.0.2: ICMP echo request, id 2, seq 1, length 64
@@ -189,11 +197,12 @@ tcpdump: listening on br-4f0537e1b2cd, link-type EN10MB (Ethernet), capture size
         0x0060:  3637                                     67
         ...
 
-$(host) tcpdump -n -i br-149d732ffd90 -vvnnXX        # capture pkts on docker network test2, nothing is captured
+$(host) tcpdump -n -i br-149d732ffd90 -vvnnXX           # capture pkts on docker network test2, nothing got
 tcpdump: listening on br-149d732ffd90, link-type EN10MB (Ethernet), capture size 262144 bytes
 ```
 
-2) try to config iptables rules to enable layer2 connection between container1 & container2:
+b) config iptables rules to enable layer2 connection between network testnet1 & testnet2:
+
 ```text
 # accepts all traffic from br-4f0537e1b2cd to br-149d732ffd90
 $(host) iptables -A FORWARD -i br-4f0537e1b2cd -o br-149d732ffd90 -j ACCEPT
@@ -205,7 +214,8 @@ $(host) iptables -A FORWARD -i br-149d732ffd90 -o br-4f0537e1b2cd -m state --sta
 $(host) iptables -t nat -A POSTROUTING -o br-149d732ffd90 -j MASQUERADE
 ```
 
-3) check forward chain, the changes are applied at the bottom:
+c) check the forward chain, the output show that the changes are applied at the bottom of this chain:
+
 ```text
 $(host) iptables -nvL FORWARD
 Chain FORWARD (policy ACCEPT 0 packets, 0 bytes)
@@ -225,7 +235,8 @@ Chain FORWARD (policy ACCEPT 0 packets, 0 bytes)
     0     0 ACCEPT                   all  --  br-149d732ffd90 br-4f0537e1b2cd  0.0.0.0/0  0.0.0.0/0   state RELATED...
 ```
 
-the masquerade rule is also applied:
+d) what's more, the masquerade rule is applied also:
+
 ```text
 $(host) iptables -nvL -t nat
             ...
@@ -239,7 +250,8 @@ Chain POSTROUTING (policy ACCEPT 2 packets, 130 bytes)
             ...
 ```
 
-4) try to ping container2 ip inside container1 again, still no incoming traffic on subnet2:
+e) once again, ping ip of container test2 inside container test1, however, still no traffic on subnet2:
+
 ```text
 $(host) tcpdump -n -i br-149d732ffd90 -vvnnXX
 tcpdump: listening on br-149d732ffd90, link-type EN10MB (Ethernet), capture size 262144 bytes
@@ -251,12 +263,17 @@ tcpdump: listening on br-149d732ffd90, link-type EN10MB (Ethernet), capture size
 
 <hr>
 
-### # solution to the problem
-convert -A to -I, which will insert the added rules at first of each chain.
-```text
-$ iptables -I FORWARD -i br-4f0537e1b2cd -o br-149d732ffd90 -j ACCEPT
+### # solution: -A vs -I, the difference?
+a) convert the action from -A to -I, to insert the added rules on top of each chain:
 
-$(host) tcpdump -n -i br-149d732ffd90 -vvnnXX   # the icmp can be accepted by subnet1 br
+```text
+$(host) iptables -I FORWARD -i br-4f0537e1b2cd -o br-149d732ffd90 -j ACCEPT
+```
+
+once again, ping ip of container test2 inside container test1, capture pkt on container 2 bridge:
+
+```text
+$(host) tcpdump -n -i br-149d732ffd90 -vvnnXX
 tcpdump: listening on br-149d732ffd90, link-type EN10MB (Ethernet), capture size 262144 bytes
 19:15:12.058300 IP (tos 0x0, ttl 63, id 56621, offset 0, flags [DF], proto ICMP (1), length 84)
     172.19.0.1 > 172.19.0.2: ICMP echo request, id 3, seq 6121, length 64
@@ -273,11 +290,16 @@ tcpdump: listening on br-149d732ffd90, link-type EN10MB (Ethernet), capture size
 0 packets dropped by kernel
 ```
 
-config 'return' logic from container2 back to container1
+b) config the return pkt redirection rules from container test2 back to container test1:
+
 ```text
 $(host) iptables -I FORWARD -i br-149d732ffd90 -o br-4f0537e1b2cd -m state --state RELATED,ESTABLISHED -j ACCEPT
+```
 
-$(container1) ping 172.19.0.2                   # ping container2 inside container1, two-way layer2 connected
+ping container test2 inside container test1, the result shows the 2 added docker bridge connected:
+
+```text
+$(container1) ping 172.19.0.2
 PING 172.19.0.2 (172.19.0.2) 56(84) bytes of data.
 64 bytes from 172.19.0.2: icmp_seq=6308 ttl=63 time=0.091 ms
 64 bytes from 172.19.0.2: icmp_seq=6309 ttl=63 time=0.076 ms
@@ -287,16 +309,19 @@ PING 172.19.0.2 (172.19.0.2) 56(84) bytes of data.
 
 <hr>
 
-### # root cause analysis
+### # root cause: iptables -I option for setting the newly-added rules matched at the highest priority
+if use -A option to append new rules, by default the DOCKER-ISOLATION-STAGED-1 is hitted, rather than the
+rule added at bottom, thus the newly added rules wont take effect when pkt arrived:
+
 ```text
-$ iptables -nvL FORWARD                     # DOCKER-ISOLATION-STAGED-1 is hitted, rather than the added rule at bottom
+$ iptables -nvL FORWARD
 Chain FORWARD (policy ACCEPT 0 packets, 0 bytes)
  pkts bytes target                   prot opt in              out              source    destination
-30601   30M DOCKER-USER              all  --  *               *                0.0.0.0/0 0.0.0.0/0
-30601   30M DOCKER-ISOLATION-STAGE-1 all  --  *               *                0.0.0.0/0 0.0.0.0/0  <- hitting this 
+30601   30M DOCKER-USER              all  --  *               *                0.0.0.0/0 0.0.0.0/0  <- hit this, go next
+30601   30M DOCKER-ISOLATION-STAGE-1 all  --  *               *                0.0.0.0/0 0.0.0.0/0  <- hit this,
             ...
-    0     0 ACCEPT                   all  --  br-4f0537e1b2cd br-149d732ffd90  0.0.0.0/0 0.0.0.0/0
-    0     0 ACCEPT                   all  --  br-149d732ffd90 br-4f0537e1b2cd  0.0.0.0/0 0.0.0.0/0  state RELATED...
+    0     0 ACCEPT                   all  --  br-4f0537e1b2cd br-149d732ffd90  0.0.0.0/0 0.0.0.0/0  <- newly add
+    0     0 ACCEPT                   all  --  br-149d732ffd90 br-4f0537e1b2cd  0.0.0.0/0 0.0.0.0/0  <- newly add
 
 $ iptables -nvL DOCKER-ISOLATION-STAGE-1    # check the isolation chain added by docker
 Chain DOCKER-ISOLATION-STAGE-1 (1 references)
@@ -306,4 +331,7 @@ Chain DOCKER-ISOLATION-STAGE-1 (1 references)
  743K   65M DOCKER-ISOLATION-STAGE-2 all  --  docker0         !docker0         0.0.0.0/0 0.0.0.0/0
 2172K 5807M RETURN                   all  --  *               *                0.0.0.0/0 0.0.0.0/0
 ```
-about the isolation rules: forward any traffic into container1 to DOCKER-ISOLATION-STAGE-2, which isolated the container from 'unwanted' traffic.
+
+something off topic about the isolation rules added by docker engine: the purpose of the extra isolation stage
+is to forward any traffic into container1 to DOCKER-ISOLATION-STAGE-2, used to isolate the container out of the
+unwanted traffic.

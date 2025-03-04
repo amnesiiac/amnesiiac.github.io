@@ -30,14 +30,12 @@ $ cp /repo/x86_64/APKINDEX.unsigned.tar.gz /repo/x86_64/APKINDEX.tar.gz
 
 (5) regist custom repo to your public alpine apk repo:
 ```text
-$ vim /etc/apk/repositories                     # add "/repo/" inside
+$ vim /etc/apk/repositories                               # add "/repo/" inside
 ```
 ```text
 $ cat /etc/apk/repositories
-```
-```txt
-# https://dl-cdn.alpinelinux.org/alpine/v3.18/main          # priority-1
-# https://dl-cdn.alpinelinux.org/alpine/v3.18/community     # priority-2
+https://dl-cdn.alpinelinux.org/alpine/v3.18/main          # priority-1
+https://dl-cdn.alpinelinux.org/alpine/v3.18/community     # priority-2
 /repo/                                                    # priority-3 to 1
 ```
 
@@ -45,16 +43,12 @@ $ cat /etc/apk/repositories
 ```text
 comment out any other repos in /etc/apk/repositories
 $ apk update
-```
-```txt
 WARNING: Ignoring /repo/x86_64/APKINDEX.tar.gz: UNTRUSTED signature
 OK: 27 distinct packages available              # 27 is not the num of custom repo pkgs, but pre-installed system pkgs)
 ```
 
 ```text
 $ apk update --allow-untrusted                  # re-run the update cmd && allow it to use un-trusted repo
-```
-```txt
 OK: 38 distinct packages available              # extra 11 pkg in custom repo is added
 $ apk search ${package_name} --allow-untrusted  # search for pkg name to confirm the pkgs are available
 ```
@@ -65,7 +59,7 @@ now we constructed an un-trustd & valid alpine linux repo
 ```text
 generating key pairs
 $ apk add abuild
-$ abuild-keygen -a -i # interactive set the key path
+$ abuild-keygen -a -i                           # interactive set the key path
 ```
 
 sign the custom repo apkindex with the full path of the private key created above
@@ -75,9 +69,7 @@ $ abuild-sign -k ~/alpine-devel@example.com-5629d7e6.rsa /repo/x86_64/APKINDEX.t
 
 (8) testing the signed repo
 ```text
-$ apk update   # no longer need the "un-trusted" flag
-```
-```txt
+$ apk update                                    # no longer need the "un-trusted" flag
 OK: 38 distinct packages available
 ```
 uncommented the above /etc/apk/repositories and enjoy.

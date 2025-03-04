@@ -13,20 +13,22 @@ tags:
 the blocking is a general operation that a process give up cpu & hang-up due to waiting for some event.
 
 inside networking IO semantics, when a process waiting for data from certain socket, 
-if the data is not comming, then set the state of the process from 'TASK_RUNNING' to 'TASK_INTERRUPTABLE'.  
-then giveup cpu initiatively, let dispatcher to arrange other procs in 'ready state'.
+if the data is not comming, will set the process state from TASK_RUNNING to TASK_INTERRUPTABLE,
+and give up cpu initiatively, let dispatcher to arrange other procs in ready state.
 
 ref: BV1qX4y1H7gm
 
 <hr>
 
 ### # the expenses for synchronous blocking
-1) when receiving data from a socket using recv syscall, if no data is arrived, current process will get off from 
-cpu occupytion, and left cpu to another process. here exists an expense for process context switch.  
-2) when the conenction data is arrived, previous sleep process is wakeup from the notification from ksoftirq context, in
-which a second time expenses for process context switch.  
-3) what's more, sync blocking IO model means one process for one socket. in high-concurrency application scenarios, 
-many processes are spawned, which will takeup untolerable memory usage.
+1 when receiving data from a socket using recv syscall, if no data arrived, current process will get off from 
+cpu occupytion, and left cpu to another process, leading to extra expense of context switch.  
+
+2 when the connection data is arrived, previous sleep process is wakeup by the notification from ksoftirq context,
+in which another expenses for process context switch.  
+
+3 what's more, sync blocking IO model means one process for one socket.
+in high-concurrency application scenarios, many processes are spawned, which will takeup untolerable memory usage.
 
 if cpu is busying doing context switches, without actually doing the business logics, that's nonsense.
 if one process for one socket connection, then tons of thousands of connection might be established for a 
@@ -34,18 +36,18 @@ company, which will lead to memory exhausted.
 
 <hr>
 
-### # blocking io with large data to read/write to stdout/file (apue)
+### # blocking io case study I: read/write a large data to stdout/file (apue)
 ```text
-#include "apue.h"                                                     // apue header file
 #include <errno.h>
 #include <fcntl.h>                                                    // file flag
+#include "apue.h"                                                     // apue header file
 
 char buf[500000];                                                     // read up to 500kb content
 
 int main(void){
     int     ntowrite;                                                 // num of byte to write
     int     nwrite;                                                   // num of byte writen by cur write
-    char    *ptr;
+    char*   ptr;
     ntowrite = read(STDIN_FILENO, buf, sizeof(buf));                  // read: up to 500kb from stdin into buf
     fprintf(stderr, "read %d bytes\n", ntowrite);                     // print num of byte to read
     ptr = buf;
@@ -62,11 +64,15 @@ int main(void){
     exit(0);
 }
 ```
+
 download apue code and compile the above code using:
+
 ```text
 $ gcc -o out test.c -I /Users/mac/c3/apue/apue.3e/include -L /Users/mac/c3/apue/apue.3e/lib -lapue
 ```
-1) using file /etc/services as stdin, only redirect stderr to file, left stdin to terminal:
+
+1 using file /etc/services as stdin, only redirect stderr to file, left stdin to terminal:
+
 ```text
 $ ./out < /etc/services/ 2>err
 # Network services, Internet style
@@ -80,23 +86,31 @@ $ ./out < /etc/services/ 2>err
 #	http://www.iana.org/assignments/port-numbers
 ...
 ```
-check the err file content as follows, the __write__ to console is done in only 1 __write__ calls, in blocking mode, the write will block on the terminal io till the whole content are written out successfully.
+
+check the err file content as follows, the write to console is done in only 1 write calls,
+in blocking mode, the write will block on the terminal io till the whole content are written out successfully.
+
 ```text
 read 500000 bytes
 nwrite = 500000, errno = 0      # the write is done in 1 try
 ```
 
-2) using file /etc/services as stdin, redirect stderr to file, redirect stdin to file:
+2 using file /etc/services as stdin, redirect stderr to file, redirect stdin to file:
+
 ```text
 $ ./out < /etc/services/ 2>err 1>info
 ```
+
 check the stderr of the above test case, the stdin is a regular file, the write operation is expected to be executed once. When stdout is regular file, the file i/o is responsible for intaking the output, the buffer is enough for accepting 500kb in.
+
 ```text
 $ cat err
 read 500000 bytes
 nwrite = 500000, errno = 0
 ```
+
 check the stdout of the above test case, which is same as test case 1.
+
 ```text
 $ cat info
 # Network services, Internet style
@@ -113,8 +127,9 @@ $ cat info
 
 <hr>
 
-### # the representation of socket inside kernel
+### # blocking io case study II: the representation of socket inside kernel
 a simple but typical code for network io in sync blocking mode:
+
 ```text
 int main(){
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -122,7 +137,9 @@ int main(){
     recv(sock, ...);
 }
 ```
+
 the related kernel socket obj with respect to above socket syscall is as:
+
 ```txt
               struct socket                    struct socket
         ┌───────────────────────┐        ┌────────────────────────────┐
@@ -154,8 +171,10 @@ the related kernel socket obj with respect to above socket syscall is as:
        struct proto_ops inet_stream_ops      struct protol tcp_prot
 
 ```
+
 the code related to create the above structure:  
 1) the syscall entrance: sock_create.
+
 ```text
 // file: net/socket.c
 SYSCALL_DEFINE3(socket, int, family, int, type, int, protocol){
@@ -164,7 +183,9 @@ SYSCALL_DEFINE3(socket, int, family, int, type, int, protocol){
     ...
 }
 ```
+
 2) the inner implementor: __sock_create.
+
 ```text
 // file: net/socket.c
 int __sock_create(struct net* net, int family, ...){
@@ -176,7 +197,9 @@ int __sock_create(struct net* net, int family, ...){
     err = pf->create(net, sock, protocol, kern);  // call each proto family's creator, AF_INET -> inet_create
 }
 ```
+
 3) the AF_INET family creator: inet_create.
+
 ```text
 // file: net/ipv4/af_inet.c
 static int inet_create(struct net* net, struct socket* sock, int protocol, int kern){
@@ -196,7 +219,9 @@ lookup_protocol:                                                 // look for the
     sock_init_data(sock, sk);                                    // init sock obj
 }
 ```
+
 4) the struct inet_protosw definition.
+
 ```text
 // when startup, insert all the elements in inetsw_array[] into the linked list inetsw
 static struct inet_protosw inetsw_array[] = {
@@ -230,7 +255,9 @@ static struct inet_protosw inetsw_array[] = {
     }
 };
 ```
+
 5) regist sk_data_ready callback function. 
+
 ```text
 // file: net/core/sock.c
 void sock_init_data(struct socket* sock, struct sock* sk){
@@ -239,10 +266,12 @@ void sock_init_data(struct socket* sock, struct sock* sk){
     sk->sk_error_report = sock_def_error_support;
 }
 ```
+
 <hr>
 
-### # cooperation between user and kernel (sync blocking way)
-0) sample code for __client-end__ networking BIO(todo: add detailed client-end code):
+### # sync blocking io case study III: cooperation between user and kernel
+0 sample code for client-end networking BIO:
+
 ```text
 int main(){
     int sk = socket(AF_INET, SOCK_STREAM, 0);
@@ -250,7 +279,9 @@ int main(){
     recv(sk, ...);
 }
 ```
-1) overview: the sync blocking way of accepting packets.
+
+1 overview: the sync blocking way of accepting packets.
+
 ```txt
    ┌────────────────────────┐            ┌───────────┐         ┌──────────────┐
    │ user process(blocking) │<----(10)---┤ ksoftirqd │<--(7)---┤ software irq │<---------┐
@@ -282,8 +313,9 @@ int main(){
        9 push into socket recv que           10 wakeup the thread in waiting que (context switch)
 ```
 
-2) procedure of syscall recv: the workflow from syscall to blocking the proc  
+2 procedure of syscall recv: the workflow from syscall to blocking the proc  
 using strace cmd for tracking the syscall path, the procedure is as follows:
+
 ```txt
                                                │
                                             ┌──+───┐
@@ -322,7 +354,18 @@ using strace cmd for tracking the syscall path, the procedure is as follows:
                                                             6.proc A giveup cpu, 
                                                             kernel dispatch proc B
 ```
-3) softirq module: the workflow when data arrived at nic  
+
+3 softirq module: the workflow when data arrived at nic  
+a softirq is a software interrupt request in the kernel. it is a way for the kernel to defer works
+which can be delayed without causing problems, and it's a way to improve kernel performance as this
+free up the main kernel thread, let it focus on user-space applications.
+
+softirqs are implemented using a special type of kernel thread called a softirqd.
+the softirqd thread runs at lower priority than the main kernel thread, so it does not interfere with
+the processing of user-space applications.
+
+softirqs are used for tasks such as network packet processing, disk I/O, and timer management.
+
 ```txt
            ┌─────────────────────────────────────────────────────────┐
            │ [runtime of process A in kernel model]                  │
@@ -367,16 +410,27 @@ using strace cmd for tracking the syscall path, the procedure is as follows:
                               └─────┘
 ```
 
+the advantages of using softirq are: improved performance (defer works that can be delayed);
+reduced latency (handling pkts & disk io in background); increased scalability (running on smp linux).
+
+the disadvantages of using softirq are: complexity to implement & manage
+(careful coordination with main kthread & other components); overhead introduced (the kernel state save & restore);
+security issue (can be used to inject code in kernel, kernel privilege abuse)
+ 
 <hr>
 
 ### # conclusion
-So, from the above workflow chart, each time a client-end waiting for & receive a packets, the related process will be peeled off from cpu & get the cpu back, in which 2 times of context switch is needed. 
-If the user program is "networking IO-bound" workload, then CPU will be busy doing useless context switch again and again.
+so, from the above workflow chart, each time a client-end waiting for & receive a packets, the related process
+will be peeled off from cpu & get the cpu back, in which 2 times of context switch is needed. 
+if the user program is "networking IO-bound" workload, then CPU will be busy doing useless context switch again and again.
 
-The networking IO model (just name it as single channel without reuse) cannot be used in server-end programs, cause the above model are assuming each socket for each connection proc, and all others will blocking util they are selected by the cpu dispatcher.
+the networking IO model (just name it as single channel without reuse) cannot be used in server-end programs,
+cause the above model are assuming each socket for each connection proc, and all others will blocking util they
+are selected by the cpu dispatcher.
 
-This BIO networking model can be used in client-end, in which the process will block to wait for incoming data to perform the next steps.
-But nowadays, some well encapsulated networking framework like golang/net are abandoned BIO like above.
+this BIO networking model can be used in client-end, in which the process will block to wait for incoming data
+to perform the next steps.
+but nowadays, some well encapsulated networking framework like golang/net are abandoned BIO like above.
 
 <hr>
 

@@ -353,6 +353,7 @@ cleanup finished
 ```
 
 the reader output:
+
 ```text
 $ ./reader
 This is the way the world ends...   # print after the count down finished

@@ -2,14 +2,18 @@
 layout: default
 ---
 
+<!-- _layout/archive.html: define tagged page structure -->
+
 <article class="container-page">
-  <span style="font-size:14px;"># {{ page.title }}</span>
+  <span style="font-size:13px;">$ {{ page.title }}</span>
   <div class="container-posts">
+    {% for post in page.posts %}
     <div class="posts-list-item">
-      {% for post in page.posts %}
         <span class="posts-list-item-name float-left"><a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a></span>
         <span class="posts-list-item-date float-right">{{ post.date | date: "%Y-%m-%d" }}</span>
-      {% endfor %}
     </div>
+    {% endfor %}
   </div>
 </article>
+
+

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "linux file permission"
+title: "linux file permission (linux, filesys)"
 author: "melon"
 date: 2022-10-16 21:30
 categories: "2022"

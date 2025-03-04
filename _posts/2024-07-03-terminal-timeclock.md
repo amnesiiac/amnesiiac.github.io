@@ -6,9 +6,14 @@ date: 2024-07-03 07:11
 categories: "2024"
 tags:
   - terminal
+  - todo
 ---
 
-some mplementations of tui timeclock for linux tty.
+some implementations of tui timeclock for linux tty.
+
+get the final workable version of timeclock + crontab to trigger every 5min check for the idle time,
+if the idle time is exceed certain value for certain tty, then trigger the foreground timeclock on it.
+if the idle time is not exceed the limit, then do nothing.
 
 <hr>
 
@@ -19,20 +24,35 @@ the below script displays current time in red at the top right corner of the ter
 #!/bin/sh
 
 while sleep 1; do
-    tput sc;                            // save the current cursor pos
-    tput cup 0 $(($(tput cols)-11));    // move the cursor to the top right corner, 11 col from the right edge
-    echo -e "\e[31m$(date +%r)\e[39m";  // -e enables interpretation of backslash escapes
-    tput rc;                            // restore the cursor to the saved pos
+    tput sc;                                  # save the current cursor pos
+    tput cup 0 $(($(tput cols)-11));          # move the cursor to the top right corner, 11 col from the right edge
+    echo -e "\e[31m$(date +%r)\e[39m";        # -e enables interpretation of backslash escapes
+    tput rc;                                  # restore the cursor to the saved pos
 done &;
 ```
 
 in addition to just display time, the script can also be used to avoid ssh reply timeout,
 which lead to connection close by peer issue.
 
-enable it by default when startup new ssh session on server, just paste the line below to ~/.bashrc file
+the following script can be added into ~/.bashrc to facilitate the shortcut start & stop of the timeclock by
+shortcut as typing 'ttt' or 'sss'.
 
 ```text
-$ while sleep 1; do tput sc; tput cup 0 $(($(tput cols)-11)); echo -e "\e[31m`date +%r`\e[39m"; tput rc; done &
+ttt() {                                       # cmd to start up timeclock
+    while sleep 1; do
+        tput sc;
+        tput cup 0 $(($(tput cols)-11));
+        echo -e "\e[31m`date +%r`\e[39m";
+        tput rc;
+    done &
+}
+
+sss() {
+    kill -sigkill %1                          # cmd to kill the bg timeclock
+}
+
+export -f ttt                                 # export file name as executable cmd
+export -f sss
 ```
 
 <hr>
@@ -84,16 +104,16 @@ int timeclock(){
 }
 
 int main(){
-    int fd = open("/dev/pts/1", O_RDWR);     // O_RDWR, O_WRONLY, O_RDONLY
+    int fd = open("/dev/pts/1", O_RDWR);                               // O_RDWR, O_WRONLY, O_RDONLY
     if(fd == -1){
         perror("Failed to open /dev/tty2");
         return 1;
     }
-    dup2(fd, STDOUT_FILENO);                 // redirect stdout to tty, by default cur tty stdout is used
-    dup2(fd, STDIN_FILENO);                  // redirect stdin from tty, by default cur tty stdin is used
+    dup2(fd, STDOUT_FILENO);                                           // redirect stdout to tty
+    dup2(fd, STDIN_FILENO);                                            // redirect stdin from tty
     close(fd);
 
-    timeclock();                             // startup text clock app
+    timeclock();                                                       // startup text clock app
     return 0;
 }
 ```
@@ -802,3 +822,7 @@ represent another terminal, then the clock display fine at that terminal for the
 and typing inside the working tty, the clock app on another tty got controled.
 
 todo: find the why the clock app wont listen to the user input from another tty.
+
+<hr>
+
+### # todo: integrate the above program with crontab jobs for timer checkup

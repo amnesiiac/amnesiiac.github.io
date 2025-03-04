@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "opengrok resources (site/local)"
-author: "twistfatezz"
+author: "melon"
 date: 2023-05-13 09:18
 categories: "2023"
 tags:
@@ -9,17 +9,20 @@ tags:
 ---
 
 ### # linux source code
-The Dockerfile:
+the dockerfile:
+
 ```text
 FROM opengrok/docker:1.7
 
-ARG V=6.0  # kernel version
+# kernel version
+ARG V=6.0
 
 RUN mkdir -p /opengrok/src
-RUN cd /opengrok/src \
-&& curl https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/snapshot/linux-${V}.tar.gz \
-   --output linux.tar.gz \
-&& tar -xvf linux.tar.gz && rm linux.tar.gz
+RUN cd /opengrok/src && \
+    curl https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/snapshot/linux-${V}.tar.gz \
+    --output linux.tar.gz && \
+    tar -xvf linux.tar.gz && \
+    rm linux.tar.gz
 
 # Trigger opengrok indexer manually
 # RUN opengrok-indexer \
@@ -33,15 +36,21 @@ WORKDIR /usr/local/tomcat
 EXPOSE 8080
 CMD ["/scripts/start.py"]
 ```
+
 build up the docker images:
+
 ```text
 docker build -t linux:v6.0 .
 ```
+
 start opengrok indexing inside container, and publish/listen service on localhost:
+
 ```text
 docker run -d -p 127.0.0.1:8080:8080 kernel6.0
 ```
+
 check the indexing process by:
+
 ```text
 docker logs ${container_id}
 ```
@@ -49,7 +58,8 @@ docker logs ${container_id}
 <hr>
 
 ### # libhv source code
-The Dockerfile:
+the dockerfile:
+
 ```text
 FROM opengrok/docker:1.7
 

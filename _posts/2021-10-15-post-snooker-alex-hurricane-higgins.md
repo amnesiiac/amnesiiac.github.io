@@ -8,7 +8,7 @@ tags:
   - snooker
 ---
 
-### # Alex Higgins BBC Documentary - People's Champion
+### # alex higgins bbc documentary: people's champion
 <iframe 
     width="100%"
     height="400" 
@@ -18,3 +18,7 @@ tags:
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
 </iframe>
 
+<hr>
+
+### # a twitch url to watch live snooker play
+https://www.twitch.tv/snookerlivestreams

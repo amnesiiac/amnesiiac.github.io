@@ -16,6 +16,7 @@ vector<int> vec = {{1,3}, {1,2}, {2,4}};
 ```
 
 which will result in:
+
 ```text
 Error: Liquid syntax error (line 6): Variable '{{1,3}' was not properly terminated with regexp: /\}\}/
 Error: Run jekyll build --trace for more information.
@@ -28,8 +29,37 @@ can bypass the liquid resolving process.
 
 <hr>
 
+### # code blocks
+$ add self-custom code block style (e.g. blur text):
+
+```text
+<pre><code style="filter: blur(1px);">
+#include <stdio.h>
+
+int main(){
+    printf("hello world!");
+    return 0;
+}
+</code></pre>
+```
+
+$ customize normal text in blog:
+
+```text
+<style>
+k{
+    filter: blur(2px);
+}
+</style>
+
+<k>you guess what's here</k>
+```
+
+<hr>
+
 ### # insert graph in blog post
-__$__ insert graph with toggle button:
+$ insert graph with toggle button:
+
 ```text
 <details>
     <summary><b>state transition model</b></summary>
@@ -37,7 +67,8 @@ __$__ insert graph with toggle button:
 </details>
 ```
 
-__$__ insert math graph hosted on https://www.desmos.com/calculator:
+$ insert math graph hosted on https://www.desmos.com/calculator:
+
 ```text
 <details>
     <summary><b>Solve the Integral From a to b</b></summary>
@@ -49,7 +80,8 @@ __$__ insert math graph hosted on https://www.desmos.com/calculator:
 </details>
 ```
 
-__$__ using github cdn repo as graph registry, with width set:
+$ using github cdn repo as graph registry, with width set:
+
 ```text
 <img src="https://cdn.jsdelivr.net/gh/slothfull/cdn@main/image/autoencoder.pdf" width="350"/>
 ```
@@ -72,6 +104,7 @@ search for tui in blog post for guidance.
 
 ### # control the division null line height
 1 use special escape character
+
 ```text
 the first blog line.
 &nbsp;
@@ -79,6 +112,7 @@ the second blog line.
 ```
 
 2 use null text block with margin customized:
+
 ```text
 <p style="margin-bottom: 20px;"></p>
 ```

@@ -11,13 +11,15 @@ tags:
 
 
 ### # buildup containerized golang compilation env
-1 dockerfile
+$ 1 dockerfile
+
 ```text
 FROM golang:1.22.1-alpine3.18
 
-# proxy
+# proxy for network connection to github & image mirrors
 ENV https_proxy=http://10.144.1.10:8080
 ENV http_proxy=http://10.144.1.10:8080
+ENV no_proxy=localhost,127.0.0.1
 
 # musl-dev: https://stackoverflow.com/a/42366740/10515951
 RUN apk update && \
@@ -28,7 +30,17 @@ RUN apk update && \
     apk add build-base && \
     apk add docker && \
     apk add vim && \
+    apk add graphviz && \
+    apk add sudo && \
     rm -rf /var/apk/cache/*
+
+# add user 1013, add user metung to wheel, enable user sudo without pwd
+RUN adduser -u 1013 -D metung && \
+    adduser metung wheel && \
+    echo 'metung ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# switch to user metung (install go for it)
+USER metung
 
 # enable cgo for cross compilation (need build-base)
 ENV CGO_ENABLED="1"
@@ -43,22 +55,24 @@ RUN git clone https://github.com/go-delve/delve && \
 COPY entrypoint.sh /usr/bin/
 ENTRYPOINT [ "entrypoint.sh" ]
 
-# apk add tini
+# need tini
 # ENTRYPOINT [ "/sbin/tini", "--", "entrypoint.sh" ]
 # [WARN  tini (939)] Tini is not running as PID 1 and isn't registered as a child subreaper.
 # Zombie processes will not be re-parented to Tini, so zombie reaping won't work.
 # To fix the problem, use the -s option or set the environment variable TINI_SUBREAPER to
-# register Tini as a child subreaper, or run Tini as PID 1.
+# register Tini as a child subreaper, or run Tini as PID 1.```
 ```
 
-2 entrypoint.sh
+$ 2 entrypoint.sh
+
 ```text
 #!/bin/sh
 
 exec "$@"
 ```
 
-3 makefile variable config file (info):
+$ 3 makefile variable config file (info):
+
 ```text
 http_proxy = http://10.158.100.9:8080
 https_proxy = http://10.158.100.9:8080
@@ -67,7 +81,8 @@ image_name = golang
 tag = alpine3.18
 ```
 
-4 makefile for automation of docker image buildup
+$ 4 makefile for automation of docker image buildup
+
 ```text
 include info
 
@@ -78,7 +93,8 @@ build:
 default: build
 ```
 
-5 an example startup script of golang env container for nicon project:
+$ 5 an example startup script of golang env container for nicon project:
+
 ```text
 #!/bin/sh
 
@@ -102,16 +118,19 @@ docker run -it --rm \
 ```
 
 enable /proc system in container the same as host:
+
 ```text
 --pid=host
 ```
 
 enable operations on the container proc system: open/unshare \...
+
 ```text
 --privileged  # include the apparmor=unconfined
 ```
 
 enable shared dockerd between the docker in container and on host:
+
 ```text
 -v /var/run/docker.sock:/var/run/docker.sock:rw
 -v /var/run/netns:/var/run/netns:shared
