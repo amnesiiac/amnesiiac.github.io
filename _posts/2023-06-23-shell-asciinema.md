@@ -10,11 +10,13 @@ tags:
 
 ### # asciinema usages on macos
 1) installation:
-```shell
+
+```text
 $ brew install asciinema
 ```
 
 2) record
+
 ```text
 # record & save to local:
 $ asciinema rec ${filename}.cast
@@ -24,6 +26,7 @@ $ asciinema rec -t "${my_record_name}"
 ```
 
 3) play
+
 ```text
 # play local record:
 asciinema play ${record.cast}
@@ -35,6 +38,7 @@ $ asciinema play https://asciinema.org/a/difqlgx86ym6emrmd8u62yqu8
 <hr>
 
 ### # asciinema \--help
+
 ```text
 $ asciinema --help
 usage: asciinema [-h] [--version] {rec,play,cat,upload,auth} ...

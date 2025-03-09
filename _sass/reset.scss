@@ -89,28 +89,33 @@ iframe{
   margin: 10px;
 }
 
-
 details{
-  margin-left: -1px;
+  margin-left: 0px;
   margin-bottom: 10px;
 }
 
-details summary b{
-  margin-left: -3px;
-  font-weight: normal;
-  font-size: 13px;
+details summary {
+  padding-top: 5px;
 }
 
-details>summary::-webkit-details-marker {
+// avoid display of default browser icon for toggle item
+summary::-webkit-details-marker {
   display: none;
 }
 
+details summary b {
+  font-size: 12px;
+  font-weight: normal;
+}
+
 details>summary::before {
-  content: '+ ';
+  content: '# click for details > ';
+  font-size: 12px;
 }
 
 details[open]>summary::before {
-  content: '- ';
+  content: '# click to close it > ';
+  font-size: 12px;
 }
 
 .container-posts{

@@ -81,7 +81,7 @@ appropriate action. whatever, it's a breaking change for the caller to add the c
 <hr>
 
 ### # definition of netlink related structures
-$ 1 two type of nlmsg supported in below toy code, following a strategy of parse both the format, but finally
+1 two type of nlmsg supported in below toy code, following a strategy of parse both the format, but finally
 output info according to nlmsg_type.
 
 ```text
@@ -98,7 +98,7 @@ address messages:
     h         NLMSG_DATA(h)
 ```
 
-$ 2 key structure definitions for nlmsg request & resolve.
+2 key structure definitions for nlmsg request & resolve.
 
 ```text
 struct iovec {
@@ -146,7 +146,7 @@ struct sockaddr_nl {
 <hr>
 
 ### # code in action: monitor route & itf state & addr state by netlink
-$ 1 src code:
+1 src code:
 
 ```text
 #include <errno.h>
@@ -287,7 +287,7 @@ int main(){
 }
 ```
 
-$ 2 compile & test:
+2 compile & test:
 
 ```text
 $(terminal) gcc -o out z.c

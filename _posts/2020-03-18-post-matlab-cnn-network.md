@@ -17,16 +17,17 @@ this article mainly covers the convolutional neural network infer & back-propaga
 
 ### # project files
 1 LeNet_5.m: main script for train & test process.
+
 ```text
-% 117082910078-melon
+% 117082910078 - melon
 
 % --- structure of LeNet_5 ---
-% input layer -> 28*28
-% convolution layer1 -> 24*24*20
-% rectified function = tanh()
-% pooling layer1 -> 12*12*20
-% full-connected layer -> 10010
-% softmax layer -> (softmax 10 for digital numbers)
+% input layer           =  28*28
+% convolution layer1    =  24*24*20
+% rectified function    =  tanh()
+% pooling layer1        =  12*12*20
+% full-connected layer  =  10010
+% softmax layer         =  softmax 10 for digital numbers
 
 % --- dataset info ---
 % training dataset = 800x10 samples
@@ -35,10 +36,12 @@ this article mainly covers the convolutional neural network infer & back-propaga
 clear all;
 clc;
 
-disp('preprocessing data......')                                               % === data preprocess ===
+disp('preprocessing data......')                                               % === data preprocess === %
 total_data = load('/Users/mac/Desktop/x/LeNet-5/mnist_data/mnist.mat');
+
 num_sample_to_get_train = 80;
-num_sample_to_get_test = 20;
+num_sample_to_get_test  = 20;
+
 train_data_0 = double(total_data.train0);
 train_data_1 = double(total_data.train1);
 train_data_2 = double(total_data.train2);
@@ -49,16 +52,16 @@ train_data_6 = double(total_data.train6);
 train_data_7 = double(total_data.train7);
 train_data_8 = double(total_data.train8);
 train_data_9 = double(total_data.train9);
-test_data_0 = double(total_data.test0);
-test_data_1 = double(total_data.test1);
-test_data_2 = double(total_data.test2);
-test_data_3 = double(total_data.test3);
-test_data_4 = double(total_data.test4);
-test_data_5 = double(total_data.test5);
-test_data_6 = double(total_data.test6);
-test_data_7 = double(total_data.test7);
-test_data_8 = double(total_data.test8);
-test_data_9 = double(total_data.test9);
+test_data_0  = double(total_data.test0);
+test_data_1  = double(total_data.test1);
+test_data_2  = double(total_data.test2);
+test_data_3  = double(total_data.test3);
+test_data_4  = double(total_data.test4);
+test_data_5  = double(total_data.test5);
+test_data_6  = double(total_data.test6);
+test_data_7  = double(total_data.test7);
+test_data_8  = double(total_data.test8);
+test_data_9  = double(total_data.test9);
 train_data_0 = train_data_0(1:num_sample_to_get_train,:);
 train_data_1 = train_data_1(1:num_sample_to_get_train,:);
 train_data_2 = train_data_2(1:num_sample_to_get_train,:);
@@ -69,17 +72,18 @@ train_data_6 = train_data_6(1:num_sample_to_get_train,:);
 train_data_7 = train_data_7(1:num_sample_to_get_train,:);
 train_data_8 = train_data_8(1:num_sample_to_get_train,:);
 train_data_9 = train_data_9(1:num_sample_to_get_train,:);
-test_data_0 = test_data_0(1:num_sample_to_get_test,:);
-test_data_1 = test_data_1(1:num_sample_to_get_test,:);
-test_data_2 = test_data_2(1:num_sample_to_get_test,:);
-test_data_3 = test_data_3(1:num_sample_to_get_test,:);
-test_data_4 = test_data_4(1:num_sample_to_get_test,:);
-test_data_5 = test_data_5(1:num_sample_to_get_test,:);
-test_data_6 = test_data_6(1:num_sample_to_get_test,:);
-test_data_7 = test_data_7(1:num_sample_to_get_test,:);
-test_data_8 = test_data_8(1:num_sample_to_get_test,:);
-test_data_9 = test_data_9(1:num_sample_to_get_test,:);
-                                                                               % === concat the train & test matrix ===
+test_data_0  = test_data_0(1:num_sample_to_get_test,:);
+test_data_1  = test_data_1(1:num_sample_to_get_test,:);
+test_data_2  = test_data_2(1:num_sample_to_get_test,:);
+test_data_3  = test_data_3(1:num_sample_to_get_test,:);
+test_data_4  = test_data_4(1:num_sample_to_get_test,:);
+test_data_5  = test_data_5(1:num_sample_to_get_test,:);
+test_data_6  = test_data_6(1:num_sample_to_get_test,:);
+test_data_7  = test_data_7(1:num_sample_to_get_test,:);
+test_data_8  = test_data_8(1:num_sample_to_get_test,:);
+test_data_9  = test_data_9(1:num_sample_to_get_test,:);
+
+disp('concat train & test matrix......');
 preprocessed_train_data = cat(1,train_data_0,train_data_1,train_data_2,...
     train_data_3,train_data_4,train_data_5,train_data_6,train_data_7,...
     train_data_8,train_data_9);
@@ -87,17 +91,17 @@ preprocessed_test_data = cat(1,test_data_0,test_data_1,test_data_2,...
     test_data_3,test_data_4,test_data_5,test_data_6,test_data_7,...
     test_data_8,test_data_9);
 
-layer_c1_num = 20;                                                             % init LeNet structure
-layer_s1_num = 20;
-layer_f1_num = 100;
-layer_output_num = 10;
-yita = 0.01;                                                                   % learning rate
-bias_c1 = (2*rand(1,20)-ones(1,20))/sqrt(20);                                  % init biases
-bias_f1 = (2*rand(1,100)-ones(1,100))/sqrt(20);
+layer_c1_num          = 20;                                                    % init LeNet structure
+layer_s1_num          = 20;
+layer_f1_num          = 100;
+layer_output_num      = 10;
+yita                  = 0.01;                                                  % learning rate
+bias_c1               = (2*rand(1,20)-ones(1,20))/sqrt(20);                    % init biases
+bias_f1               = (2*rand(1,100)-ones(1,100))/sqrt(20);
 [kernel_c1,kernel_f1] = init_kernel(layer_c1_num,layer_f1_num);                % init conv kernels
-pooling_a = ones(2,2)/4;                                                       % init kernel for pooling
-weight_f1 = (2*rand(20,100)-ones(20,100))/sqrt(20);                            % init weights for fc-layers
-weight_output = (2*rand(100,10)-ones(100,10))/sqrt(100);
+pooling_a             = ones(2,2)/4;                                           % init kernel for pooling
+weight_f1             = (2*rand(20,100)-ones(20,100))/sqrt(20);                % init weights for fc-layers
+weight_output         = (2*rand(100,10)-ones(100,10))/sqrt(100);
 disp('network successfully initialized......');
 
 disp('training networks......');                                               % === train process ===
@@ -334,4 +338,4 @@ end
 <hr>
 
 ### # reference
-https://blog.csdn.net/u010540396/article/details/52895074
+blog post: back-propagation algorithm in math
