@@ -10,10 +10,6 @@ tags:
   - todo
 ---
 
-ref: https://bai-yingjie.github.io/notes/performance_ping流程和函数调用解析.html?h=ping
-
-<hr>
-
 ### # application scenarios
 two machine a (5.5.5.11) and b (5.5.5.22), connected directly via a physical net interfaces (40G mellanox cx4).
 test the ping cmd in machine b in following ways:  
