@@ -416,7 +416,7 @@ def conditional_sampler(sampling_index, current_x, mean, cov):
 
 
 def gibbs_sampler(initial_point, num_samples, mean, cov, create_gif=True):
-    frames = []                                                             # for GIF
+    frames = []                                                             # for gif
     point = np.array(initial_point)
     samples = np.empty([num_samples+1, 2])                                  # sampled points
     samples[0] = point
@@ -475,24 +475,22 @@ ax.legend(loc='upper left')
 # plt.show()
 
 initial_point = [-9.0, -9.0]; num_samples = 500
-samples, tmp_points, frames = gibbs_sampler(initial_point, num_samples, 
-                                            mean, cov, create_gif=True)
+samples, tmp_points, frames = gibbs_sampler(initial_point, num_samples, mean, cov, create_gif=True)
 
-gif.save(frames, "/Users/mac/desktop/gibbs.gif", duration=150)            # GIF
-# Image(filename="gibbs.gif")
+gif.save(frames, "/Users/mac/desktop/gibbs.gif", duration=150)            # gif
 ```
 
 <hr>
 
 ### # n-dimension gibbs sampling
-(1) input stationary distribution $\pi(x,y,z)$, set state transition threshold $n$,
+@ 1 input stationary distribution $\pi(x,y,z)$, set state transition threshold $n$,
 num of samples $m$.  
-(2) initialize start values $(x_1, y_1, z_1)$.  
-(3) for $t=0$ to $t=n+m+1$:  
-(3.1) sampling from condition distribution $p(x\mid y_t,z_t)$ to get $x_{t+1}$.  
-(3.2) sampling from condition distribution $p(y\mid x_{t+1},z_{t})$ to get $y_{t+1}$.  
-(3.3) sampling from condition distribution $p(z\mid x_{t+1}, y_{t+1})$ to get $z_{t+1}$.  
-(4) the derived samples $\{(x_n,y_n,z_n),(x_{n+1},y_{n+1},z_{n+1})...(x_{n+m-1},y_{n+m-1},z_{n+m-1})\}$
+@ 2 initialize start values $(x_1, y_1, z_1)$.  
+@ 3 for $t=0$ to $t=n+m+1$:  
+3.1 sampling from condition distribution $p(x\mid y_t,z_t)$ to get $x_{t+1}$.  
+3.2 sampling from condition distribution $p(y\mid x_{t+1},z_{t})$ to get $y_{t+1}$.  
+3.3 sampling from condition distribution $p(z\mid x_{t+1}, y_{t+1})$ to get $z_{t+1}$.  
+@ 4 the derived samples $\{(x_n,y_n,z_n),(x_{n+1},y_{n+1},z_{n+1})...(x_{n+m-1},y_{n+m-1},z_{n+m-1})\}$
 is the n-d gibbs sampling results.
 
 <hr>
@@ -503,13 +501,12 @@ https://zhuanlan.zhihu.com/p/37121528
 https://mr-easy.github.io/2020-05-21-implementing-gibbs-sampling-in-python/
 https://houbb.github.io/2020/01/28/math-01-markov-chain  
 https://www.zhihu.com/question/63305712  
-https://www.cnblogs.com/pinard/p/6632399.html  
+https://www.cnblogs.com/pinard/p/6632399.html
 
 <hr>
 
 ### # keyword desc
-aperiodic Markov Chain: the transition state are not in a loop. aperiodic markov cHain is
-non-convergent.
+aperiodic markov chain: the transition state are not in a loop. aperiodic markov chain is non-convergent.
 for any state $i$, let $d$ denotes the greatest common divisor of set $\{n\mid n>=1, P_{ii}^n>0\}$,
 if $d=1$, then this markov chain is aperiodic.
 

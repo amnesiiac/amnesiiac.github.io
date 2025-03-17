@@ -81,8 +81,8 @@ appropriate action. whatever, it's a breaking change for the caller to add the c
 <hr>
 
 ### # definition of netlink related structures
-1 two type of nlmsg supported in below toy code, following a strategy of parse both the format, but finally
-output info according to nlmsg_type.
+1 two type of nlmsg supported in below toy code, following a strategy of parsing pyload in both format,
+but finally output info according to nlmsg_type.
 
 ```text
 interface messages:

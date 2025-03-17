@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "assembly language (寄存器&执行指令)"
+title: "assembly language (寄存器& 执行指令)"
 subtitle: '[assembly language wangshuang 3ed] - chapter2' 
 author: "twistfatezz"
 header-style: text

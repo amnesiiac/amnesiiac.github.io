@@ -326,9 +326,9 @@ cargo.toml:
 ```blurtext
 [package]
 name = "inco_proxy"
-version = "0.1.0"
-edition = "2021"
-authors = ["xxxx xxxx <xxxx.3.xxxx@xxxxx-xxxxx.com>"]
+version = "0.1.3"
+edition = "2024"
+authors = ["the inco_proxy app developers"]
 
 [dependencies]
 pnet_packet = "0.31.0"

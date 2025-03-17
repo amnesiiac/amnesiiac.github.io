@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "virtio dev/drv abstraction (linux, visualization)"
+title: "virtio device & driver abstraction (linux, virtualization)"
 author: "melon"
 date: 2024-10-28 20:43
 categories: "2024"
@@ -12,108 +12,151 @@ tags:
 
 ### # relationship between qemu & kvm
 when working together, kvm arbitrates access to the cpu and memory, and qemu emulates the hardware resources
-(hard disk, video, USB, etc.).
-when working alone, qemu emulates both cpu and hardware.
+(hard disk, video, usb, etc.).
+when working alone, qemu emulate both cpu and hardware.
 
 <hr>
 
-### # virtio spec and vhost protocol
-$ 1 difference between virtio spec & vhost protocol:  
-1.1 virtio spec, maintained by oasis, defines how to create the control & data plane between guest & host:
-e.g., the buffer & ring layouts in data plane is described in details in the spec.
+### # virtio spec & vhost protocol
+1 virtio spec: maintained by oasis, define how to create the control & data plane between guest & host:
+the buffer & vring layout in data plane is described in details in the specification.
 
-1.2 vhost protocol, allow virtio data plane implementation to be offloaded to certain element for
-performance enhancement (user/host process).
+2 vhost protocol: allow virtio data plane implementation to be offloaded to somewhere for
+performance enhancement (implemented as user or host process).
 
-<p style="margin-bottom: 20px;"></p>
+<hr>
 
-$ 2 components of virtio networking:  
-2.1 control plane: for capability negotiation between the host & guest, for data plane management.  
-it is implemented in qemu process based on the virtio spec, while the data plane is not, why?  
-because if data plane is implemented in qemu (just a linux userspace process), the operation to exchange
+### # virtio networking components
+1 control plane: for capability negotiation between the host & guest, for data plane management.  
+it is implemented in qemu process based on the virtio spec, while the data plane is out of qemu, why?
+reason: if data plane is implemented in qemu (as a linux userspace process), the operation to exchange
 data (pkt) between userspace & kernel will be too expensive!
 
-2.2 data plane: used for transferring the actual data (packets) between host and guest.  
+2 data plane: used for transferring the actual data (pkt) between host and guest.  
 it is designed to be as efficient as possible to move the packet fast, while the control plane
 is designed to be as flexible as possible to support different device and vendor in future architectures.
 
-here the vhost protocol comes into play, to help us implement a data plane going directly from the host
-to the guest (bypass the qemu process).
+3 data plane implementation offloading (vhost protocol's function): to help us implement a data plane
+going directly from the host to the guest (bypass the qemu process); by vhost offloading, we eliminate
+the latency of data copy & process to enhance the performance.
 
 <hr>
 
-### # virtio device
+### # virtio device introduction
 virtio device can be discovered by pci, mmio, channel io.
 
 virtio dev is a device that exposes virtio interface for software to manage & exchange info.
 virtio dev can be exposed to the emulated environment by pci, memory mapping io (expose the dev in a mem region)
 and s/390 channel io.
-part of the communication needs to be delegated to mechanism like device discovery.
+part of the communication need to be delegated to mechanism like device discovery.
 
-virtio device's main task is to convert the signal: from the form outside the virtual env (container, vm\...),
+virtio device's main task: convert the signal from the form outside the virtual env (container, vm\...),
 to the form needed for data exchange on the virtio dataplane (vring\...).
 the signal could be physical (electricity or light from a nic) or already virtual (just a representation of pkt).
 
 <hr>
 
-### # virtio interface: the mandatory components
-this section will focus on the basic components of virtio interfaces, and describe how the virito dev & drv
-communicating with each other by them.
+### # virtio interface: the mandatory component of virtio device
+this section will introduce the basic components of virtio interface, and describe how virtio dev & drv
+communicate with each other by them.
 
-$ 1 device status field (traffic lights)  
+$ 1 device status field (the traffic light)  
 the dev status field is a sequence of bits the dev & drv used to for their init,
 which act like traffic lights, the status of dev is indicated by set and clear the bits:
 
 1.1 guest drv set the bit ACKNOWLEDGE (0x1) in device status field to indicate the ack for the dev,
-and set the bit DRIVER (0x2) to indicate the init is in progress.
-
+and set the bit DRIVER (0x2) to indicate the init is in progress.  
 1.2 guest drv start feature negotiation using the feature bits, and sets bit DRIVER_OK (0x4) and
-FEATURES_OK (0x8) to acknowledge the features, so the following communication can start.
-
+FEATURES_OK (0x8) to acknowledge the features, so the following communication can start.  
 1.3 however, if the dev want to indicate a fatal failure, it can set bit DEVICE_NEEDS_RESET (0x40),
 and the drv can do the same with bit FAILED (0x80).
 
-the device communicates the location of these bits using transport specific methods, like pci scanning or knowing
+the device communicate the location of these bits using transport specific method, like pci scanning or knowing
 the address for mmio.
 
 <p style="margin-bottom: 20px;"></p>
 
 $ 2 feature bits (set communication agreement points)  
-device’s feature bits are used to communicate what features it supports, and to agree with the drv about
-what of them will be used.
+device feature bits are used to communicate what feature it support, and to agree with the driver about
+what of the feature bits will be used.
 
 the feature bits can be either device-generic or device-specific:
 for dev-generic feature, a bit can acknowledge the drv what memory mode can be used.
 for dev-specific feature, a bit can represent different kinds of offloads supported: checksum or
 scatter-gather (as a nic dev).
 
-after the dev's init, the guest drv reads the feature bits the dev offers, and send back the subset that it
-can handle.
-if they agree with each other, the drv will allocate and inform the virtqueues established to the dev, with all
-other config needed.
+after the dev initialied, the guest drv read the feature bits the dev offers, and send back the subset
+which it can handle.
+if they agree with each other, the drv will allocate and inform the virtqueues established to the dev,
+with all other config needed.
 
 <p style="margin-bottom: 20px;"></p>
 
-$ 3 notifications (you have work to do)  
-dev and drv need to notify each other that they have info to communicate by notification.
-the semantic for the notification is specified in the standard, while the implementation are transport specific:
-can either by a pci irq or a write to a specific memory location.
-thus the dev & drv need to expose one notification method at least. 
+$ 3 notifications (the peer got work to do)  
+by notification, dev & drv is able to notify each other that they got info to communicate.
+the notification semantic is specified in the standard, while the implementation are transport specific:
+can either by a irq (pci) or a write to a specific memory location (mmio).
+the dev & drv need to expose one notification method at least.
 
 <p style="margin-bottom: 20px;"></p>
 
-$ 4 virqueues (the communication media)  
-a virtqueue is a queue of guest’s buffers that the host consumes (r/w to guest) and return msg from host to guest.
+$ 4 device configuration space (for dev initialization)  
+configuration space is used for dev init, which generally wont frequently change.
+the config space is organized as little-endian byte order, and the driver must read & write in 32-bit format.
+some config are optional, which is determined by corresponding feature bits effectiveness.
+
+<p style="margin-bottom: 20px;"></p>
+
+$ 5 virtqueues (the communication media)  
+virtqueue is a queue of guest’s buffer that the host consume (r/w to guest) and return msg from host to guest.
 the memory layout of a virtqueue is like a circular ring (vring).
+each vqueue including: 1 descriptor table; 2 available ring; 3 used ring.
+all the three parts are stored in guest memory, with consecutive physical address.
+requirements of the alignment & size of the three parts are as:
+
+virtqueue part    | alignment  | size in bytes
+---               | ---        | ---
+descriptor table  | 16         | 16 * vque_size
+available ring    | 2          | 6 + 2 * vque_size
+used ring         | 4          | 6 + 8 * vque_size
+
+<p style="margin-bottom: 20px;"></p>
+
+$ 6 steps for the guest driver to send a buffer to the virtio dev  
+6.1 the guest driver fill one or serveral chained slot in the descriptor table.  
+6.2 the guest driver write the descriptor index to the available ring.  
+6.3 the guest driver write notification to the device.  
+6.4 after device use the buffer, it write the descriptor index to the used ring.  
+6.5 the device send an irq to the driver.
+
+<p style="margin-bottom: 20px;"></p>
+
+$ 7 more details can refer to blog post vring intro.
+
+<p style="margin-bottom: 20px;"></p>
+
+$ 8 the steps for virtio driver to initialize a device  
+8.1 reset the device.  
+8.2 set the ACKNOWLEDGE status bit: the guest kernel has notice the device.  
+8.3 set the DRIVER status bit: the guest kernel know how to drive the device.  
+8.4 read device feature bits, and write the subset of feature bits understood by the kernel and
+    driver to the device.
+    during this step the driver MAY read (but MUST NOT write) the device-specific config fields
+    to check that it can support the device before accepting it.  
+8.5 set the FEATURES_OK status bit. the driver MUST NOT accept new feature bits after this step.  
+8.6 re-read device status to ensure the FEATURES_OK bit is still set: otherwise, the dev does not support our
+    subset of features and the dev is unusable.  
+8.7 perform dev-specific setup, including discovery of virtqueues for the dev, optional per-bus setup,
+    reading and possibly writing the dev’s virtio config space, and population of virtqueues.  
+8.8 set the DRIVER_OK status bit. at this point the device is 'live'.
 
 <hr>
 
 ### # virtio drivers: the software avatar
 the virtio driver is the software in the virtual environment, used to talk with the virtio device through
 relevant parts of the virtio spec.
-generally speaking, the virtio driver's control plane tasks are:  
-1 look for the device.  
-2 allocate shared memory in the guest for the communication.
+generally speaking, the virtio driver tasks for the control plane are:
+1 look for the device; 2 allocate shared memory in the guest for the communication.
 
 <hr>
 

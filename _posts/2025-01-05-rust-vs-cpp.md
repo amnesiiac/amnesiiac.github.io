@@ -175,4 +175,5 @@ trait Interface {                      | struct Interface {
 <hr>
 
 ### # reference
-https://maulingmonkey.com/guide/cpp-vs-rust/
+https://maulingmonkey.com/guide/cpp-vs-rust/  
+https://locka99.gitbooks.io/a-guide-to-porting-c-to-rust/content/ (todo)

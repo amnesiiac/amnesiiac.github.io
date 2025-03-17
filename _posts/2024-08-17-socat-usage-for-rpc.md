@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "socat tools to enable rpc through vmm & vm (socat, rpc, shared fs)"
+title: "socat to enable rpc through vmm & vm (socat, rpc, shared fs)"
 author: "melon"
 date: 2024-08-17 21:49
 categories: "2024"
@@ -9,8 +9,8 @@ tags:
   - virtualization
 ---
 
-this article focus on introduce how to use socat tool for rpc purpose from the wrapper container env
-inside the vm managed by the vmm like cloud-hypervisor.
+this article mainly describes: how to use socat utility to emulate the rpc from wrapper container into guest vm,
+which is supervised by cloudhypervisor.
 
 <hr>
 
@@ -75,11 +75,11 @@ cmd_mount() {
     while true; do
         # start virtiofsd with sock for communication, create shared fs between wrapper container & board vm
         virtiofsd --log-level info --seccomp none --sandbox none --cache=always \
---socket-path=$WORK_DIR/run/rootextra.sock --shared-dir=$WORK_DIR/rootfs > $WORK_DIR/run/virtiofsd.log 2>&1
+            --socket-path=$WORK_DIR/run/rootextra.sock --shared-dir=$WORK_DIR/rootfs > $WORK_DIR/run/virtiofsd.log 2>&1
         sleep 0.5
         echo "restarting virtiofsd"
     done &
-    # add a virtual device to the vm under control, expose tag inside to be used for mount
+    # add a virtual fs (vhost-user dev) to the guest kernel, expose tag inside for mount
     ch-remote --api-socket $WORK_DIR/run/clh.sock add-fs tag=rootextra,socket=$WORK_DIR/run/rootextra.sock
 }
 
@@ -140,7 +140,7 @@ hostfw_vm_init() {
     mkdir /rootextra                                           # create fs
     mount rootextra /rootextra -t virtiofs -o noatime          # mount the dev by tag assigned by virtiofsd to target
     ln -sf /rootextra/mnt/* /mnt                               # overwrite dir from share folderto real
-    ln -sf /rootextra/isam/user/host/* /isam/user/host
+    ln -sf /rootextra/isxx/user/host/* /isxx/user/host
     ln -sf /rootextra/etc/* /etc
     for f in /rootextra/dev/*; do ln -sf $f ${f#/rootextra}; done
 
@@ -199,13 +199,13 @@ case "$1" in
         create_persistent_symlinks
         overlay_board_data
 
-        if config_flag_enabled enable_redundancy && [ ! -f /isam/user/host/chassis/eps/eps_self_active ]; then
-            mkdir -p /isam/user/host/chassis/eps/
-            echo 0 > /isam/user/host/chassis/eps/eps_peer_present
-            echo 1 > /isam/user/host/chassis/eps/eps_self_avialiable
-            echo 1 > /isam/user/host/chassis/eps/eps_self_active
+        if config_flag_enabled enable_redundancy && [ ! -f /isxx/user/host/chassis/eps/eps_self_active ]; then
+            mkdir -p /xxxx/user/host/chassis/xxx/
+            echo 0 > /xxxx/user/host/chassis/xxx/xxx_peer_present
+            echo 1 > /xxxx/user/host/chassis/xxx/xxx_self_avialiable
+            echo 1 > /xxxx/user/host/chassis/xxx/xxx_self_active
         fi
-        ls /isam/user/host/chassis/eps/
+        ls /xxxx/user/host/chassis/xxx/
         exit 0
         ;;
     stop) ;;
@@ -215,117 +215,6 @@ case "$1" in
         ;;
 esac
 ```
-
-<hr>
-
-### # usecase 0: try create another shared dir between wrapper container & board image vm
-1 modify the cmd_mount function inside vm.sh:
-
-```text
-cmd_mount() {
-    # start virtiofsd daemon, change the shared dir, change the daemon listening sock
-    while true; do
-        virtiofsd --log-level info --seccomp none --sandbox none --cache=always \
---socket-path=$WORK_DIR/run/rootextra_test.sock --shared-dir=$WORK_DIR/rootfs_test > \
-$WORK_DIR/run/virtiofsd_test.log 2>&1
-        sleep 0.5
-        echo "restarting virtiofsd"
-    done &
-    # change the comm between virtiofsd with vmm cloudhypervisor
-    ch-remote --api-socket $WORK_DIR/run/clh.sock add-fs tag=rootextra_test,socket=$WORK_DIR/run/rootextra_test.sock
-}
-```
-
-2 enter in the wrapper container of vm, execute script, the output shows the virtual dev is created.
-
-```text
-isam-reborn:/work# mkdir -p rootfs_test
-isam-reborn:/work# vm.sh mount
-{"id":"_fs8","bdf":"0000:00:0a.0"}
-```
-
-3 enter into the board vm, check the existence of the device by navigating the device mounted:
-
-```text
-$(board) mount
-rootfs on / type rootfs (rw,size=447424k,nr_inodes=1271494)
-none on /dev type devtmpfs (rw,relatime,size=4096k,nr_inodes=1271499,mode=755)
-none on /dev/pts type devpts (rw,relatime,mode=600,ptmxmode=000)
-none on /proc type proc (rw,relatime)
-none on /sys type sysfs (rw,relatime)
-rootextra on /rootextra type virtiofs (rw,noatime)   // pre established shared dir mounted at /rootextra
-none on /rootextra/isam/user/host/chassis type virtiofs (rw,noatime)
-none on /rootextra/mnt/nand-persistent type virtiofs (rw,noatime)
-fuse_cpuload on /isam/cpuload/config type fuse.fuse_cpuload (rw,nosuid,nodev,relatime,user_id=0,group_id=0)
-tmpfs on /isam/cpuload/output type tmpfs (rw,relatime,size=1024k)
-fuse_devices on /isam/slot_default/devs.fuse type fuse.fuse_devices (rw,nosuid,nodev,relatime,user_id=0,group_id=0)
-fuse_prozone on /isam/slot_default/prozone type fuse.fuse_prozone (rw,nosuid,nodev,relatime,user_id=0,group_id=0)
-fuse_devices on /isam/slot_default/smas.fuse type fuse.fuse_devices (rw,nosuid,nodev,relatime,user_id=0,group_id=0)
-none on /rootextra/mnt/isam-nor-mgnt-partition type virtiofs (rw,noatime)
-none on /rootextra/mnt/nand-dbase type virtiofs (rw,noatime)
-none on /rootextra/isam/user/host/shelf type virtiofs (rw,noatime)
-mount_cpu, on /mnt/cgroups/cpu type cgroup (rw,relatime,cpu)
-mount_cpuacct, on /mnt/cgroups/cpuacct type cgroup (rw,relatime,cpuacct)
-fuse_quota on /rootextra/mnt/nand-persistent/persistent/app_data/slot_default.quota type fuse.fuse_quota \
-    (rw,nosuid,nodev,relatime,user_id=0,group_id=0)
-unionfs on /isam/slot_default/run type fuse.unionfs \
-    (rw,nosuid,nodev,relatime,user_id=0,group_id=0,default_permissions)
-fuse_quota on /rootextra/mnt/nand-persistent/persistent/app_data/nt_1101.quota type fuse.fuse_quota \
-    (rw,nosuid,nodev,relatime,user_id=0,group_id=0)
-unionfs on /isam/slot_1101/run type fuse.unionfs (rw,nosuid,nodev,relatime,user_id=0,group_id=0,default_permissions)
-/dev/loop0 on /mnt/isam/ZHWTQD2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop1 on /mnt/isam/ZHWYQM2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop2 on /mnt/isam/ZATFQM2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop3 on /mnt/isam/ZJW4QM2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop4 on /mnt/isam/ZJW5QM2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop5 on /mnt/isam/ZJXDQM2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop6 on /mnt/isam/ZKK0QM2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop7 on /mnt/isam/ZKJXQD2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop8 on /mnt/isam/ZKJXQM2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop9 on /mnt/isam/ZK0TQD2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop10 on /mnt/isam/ZK0TQM2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop11 on /mnt/isam/ZK2AQD2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop12 on /mnt/isam/ZK2AQM2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop13 on /mnt/isam/ZK7YQD2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop14 on /mnt/isam/ZK7YQM2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop15 on /mnt/isam/ZKSSQD2409.388 type squashfs (ro,relatime,errors=continue)
-/dev/loop16 on /mnt/isam/ZKSSQM2409.388 type squashfs (ro,relatime,errors=continue)
-tmpfs on /mnt/filesync type tmpfs (rw,relatime,size=307200k)
-tmpfs on /mnt/dynamic_fast_db type tmpfs (rw,relatime,size=286720k)
-sysregd on /mnt/xenomai/anon/root/anon/system type fuse.sysregd \
-    (rw,nosuid,nodev,relatime,user_id=0,group_id=0,default_permissions)
-tmpfs on /isam/logs/internal_syslog type tmpfs (rw,relatime,size=65536k)
-resource_monitor on /isam/resource_monitor type fuse.resource_monitor (rw,nosuid,nodev,relatime,user_id=0,group_id=0)
-none on /rootextra/ap/local/devtools type virtiofs (rw,noatime)
-none on /rootextra/repo1/guolinp/hostcontroller/instances/admin-lant-a_\
-    20240715112449/workdir/setup_shelf_boards_1/olt_1/nt_1 type virtiofs (rw,noatime)
-```
-
-however, the above output shows: there's no newly created shared fs.
-check the device existence by sysfs:
-
-```text
-$(board) cd /sys/devices/pci0000:00/0000:00:09.0 && ls
-ari_enabled                 dma_mask_bits       local_cpulist     remove              subsystem_vendor
-broken_parity_status        driver              local_cpus        rescan              uevent
-class                       driver_override     modalias          resource            vendor
-config                      enable              msi_bus           resource0           virtio8
-consistent_dma_mask_bits    firmware_node       msi_irqs          revision
-d3cold_allowed              irq                 power             subsystem
-device                      link                power_state       subsystem_device
-```
-
-which show the virtual device is added to vm guest kernel.
-
-try mount the fs with the designated tag provided in clh in vm_mount:
-
-```text
-$ mount rootextra_test /rootfs_test
-```
-
-after that the /rootfs_test inside wrapper container is connected with baord vm dir /rootfs_test,
-any fs operations will be encapsulated with virtio proto & wrapper pci proto, forwarding to clh,
-then pass to virtiofsd by the sock designated, finally the changes will be reflected on both side.
 
 <hr>
 
@@ -356,7 +245,7 @@ def collect_system_log(self):
             )
         # collect syslog, reboot info and put them into board persistent dir /rootextra
         self.sb.exec(
-            'vsexec "/isam/scripts/collect_logs now; \            # collect logs
+            'vsexec "/xxxx/scripts/collect_logs now; \            # collect logs
              cp -afH /mnt/reboot_info /tmp/system_logs_now; \     # copy reboot info into system log dir
              cp -afH /tmp/system_logs_now /rootextra"'            # copy reboot info & system logs into shared mount
         )
@@ -368,7 +257,7 @@ def collect_system_log(self):
                    self.workdir))
         sh.run("cd {} && mv system_logs_now system_logs && zip -rq system_logs.zip system_logs".format(self.workdir))
    else :
-        self.sb.exec("/isam/scripts/collect_logs now; cp -afH /mnt/reboot_info /tmp/system_logs_now")
+        self.sb.exec("/xxxx/scripts/collect_logs now; cp -afH /mnt/reboot_info /tmp/system_logs_now")
         self.sb.cp("/tmp/system_logs_now", self.workdir, reverse=True)
         sh.run("cd {} && mv system_logs_now system_logs && zip -rq system_logs.zip system_logs".format(self.workdir))
     fs.remove_files(os.path.join(self.workdir, "system_logs"))
@@ -377,11 +266,11 @@ def collect_system_log(self):
 
 <hr>
 
-### # usercase 2: show board vm dir info based on the shared fs
+### # usecase 2: show board vm dir info based on the shared fs
 in board wrapper container, the vmm.vsock is established fine:
 
 ```text
-isam-reborn:/tmp# ls -l
+xxxx-reborn:/tmp# ls -l
 total 0
 srwx------    1 root     root             0 Jul 15 05:54 vmm.vsock
 ```
@@ -389,10 +278,10 @@ srwx------    1 root     root             0 Jul 15 05:54 vmm.vsock
 in board wrapper container, execute ls -l command using vsexec script:
 
 ```text
-isam-reborn:/# which vsexec
+reborn:/# which vsexec
 /usr/bin/vsexec
 
-isam-reborn:/# vsexec "ls -l"
+reborn:/# vsexec "ls -l"
 spawn socat - UNIX-CONNECT:/tmp/vmm.vsock
 CONNECT 1234
 ls -l
@@ -406,7 +295,7 @@ drwxr-xr-x    7 root     root     3060 Jul 15 05:55 dev
 drwxr-xr-x   18 root     root     1380 Jul 15 05:58 etc
 drwxr-xr-x    3 fdh      fdh        60 Jul 15 05:53 home
 -rwxr-xr-x    1 root     root     2232 Jul 15 05:54 init
-drwxrwxrwx   29 root     root      680 Jul 15 05:55 isam
+drwxrwxrwx   29 root     root      680 Jul 15 05:55 isxx
 drwxr-xr-x    5 root     root      640 Jul 15 05:55 lib
 lrwxrwxrwx    1 root     root        3 Jul 15 05:54 lib32 -> lib
 lrwxrwxrwx    1 root     root       11 Jul 15 05:54 linuxrc -> bin/busybox
@@ -424,7 +313,6 @@ drwxrwxrwt   12 root     root      980 Jul 17 09:14 tmp
 -r-xr-xr-x    1 root     root      351 Jul 15 05:54 type_a.version
 drwxr-xr-x    8 root     root      180 Jul 15 05:54 usr
 drwxr-xr-x    7 root     root      260 Jul 15 05:55 var
-lrwxrwxrwx    1 root     root       54 Jul 15 05:55 yang_categories_per_mode.json -> /mnt/xxxx.json
 ```
 
 the board fs dir info is shown by this rpc call, which can be confirmed inside board vm.
@@ -432,5 +320,5 @@ the board fs dir info is shown by this rpc call, which can be confirmed inside b
 <hr>
 
 ### # further readings
-ref: https://virtio-fs.gitlab.io/index.html  
-ref: some blog post with base illustration on virtio
+1 https://virtio-fs.gitlab.io/index.html  
+2 virtio blog posts

@@ -268,8 +268,8 @@ in intermediate state of forward & backward process.
 this part will move from pytorch to c implementation and get rid of tensor abstraction.
 
 a brief introduction to tensors:  
-1) a 1d block of memory called storage that holds the raw data.  
-2) a view over that storage that holds its shape.
+1 a 1d block of memory called storage that holds the raw data.  
+2 a view over that storage that holds its shape.
 see @[pytorch internals][8] for more details.
 
 so for example given a 3d tensor:
@@ -481,38 +481,36 @@ and then accumulate into them during backward pass.
 <p style="margin-bottom: 20px;"></p>
 
 2 layernorm vs rmsnorm: the difference  
-unlike gpt2, @[llama2.c][9] swaps out layernorm for the simpler rmsnorm,
-the implementation is as:
+unlike gpt2, @[llama2.c][9] replace layernorm with the simpler rmsnorm, the implementation is as:
 
 ```text
 void rmsnorm(float* o, float* x, float* weight, int size){
-    float ss = 0.0f;                                       // calculate sum of squares
+    float ss = 0.0f;                     // calculate sum of squares
     for(int j = 0; j < size; j++){
         ss += x[j] * x[j];
     }
     ss /= size;
     ss += 1e-5f;
     ss = 1.0f / sqrtf(ss);
-    for(int j = 0; j < size; j++){                         // normalize and scale
+    for(int j = 0; j < size; j++){       // normalize and scale
         o[j] = weight[j] * (ss * x[j]);
     }
 }
 ```
 
-how does this differ to layernorm?
+how does rmsnorm differ to layernorm?  
+1 rmsnorm does not subtract the mean, it only normalizes by the norm (not std norm), which is very trendy
+because it works just as well.
+whatmore, the rmsnorm does not have biases, only has a weight for scaling the norm, in contrast, gpt2 use
+too many biases everywhere and somehow can be removed.
 
-1) rmsnorm does not subtract the mean, it only normalizes by the norm (not std norm).
-this become very trendy because it works just as well.
-whatmore, the rmsnorm does not have biases, only has a weight for scaling the norm.
-in contrast, gpt2 used too many biases everywhere and somehow can be removed.
+the network itself can simulate biases if it needs them, e.g. by allocating extra one channel dimensions
+to be constant, and then weight multiplying the constant dimension will effectively work like a bias,
+which will significantly simplify the code.
 
-the network itself can simulate biases if it needs them, e.g. by allocating extra one
-channel dimensions to be constant, and then weight multiplying the constant dimension will
-effectively work like a bias, which will significantly simplify the code.
-
-2) the llama2 inference code has no batch dimension (batch size = 1).
-you could have batched inference as well, especially when host an llm to accept
-many simultaneous queries a meantime.
+2 the llama2 inference code has no batch dimension (batch size = 1).
+you could have batched inference as well, especially when host an llm to accept many simultaneous
+queries a meantime.
 
 while, if you're just running an llm locally, a single stream of generation is enough.
 so there's no need for parallelism to support multiple streams at once.
@@ -522,11 +520,10 @@ thus, llama2.c is not batched, therefore you won't see any loops that look like:
 for(int b = 0; b < B; b++){...}
 ```
 
-3) the rmsnorm test/product inference code has no time dimension T.
+3 the rmsnorm test/product inference code has no time dimension T.
 during training, we can loop over time inside each layer and calculate norm at all time steps.
-however, during test/product inference, which need generate one token at a time, then
-feed the token predicted at time t into the forward pass of the transformer at the next
-time step t+1.
+however, during test/product inference, which need generate one token at a time, then feed the token
+predicted at time t into the forward pass of the transformer at the next time step t+1.
 
 so there's no no loops in forwarding stage like:
 
@@ -537,12 +534,9 @@ for(int t = 0; t < T; t++){...}
 but the loop over time dimension does exist, ref: @[llama2#timeloop][10],
 in which it lies outside of the transformer forward pass.
 
-
-
 during llama2 inference, there's no track of any intermediate calculations, memory, or cache.
 because during test/product inference, there is no backward pass to follow.
-as a result, the memory consumption of test/product inference is significantly lower than
-that of training.
+as a result, the memory consumption of test/product inference is significantly lower than that of training.
 
 <hr>
 

@@ -15,7 +15,7 @@ this article mainly covers the basic neural network back-propagation algorithm.
 
 ### # math walk for the bp algorithm pipeline
 1 given a dataset contains $m$ samples:
-$ \{(x^{(1)},y^{(1)}),(x^{(2)},y^{(2)}),\cdots, (x^{(m)},y^{(m)})\} $,
+$\{(x^{(1)},y^{(1)}),(x^{(2)},y^{(2)}),\cdots, (x^{(m)},y^{(m)})\}$,
 in which x represents the sample data, y represents the label.
 
 <p style="margin-bottom: 20px;"></p>

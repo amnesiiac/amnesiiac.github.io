@@ -82,7 +82,7 @@ given linear regression model as following formula:
 $$ y = H_w(x) = w_1 + w_2 \times x $$
 
 to find the best formula paramters which fits the given sample data points
-$$(x_1,y_1), (x_2,y_2)...,(x_n,y_n)$$ best, given the loss function (MSE) below,
+$(x_1,y_1), (x_2,y_2)...,(x_n,y_n)$ best, given the loss function (MSE) below,
 then the best fitting line problem is equivalent to:
 
 $$ Minimize\ J(w_1,w_2) = \frac{1}{n}\sum_{i=1}^n(pred_i-y_i)^2 $$

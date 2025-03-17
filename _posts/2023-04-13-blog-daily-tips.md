@@ -128,3 +128,9 @@ this is a url which allow actual hidden url at bottom of blog: [url anchor][id].
 remote link anchor to enable set long url at bottom of blog [url anchor][id].
 [id]: http://groups.google.com/group/celluloid-ruby
 ```
+
+<hr>
+
+### # math blocks display
+use `$ 1`, `$ 2`, `1.1`, `1.2` for blog post without any mathjax render elements.  
+use `@ 1`, `@ 2`, `1.1`, `1.2` for blog post with mathjax render elements, to avoid confliction.

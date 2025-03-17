@@ -17,7 +17,7 @@ try ssh to the exposed port, but returned err:
 
 ```text
 $ ssh root@127.0.0.1 -p 49156
-ssh: conect to host 127.0.0.1 port 49156: No route to host
+ssh: connect to host 127.0.0.1 port 49156: No route to host
 ```
 
 <hr>

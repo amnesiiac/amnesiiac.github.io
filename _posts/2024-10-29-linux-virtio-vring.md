@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "vring introduction (linux, visualization)"
+title: "vring intro: the virtio data plane design (linux, virtualization)"
 author: "melon"
 date: 2024-10-29 20:28
 categories: "2024"

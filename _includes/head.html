@@ -23,11 +23,12 @@
 {% if site.analytics %}{% include analytics.html %}{% endif %}
 
 {% if site.mathjax %}
-<!-- use $...$ for inline math -->
+<!-- doc: https://docs.mathjax.org/en/v2.0-latest/output.html -->
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
+    jax: ["input/TeX", "output/SVG"],
     tex2jax: {
-      inlineMath: [ ['$','$'] ],
+      inlineMath: [['$','$']],
       processEscapes: true
     }
   });
