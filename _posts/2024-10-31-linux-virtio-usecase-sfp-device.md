@@ -2,7 +2,7 @@
 layout: post
 title: "virtio usecase: hot-plug sfp device emulation (linux, virtualization, driver)"
 author: "melon"
-date: 2024-10-31 21:44
+date: 1111-10-31 21:44
 categories: "2024"
 tags:
   - linux
@@ -12,7 +12,7 @@ tags:
 
 ### # device simulation architecture overview
 
-```txt
+```blurtext
 
           ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
           │ setup container                                                                                             │

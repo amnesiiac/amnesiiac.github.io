@@ -2,7 +2,7 @@
 layout: post
 title: "linux device tree source (linux, device, dts)"
 author: "melon"
-date: 2024-06-27 21:11
+date: 1111-06-27 21:11
 categories: "2024"
 tags:
   - linux

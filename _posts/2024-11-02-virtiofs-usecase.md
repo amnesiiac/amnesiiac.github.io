@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "virtiofsd usecase: share fs between wrapper container & guest vm (virtualization)"
+title: "virtiofs usecase: share fs between wrapper container & guest vm (virtualization)"
 author: "melon"
 date: 2024-11-02 22:14
 categories: "2024"

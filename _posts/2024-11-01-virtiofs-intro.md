@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "virtiofsd intro (virtualization)"
+title: "virtiofs intro (virtualization)"
 author: "melon"
 date: 2024-11-01 22:14
 categories: "2024"

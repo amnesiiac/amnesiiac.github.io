@@ -564,6 +564,12 @@ everything between the two flavor matches ok.
 ### # autograd of layernorm by our own autograd engine
 todo (conclude in another blog)
 
+<hr>
+
+### # reference
+https://neuralthreads.medium.com/layer-normalization-and-how-to-compute-its-jacobian-for-backpropagation-55a549d5936f  
+https://neuralthreads.medium.com/layer-normalization-applied-on-a-neural-network-f6ad51341726  
+https://liorsinai.github.io/mathematics/2022/05/18/layernorm.html
 
 
 [1]: https://d4mucfpksywv.cloudfront.net/better-language-models/language_models_are_unsupervised_multitask_learners.pdf
