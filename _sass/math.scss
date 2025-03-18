@@ -9,3 +9,17 @@
   font-size: 12px !important;
   background-color: #f0f0f0;
 }
+
+// below settings are for non-svg render engine: common-html
+.mjx-math {
+  width: 99% !important;
+}
+
+.mjx-box {
+  text-align: center;
+  font-size: 12px;
+}
+
+.mjx-itable {
+  font-size: 12px;
+}
