@@ -7,7 +7,6 @@ categories: "2024"
 tags:
   - linux
   - driver
-  - nokia
 ---
 
 this article will focus on the main trunk of the irq controller driver, which is widely used in both target &

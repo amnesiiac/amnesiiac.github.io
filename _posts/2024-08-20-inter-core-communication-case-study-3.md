@@ -10,7 +10,6 @@ tags:
   - driver
   - icc
   - async
-  - nokia
 ---
 
 this article focus on illustration of the rust app, which working as a proxy of the rpmsg based on core 0
@@ -18,7 +17,7 @@ s6-service scripts.
 
 <hr>
 
-### # code walk through rust inco-proxy app
+### # code walk through inco-proxy app (rust)
 rpmsg.rs:
 
 ```blurtext
@@ -344,7 +343,7 @@ strip = true
 
 usages:
 
-```text
+```blurtext
 $ UDRV_JSON_PATH=/isam/user/plat_srv/udrv.json start_app --bg /isam/user/host/apps/inco_proxy rpmsg4000 > /tmp/messages
 ```
 
@@ -368,3 +367,112 @@ $ 2 features of async model:
 1.4 await point out where the function yield control back to runtime.  
 1.5 actual parallelism can be achieved by execute runtime on multiple threads.
 
+<hr>
+
+### # code walk through inco-proxy app (cpp)
+rpmsg.cpp:
+
+```text
+#include <iostream>
+#include <string>
+#include <thread>
+#include <chrono>
+#include <memory>
+#include <vector>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
+#include <functional>
+#include <optional>
+#include <stdexcept>
+#include <cstring>
+#include <pnet_datalink/pnet_datalink.h>
+#include <pnet_packet/pnet_packet.h>
+
+const size_t ETHERNET_HEADER_LEN = 14;
+
+class Services {
+public:
+    virtual void watcher(std::shared_ptr<std::queue<std::string>> sync_tx) = 0;
+    virtual void handler(std::shared_ptr<std::queue<std::string>> sync_rx) = 0;
+};
+
+class RawSocket : public Services {
+public:
+    pnet_datalink::NetworkInterface interface;
+    std::unique_ptr<pnet_datalink::DataLinkReceiver> receiver;
+    std::unique_ptr<pnet_datalink::DataLinkSender> sender;
+
+    RawSocket(const std::string& name){
+        auto interfaces = pnet_datalink::interfaces();
+        auto it = std::find_if(interfaces.begin(), interfaces.end(), [&](const pnet_datalink::NetworkInterface& iface){
+            return iface.name == name;
+        });
+        if(it == interfaces.end()){
+            throw std::runtime_error("Network interface not found");
+        }
+        interface = *it;
+        auto channel = pnet_datalink::channel(interface, pnet_datalink::Default::default());
+        if(std::holds_alternative<pnet_datalink::Channel>(channel)){
+            auto [tx, rx] = std::get<pnet_datalink::Channel>(channel);
+            sender = std::move(tx);
+            receiver = std::move(rx);
+        }
+        else{
+            throw std::runtime_error("Unhandled channel type");
+        }
+    }
+
+    std::optional<std::exception_ptr> send(const std::string& buf){
+        size_t len = buf.size() + ETHERNET_HEADER_LEN;
+        std::cout << "[rpmsg] send raw packet to " << interface.name << std::endl;
+
+        return sender->build_and_send(1, len, [&](uint8_t* packet){
+            auto mutable_packet = pnet_packet::MutableEthernetPacket::new(packet);
+            mutable_packet.set_destination(pnet_datalink::MacAddr::broadcast());
+            mutable_packet.set_source(interface.mac.value());
+            mutable_packet.set_ethertype(pnet_packet::EtherType(0x8800));
+            mutable_packet.set_payload(reinterpret_cast<const uint8_t*>(buf.data()), buf.size());
+        });
+    }
+
+    void watcher(std::shared_ptr<std::queue<std::string>> sync_tx) override {
+        bool error_printed = false;
+        while(true){
+            auto packet = receiver->next();
+            if(packet){
+                auto ethernet_packet = pnet_packet::EthernetPacket::new(*packet);
+                auto payload = ethernet_packet.payload();
+
+                std::string dst(reinterpret_cast<const char*>(payload.data()), payload.size());
+                sync_tx->push(dst);
+                if(error_printed){
+                    std::cerr << "Recovered from error" << std::endl;
+                    error_printed = false;
+                }
+            }
+            else{
+                if(!error_printed){
+                    std::cerr << "An error occurred while reading" << std::endl;
+                    error_printed = true;
+                }
+                continue;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+
+    void handler(std::shared_ptr<std::queue<std::string>> sync_rx) override {
+        while(true){
+            if(!sync_rx->empty()){
+                std::string dst = sync_rx->front();
+                sync_rx->pop();
+                if(dst == "REDUN_NOTIFY"){
+                    send("REDUN_NOTIFY");
+                }
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+};
+```

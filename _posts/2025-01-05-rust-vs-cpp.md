@@ -166,11 +166,20 @@ fn add (a: i32, b: i32) -> i32 {       | int32_t add (int32_t a, int32_t b) {
 }                                      | }
                                        |
 trait Interface {                      | struct Interface {
-    fn foo(&self, _: u32) -> u64;      |         virtual uint64_t foo(uint32_t) = 0;
-    fn bar(&self, param: u32) -> u64 { |         virtual uint64_t bar(uint32_t param) {
-        self.foo(param)                |             return this->foo(param);
-    }                                  |         }
+    fn foo(&self, _: u32) -> u64;      |     virtual uint64_t foo(uint32_t) = 0;
+    fn bar(&self, param: u32) -> u64 { |     virtual uint64_t bar(uint32_t param) {
+        self.foo(param)                |         return this->foo(param);
+    }                                  |     }
 }                                      | };
+
+<hr>
+
+### # can modern cpp be as safe as rust?
+RAII cannot prevent use after free problem:  
+ref: https://www.reddit.com/r/rust/comments/wppvqz/cant_modern_c_be_as_safe_as_rust/
+
+modern cpp cases that are not safe:  
+ref: https://alexgaynor.net/2019/apr/21/modern-c++-wont-save-us/
 
 <hr>
 

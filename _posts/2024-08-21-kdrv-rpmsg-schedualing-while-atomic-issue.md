@@ -8,7 +8,6 @@ tags:
   - driver
   - virtualization
   - icc
-  - nokia
   - todo
 ---
 

@@ -7,7 +7,6 @@ categories: "2024"
 tags:
   - linux
   - driver 
-  - nokia
 ---
 
 introduction to udrv ll_services.

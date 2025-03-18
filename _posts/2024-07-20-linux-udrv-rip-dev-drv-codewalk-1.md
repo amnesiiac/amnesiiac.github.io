@@ -7,7 +7,6 @@ categories: "2024"
 tags:
   - linux
   - driver
-  - nokia
 ---
 
 rip device is hosted on eeprom chip, which is used to store non-volatile information of the product:

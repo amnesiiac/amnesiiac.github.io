@@ -7,7 +7,6 @@ categories: "2024"
 tags:
   - linux
   - driver
-  - nokia
   - todo
 ---
 

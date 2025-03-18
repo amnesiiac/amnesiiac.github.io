@@ -8,7 +8,6 @@ tags:
   - virtualization
   - driver
   - icc
-  - nokia
 ---
 
 this article introduce a rust app used in inter-core communication scenarios between a smp linux os

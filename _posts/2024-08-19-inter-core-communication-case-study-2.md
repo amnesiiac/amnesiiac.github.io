@@ -8,7 +8,6 @@ tags:
   - virtualization
   - driver
   - icc
-  - nokia
 ---
 
 the previous part I shows the high-level design graphs of the basic infra involved to buildup the bridge for

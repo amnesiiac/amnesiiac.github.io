@@ -7,7 +7,6 @@ categories: "2024"
 tags:
   - linux
   - driver
-  - nokia
 ---
 
 file controller driver code walk will focus on the main trunk of file controller driver, which is widely used

@@ -7,7 +7,6 @@ categories: "2024"
 tags:
   - linux
   - driver
-  - nokia
 ---
 
 rip code walk I illustrate the main trunk of udrv infra, this article will focus on rip device driver.
