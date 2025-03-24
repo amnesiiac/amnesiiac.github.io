@@ -41,8 +41,9 @@ pre:has(code.language-blurtext) {
   // filter: blur(1px);
 }
 
+// remove default background color for `text` in post
 .highlighter-rouge {
-  background-color: #eee;
+  // background-color: #eee;
 }
 
 // comments inside code block

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "restore git repo file mtime as time of latest commit (shell)"
+title: "restore git repo file mtime as the time of latest commit (shell)"
 author: "melon"
 date: 2024-01-04 21:08
 categories: "2024"

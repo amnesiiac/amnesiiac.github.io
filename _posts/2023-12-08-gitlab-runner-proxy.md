@@ -10,6 +10,7 @@ tags:
 
 ### # steps to setup the proxy env var for certain gitlab-runner
 check the runner status & get the config file path
+
 ```text
 $ systemctl status gitlab-runner
 ● gitlab-runner.service - GitLab Runner
@@ -22,6 +23,7 @@ $ systemctl status gitlab-runner
 ```
 
 modify gitlab-runner config for adding proxy settings (per runner)
+
 ```text
 $ cat /etc/gitlab-runner/config.toml | tail -n
 [[runners]]
@@ -56,9 +58,11 @@ $ cat /etc/gitlab-runner/config.toml | tail -n
     volumes = ["/repo/apk/packages:/home/reborn/packages:rw", "/cache"]
     shm_size = 0
 ```
+
 more details about toml config lang see: https://github.com/toml-lang/toml.
 
 validate the configured proxy settings inside rebornlinux/aport/.gitlab-ci.yml:
+
 ```text
 .init:
   when: manual
@@ -76,6 +80,7 @@ init-x86_64:
 ```
 
 manual trigger the init-x86_64 job, check the result in the gitlab runner logs:
+
 ```text
 Running with gitlab-runner 13.4.0 (4e1f20da) on cloud-server-1 q2SyArba
 Preparing the "docker" executor
@@ -105,6 +110,7 @@ declare -x CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX="gitlabe1.ext.net.xxxxx.com:44
 declare -x http_proxy="http://10.144.1.10:8080"
 declare -x https_proxy="http://10.144.1.10:8080"
 ```
+
 that is, the proxy is settled successfully.
 
 <hr>

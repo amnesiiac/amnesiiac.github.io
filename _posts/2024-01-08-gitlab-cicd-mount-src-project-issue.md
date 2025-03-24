@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "issues when mount src project into gitlab-runner (gitlab-runner)"
+title: "gitlab-runner issue: project file mtime wrongly set as clone-time (ci/cd, gitlab)"
 author: "melon"
 date: 2024-01-08 22:00
 categories: "2024"
@@ -10,13 +10,13 @@ tags:
 
 ### # background
 rebornlinux/aports is cloned from alpine/aports, which act as like buildroot for alpine distributions.
+this ci/cd jobs is to use aports/scripts/bootstrap.sh to generate rootfs & basic infra apks by cross compilation.
 
-the task is to invoke aports/scripts/bootstrap.sh to generated rootfs & basic apk using cross compilation.
-
-however, an issue happened when try modify aports/packages/main/libffi/APKBUILD and commit to rebornlinux/aports repo,
-keep APKBUILD for other apk the same as before.
+due to network connection unstability, the long-run job always need a restart.
+however, each time we re-start the ci/cd job, the apk already built get re-build again regardless of the apk cache.
 
 the desired bootstrap job init-ppc64 output should be like following:
+
 ```text
 $ ${CI_PROJECT_DIR}/scripts/bootstrap.sh ppc64 gccgo,norust,nokernel > ~/logs/$CI_JOB_NAME.log 2>&1 \
     || (tail -n 100 ~/logs/$CI_JOB_NAME.log; false)
@@ -52,10 +52,12 @@ $ ${CI_PROJECT_DIR}/scripts/bootstrap.sh ppc64 gccgo,norust,nokernel > ~/logs/$C
 >>> libffi*: Compressing data...
 Job succeeded
 ```
+
 all unchanged apk are skipped from rebuilding, the newly changed apk libffi should be rebuilt.
 
 however, after we resubmit another commit to aport repo, and test the skip behavior of bootstrap stage again,
 the bootstrap cross compilation (from x86_64 to ppc64) rebuild every apk with aport, distfiles, packages, apkcache.
+
 ```text
 $ ${CI_PROJECT_DIR}/scripts/bootstrap.sh ppc64 gccgo,norust,nokernel > ~/logs/$CI_JOB_NAME.log 2>&1 \
     || (tail -n 100 ~/logs/$CI_JOB_NAME.log; false)
@@ -98,10 +100,11 @@ $ ${CI_PROJECT_DIR}/scripts/bootstrap.sh ppc64 gccgo,norust,nokernel > ~/logs/$C
 ### # preliminary analysis
 major bootstrap related dir are mounted from gitlab-runner host to job runtime container:  
 1 aports: for persistent of the job src code repo, which act as buildroot for alpine linux;  
-2 packages: for persistent of the job output apks, organized as packages/${repo}/${arch}/xxx.apk;  
+2 packages: for persistent of the job output apks, organized as `packages/${repo}/${arch}/xxx.apk`;  
 3 logs: for persistent of the job full logs;  
 4 apkcached: for persistent of the job apk cache (some apk);  
 5 distfiles: for persistent of the job target apk srouce code repo.
+
 ```text
 $ sudo cat /etc/gitlab-runner/config.toml
 [[runners]]
@@ -134,6 +137,7 @@ $ sudo cat /etc/gitlab-runner/config.toml
 
 checking the apk up to date determine logic by abuild script src:
 judging whether source code & patches & APKBUILD file are newer than apk, if apk is newer, then the apk is up to date.
+
 ```text
 $ vim $(which abuild)
 ...
@@ -212,6 +216,7 @@ we need to found out why gitlab ci/cd job related source code, mounted into gitl
 after each git fetch, all the timestamp of files will change to job creation time.
 
 given a simple test gitlab ci/cd config file as:
+
 ```text
 test:
   when: manual
@@ -223,7 +228,8 @@ test:
     - docker-generic
 ```
 
-the first attempt using git clone, gitlab ci/cd log as:
+the first attempt update code by git clone, gitlab ci/cd log as:
+
 ```text
 Running with gitlab-runner 13.4.0 (4e1f20da) on docker-rebornlinux WG-gzNpK
 Preparing the "docker" executor
@@ -245,12 +251,13 @@ $ stat /builds/rebornlinux/devkit/README.md
 Device: fc02h/64514d	Inode: 1827213     Links: 1
 Access: (0666/-rw-rw-rw-)  Uid: (    0/    root)   Gid: (    0/    root)
 Access: 2024-01-08 02:21:50.077224077 +0000
-Modify: 2024-01-08 02:21:50.077224077 +0000
+Modify: 2024-01-08 02:21:50.077224077 +0000   <--- the file mtime is set as the time made to readme
 Change: 2024-01-08 02:21:50.077224077 +0000
 Job succeeded
 ```
 
-the second attempt using git fetch, gitlab ci/cd log as:
+the second attempt to update code repo by git fetch, gitlab ci/cd log as:
+
 ```text
 Running with gitlab-runner 13.4.0 (4e1f20da) on docker-rebornlinux WG-gzNpK
 Preparing the "docker" executor
@@ -260,7 +267,7 @@ Using docker image sha256:f8c2... for alpine:latest with digest alpine@sha256:51
 Preparing environment
 Running on runner-wg-gznpk-project-64744-concurrent-0 via cloud-server-2...
 Getting source from Git repository
-Fetching changes with git depth set to 50...
+Fetching changes with git depth set to 50...  <--- performing git fetch to retrieve the changes
 Initialized empty Git repository in /builds/rebornlinux/devkit/.git/
 Created fresh repository.
 Checking out 10978ab5 as test...
@@ -272,13 +279,13 @@ $ stat /builds/rebornlinux/devkit/README.md
 Device: fc02h/64514d	Inode: 1827220     Links: 1
 Access: (0666/-rw-rw-rw-)  Uid: (    0/    root)   Gid: (    0/    root)
 Access: 2024-01-08 02:23:50.612652831 +0000
-Modify: 2024-01-08 02:23:50.612652831 +0000
+Modify: 2024-01-08 02:23:50.612652831 +0000   <--- the file mtime is untouched after 2nd pipeline job
 Change: 2024-01-08 02:23:50.612652831 +0000
 Job succeeded
 ```
-compare the timestamp printed from the same file of src proj, the second fetch simply fallback to git clone indeed.
 
 let's re-run the gitlab ci/cd job again manually, the log is as:
+
 ```text
 Running with gitlab-runner 13.4.0 (4e1f20da) on docker-rebornlinux WG-gzNpK
 Preparing the "docker" executor
@@ -296,19 +303,20 @@ Executing "step_script" stage of the job script
 $ stat /builds/rebornlinux/devkit/README.md
   File: /builds/rebornlinux/devkit/README.md
   Size: 4601      	Blocks: 16         IO Block: 4096   regular file
-Device: fc02h/64514d	Inode: 1827220     Links: 1
+Device: fc02h/64514d	Inode: 1827310     Links: 1
 Access: (0666/-rw-rw-rw-)  Uid: (    0/    root)   Gid: (    0/    root)
 Access: 2024-01-08 02:23:50.612652831 +0000
-Modify: 2024-01-08 02:23:50.612652831 +0000
+Modify: 2024-01-08 02:23:50.612652831 +0000   <--- mtime set as the time a changes made to this file
 Change: 2024-01-08 02:23:50.612652831 +0000
 Job succeeded
 ```
+
 we could see that the timestamp of the git fetch job re-run is not changed compared to last git fetch job.
 that is to say, between the two jobs, some cache that holds the ci/cd job src proj is re-utilized.
 
-let us change some words in rebornlinux/devkit/README.md, then re-run the job,
-after GIT_STRATEGY: fetch, the timestamp related to README is changed,
-which conforms to the expected behavior.
+let us make changes & commit in rebornlinux/devkit/README.md, then re-run the job,
+after GIT_STRATEGY: fetch, the timestamp related to README is changed, which is expected.
+
 ```text
 Running with gitlab-runner 13.4.0 (4e1f20da) on docker-rebornlinux WG-gzNpK
 Preparing the "docker" executor
@@ -334,30 +342,40 @@ Change: 2024-01-08 02:54:50.869532109 +0000
 Job succeeded
 ```
 
-if we maintain self-mounted src proj code and mounted into gitlab runner using above runner config,
-each time ci/cd job is doing git clone or git fetch, whatever the relevant files changed or not,
-will modify the mtime for the src code tree.
+the problem is: if we maintain code on runner host machine for persistency and mount into the runner
+(rather than fetch whole repo by runner each time), after git fetch & git clone, whatever a code file
+is touched or not, the mtime of the whole repo is changed to the time we clone the repo.
+
+```text
+$(host machine persistent devkit dir) stat Dockerfile.base
+  File: /repo/metung/builds/rebornlinux/devkit/Dockerfile.base
+  Size: 4615               Blocks: 16         IO Block: 4096   regular file
+Device: fc02h/64514d	   Inode: 1827220     Links: 1
+Access: (0666/-rw-rw-rw-)  Uid: (0/root)      Gid: (0/root)
+Access: 2024-01-08 02:54:50.869532109 +0000
+Modify: 2024-01-08 02:54:50.869532109 +0000   <--- the dockerfile last commit time is 2023-12-28,
+Change: 2024-01-08 02:54:50.869532109 +0000        while current mtime is set as the time last update whole repo 
+Job succeeded
+```
 
 <hr>
 
 ### # solutions
-◆ method-1 use tag for runner for specific job to re-use the cache, let gitlab cache to manage src code tree & timestamp.
+$ 1 assign runner tag for specific job to re-use the cache, manage src code tree & timestamp via
+gitlab cache mechanism.
+test result: even with named cache for designated dir, the built apks still need to be rebuilt again among
+different pipeline after each commit.  
+gitlab ci/cd job caching tricks, ref: https://docs.gitlab.com/ee/ci/caching.
 
-test result: even with named cache for designated dir, the built apks still need to be rebuilt again among different pipeline after each commit.
+$ 2 mount src code tree repo into gitlab runner, add a hook function after each default git operation,
+before bootstrap stage of ci/cd job. the gitlab-ci.yml is like:
 
-see https://docs.gitlab.com/ee/ci/caching for details about gitlab ci/cd job caching tricks.  
-see blog post gitlab cache for understanding of gitlab shared cache in different level.
-
-
-◆ method-2 mount src code tree repo into gitlab runner, add a hook function after each default git operation,
-before bootstrap stage of ci/cd job.  
-the gitlab-ci.yml is like:
 ```text
 .bootstrap_begin: &bootstrap_begin
   - rm -f ~/logs/$CI_JOB_NAME.log; touch ~/logs/$CI_JOB_NAME.log
   - exit_code=0
   - tail -f ~/logs/$CI_JOB_NAME.log | grep -e ">>>" &
-  - restore_repo_time_as_last_commit.sh
+  - restore_repo_time_as_last_commit.sh                   # for repair the mtime of the project files
 
 .bootstrap_end: &bootstrap_end
   - sleep 3
@@ -384,12 +402,16 @@ init-aarch64:
   tags:
     - aport-specific
 ```
-the restore_repo_time_as_last_commit.sh could be found at blog post: restore git repo file mtime.
-after changing all rebornlinux/aport timestamps, it reported all apk up to date, and the needless rebuilt is skipped.
 
-◆ method-3 discard the gitlab build-in git operation by setting the GIT_STRATEGY as none,
+the restore_repo_time_as_last_commit.sh could be found at blog post: restore git repo file mtime to the time
+at its related last commit.
+after changing all rebornlinux/aport timestamps, it reported all apk up to date,
+and the needless rebuilt is skipped.
+
+$ 3 discard the gitlab build-in git operation by setting the GIT_STRATEGY as none,
 manually clone / fetch the utilized aport repo before each job starts.  
 this method can fix the bug, but will not pretain the tag of each gitlab ci/cd pipeline:
+
 ```text
 $ git log --oneline
 fff51afa (HEAD, origin/reborn, refs/pipelines/3089452) bootstrap: debugging
@@ -400,9 +422,5 @@ fff51afa (HEAD, origin/reborn, refs/pipelines/3089452) bootstrap: debugging
 72ad51c7 main/build-base: support cross build dependency on build-base-CTARGET_ARCH
 ...
 ```
-the tag named pipeline/* is recorded for each pipeline history to trigger job for certain rev of code repo.
 
-<hr>
-
-### # code in action (method #3)
-todo
+the tag show as pipeline/* is used for each pipeline to trigger job based on certain rev of code.

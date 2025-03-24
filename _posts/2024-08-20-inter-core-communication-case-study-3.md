@@ -370,7 +370,7 @@ $ 2 features of async model:
 <hr>
 
 ### # code walk through inco-proxy app (cpp)
-rpmsg.cpp:
+rpmsg.h:
 
 ```text
 #include <iostream>
@@ -474,5 +474,110 @@ public:
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
+};
+```
+
+inotify.h:
+
+```text
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <thread>
+#include <chrono>
+#include <filesystem>
+#include <json/json.h>
+#include <condition_variable>
+#include <mutex>
+#include <queue>
+#include <unordered_map>
+
+class Services {
+public:
+    virtual void watcher(std::condition_variable& cv, std::queue<std::string>& sync_queue) = 0;
+    virtual void handler(std::queue<std::string>& sync_queue) = 0;
+};
+
+const std::string REDUN_NOTIFY = "redun_notify_irq";
+const std::string IHUB_HWWD = "ihub_hwwd_irq";
+const std::string IHUB_RESET = "ihub_reset_irq";
+
+class IrqDevs : public Services {
+public:
+    IrqDevs(const std::string& path){
+        std::ifstream file(path);
+        if(!file.is_open()){
+            throw std::runtime_error("Unable to read file");
+        }
+        Json::Value json;
+        file >> json;
+
+        std::string ihub_irq_dev = json["file"]["ihub-irq-dev"]["path"].asString();
+        std::filesystem::create_directory(ihub_irq_dev);
+        auto ihub_config_dev_regs = json["misc"]["ihub_config_dev"]["regs"];
+
+        std::string redun_notify_trig = "message_6_trig";
+        if(ihub_config_dev_regs.isMember("redun_notify_trig")){
+            std::string reg_value = ihub_config_dev_regs["redun_notify_trig"]["reg"].asString();
+            redun_notify_trig = reg_value.substr(reg_value.find(".") + 1);
+        }
+        redun_notify_path = ihub_irq_dev + "/" + redun_notify_trig;
+        std::ofstream(redun_notify_path).close();
+
+        std::string ihub_hwwd_irq = "message_5_state";
+        if(ihub_config_dev_regs.isMember("ihub_hwwd_irq")){
+            std::string reg_value = ihub_config_dev_regs["ihub_hwwd_irq"]["reg"].asString();
+            ihub_hwwd_irq = reg_value.substr(reg_value.find(".") + 1);
+        }
+        ihub_hwwd_path = ihub_irq_dev + "/" + ihub_hwwd_irq;
+        std::ofstream(ihub_hwwd_path).close();
+
+        std::string ihub_reset_irq = "message_4_state";
+        if(ihub_config_dev_regs.isMember("ihub_reset_irq")){
+            std::string reg_value = ihub_config_dev_regs["ihub_reset_irq"]["reg"].asString();
+            ihub_reset_irq = reg_value.substr(reg_value.find(".") + 1);
+        }
+        ihub_reset_path = ihub_irq_dev + "/" + ihub_reset_irq;
+        std::ofstream(ihub_reset_path).close();
+    }
+
+    void write(const std::string& path, const std::string& buf){
+        std::cout << "[inotify] write file: " << path << std::endl;
+        std::ofstream f(path);
+        if(!f.is_open()){
+            throw std::runtime_error("Unable to open file");
+        }
+        f << buf;
+        f.close();
+    }
+
+    void watcher(std::condition_variable& cv, std::queue<std::string>& sync_queue) override {
+        // Inotify implementation not provided in std cpp
+        // 1 use fs polling or equivalent
+        // 2 use custom inotify: ref: https://github.com/aabolfazl/inotify/blob/master/main.cpp
+    }
+
+    void handler(std::queue<std::string>& sync_queue) override {
+        while(true){
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::unique_lock<std::mutex> lock(mutex);
+            if(!sync_queue.empty()){
+                std::string dst = sync_queue.front();
+                sync_queue.pop();
+                if(dst == IHUB_HWWD){
+                    write(ihub_hwwd_path, "1");
+                }
+                else if(dst == IHUB_RESET){
+                    write(ihub_reset_path, "1");
+                }
+            }
+        }
+    }
+
+private:
+    std::string redun_notify_path;
+    std::string ihub_hwwd_path;
+    std::string ihub_reset_path;
+    std::mutex mutex;
 };
 ```
