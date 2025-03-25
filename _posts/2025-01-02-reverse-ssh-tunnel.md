@@ -2,7 +2,7 @@
 layout: post
 title: "reverse ssh tunnel for remote debug (ssh, reverse tunnel)"
 author: "melon"
-date: 1111-03-05 21:03
+date: 1111-01-02 21:03
 categories: "2025"
 tags:
   - python
