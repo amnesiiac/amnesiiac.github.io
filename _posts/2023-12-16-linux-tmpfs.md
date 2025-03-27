@@ -76,5 +76,5 @@ the mkinitrd is a tool to create initial ram disk (initrd), which is loaded in m
 <hr>
 
 ### # reference
-https://www.kernel.org/doc/html/v5.9/filesystems/tmpfs.html  
-ramfs, rootfs, initramfs see: https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html.
+kernel doc: https://www.kernel.org/doc/html/v5.9/filesystems/tmpfs.html  
+ramfs, rootfs, initramfs: https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html

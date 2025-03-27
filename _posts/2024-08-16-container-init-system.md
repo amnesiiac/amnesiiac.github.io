@@ -2,7 +2,7 @@
 layout: post
 title: "container init system (container, init-system, script)"
 author: "melon"
-date: 2022-08-16 21:44
+date: 2024-08-16 21:44
 categories: "2024"
 tags:
   - container

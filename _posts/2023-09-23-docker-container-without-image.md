@@ -10,7 +10,8 @@ tags:
 ---
 
 ### # introduction to low-level container api: runc
-The docker relies on a bunch of softwares, a typical reliance map is as follows:
+the docker relies on a bunch of softwares, a typical reliance map is as follows:
+
 ```txt
 
                            <─── runc ───>
@@ -20,7 +21,9 @@ The docker relies on a bunch of softwares, a typical reliance map is as follows:
           low-level <----------------------------------------------------------------> high-level
 
 ```
+
 take a closer look at the concise workflow of runc:
+
 ```txt
                         (1)
             prepare files for container-1                                                  container c309add4f1 created
@@ -75,9 +78,13 @@ take a closer look at the concise workflow of runc:
                                                                                          │            cgroups           │
                                                                                          └──────────────────────────────┘
 ```
-Based on the above diagram, the runc runtime has nothing to do with "image", but only relies on a __regular filesystem directory__ and at least __an executable file inside__ and a __config.json__.  
 
-Docker (or any other container engine like containerd, or podman) takes an "image" and converts the "image" to an OCI bundle before invoking the lower-level container runtime like runc. That is to say, docker use "image" to generate the "bundle" for lower runc.
+based on the above diagram, the runc runtime has nothing to do with "image", but only relies on a filesystem directory
+and at least executable file inside and a config.json.  
+
+docker or any other container engine like containerd, or podman take an image and converts the image to an oci bundle
+before invoking the lower-level container runtime like runc.
+that is to say, docker use image to generate the bundle for lower runc.
 
 <hr>
 

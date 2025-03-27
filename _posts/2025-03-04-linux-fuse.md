@@ -6,11 +6,9 @@ date: 2025-03-04 21:51
 categories: "2025"
 tags:
   - linux
-  - todo
 ---
 
-### # introduction for fuse
-todo
+todo: basic intro to fuse filesystem
 
 <hr>
 
@@ -50,7 +48,7 @@ USER metung
 
 <hr>
 
-### # toy code for basic custom fuse setup
+### # toy code for custom fuse fs setup
 
 ```text
 #include <fuse.h>
@@ -59,77 +57,80 @@ USER metung
 #include <errno.h>
 #include <fcntl.h>
 
-static const char* hello_str = "hello world!\n";
-static const char* hello_path = "/hello";
+static const char* hello_str = "hello world!\n";                 // content of hello file
+static const char* hello_path = "/hello";                        // path to hello file
 
-static int hello_getattr(const char* path, struct stat* stbuf){
+static int hello_getattr(const char* path, struct stat* stbuf){  // handle getattr
     int res = 0;
-    memset(stbuf, 0, sizeof(struct stat));
-    if(strcmp(path, "/") == 0){
-        stbuf->st_mode = S_IFDIR | 0755;
-        stbuf->st_nlink = 2;
+    memset(stbuf, 0, sizeof(struct stat));                       // clear mem for stat buf
+    if(strcmp(path, "/") == 0){                                  // if path is root dir /
+        stbuf->st_mode = S_IFDIR | 0755;                         // set st_mod 0755 of a dir
+        stbuf->st_nlink = 2;                                     // set hard link to it as 2 (from its parent dir & itself .)
     }
-    else if(strcmp(path, hello_path) == 0){
-        stbuf->st_mode = S_IFREG | 0444;
-        stbuf->st_nlink = 1;
-        stbuf->st_size = strlen(hello_str);
+    else if(strcmp(path, hello_path) == 0){                      // if path is hello file path /hello
+        stbuf->st_mode = S_IFREG | 0444;                         // set st_mod 0444 of a regular file
+        stbuf->st_nlink = 1;                                     // set hard link of regular file as 1 (from its parent dir)
+        stbuf->st_size = strlen(hello_str);                      // set st_size as the size of hello str
     }
     else{
-        res = -ENOENT;
+        res = -ENOENT;                                           // for other path, return no file or dir error
     }
     return res;
 }
 
-static int hello_readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi){
-    (void) offset;
+static int hello_readdir(const char* path, void* buf,
+                         fuse_fill_dir_t filler, off_t offset,
+                         struct fuse_file_info* fi){             // handle readdir (e.g. ls /hello)
+    (void) offset;                                               // suppress compiler warnings for unused
     (void) fi;
-    if(strcmp(path, "/") != 0){
+    if(strcmp(path, "/") != 0){                                  // check if path is /, or ret no such file or dir
         return -ENOENT;
     }
-    filler(buf, ".", NULL, 0);
-    filler(buf, "..", NULL, 0);
-    filler(buf, hello_path + 1, NULL, 0);
+    filler(buf, ".", NULL, 0);                                   // fill dir buf with cur dir .
+    filler(buf, "..", NULL, 0);                                  // fill dir buf with parent dir ..
+    filler(buf, hello_path + 1, NULL, 0);                        // fill dir buf with file path (exclude leading /)
     return 0;
 }
 
 static int hello_open(const char* path, struct fuse_file_info* fi){
-    if(strcmp(path, hello_path) != 0){
+    if(strcmp(path, hello_path) != 0){                           // check if path is hello_path, or ret no entry err
         return -ENOENT;
     }
-    if((fi->flags & 3) != O_RDONLY){
+    if((fi->flags & 3) != O_RDONLY){                             // check if read-only mode, or ret perm denied
         return -EACCES;
     }
     return 0;
 }
 
-static int hello_read(const char* path, char* buf, size_t size, off_t offset, struct fuse_file_info* fi){
+static int hello_read(const char* path, char* buf, size_t size,
+                      off_t offset, struct fuse_file_info* fi){  // handle read
     size_t len;
     (void) fi;
     if(strcmp(path, hello_path) != 0){
         return -ENOENT;
     }
-    len = strlen(hello_str);
+    len = strlen(hello_str);                                     // set max available len of bytes for read
     if(offset < len){
         if(offset + size > len){
             size = len - offset;
         }
-        memcpy(buf, hello_str + offset, size);
+        memcpy(buf, hello_str + offset, size);                   // set buf by read result
     }
     else{
-        size = 0;
+        size = 0;                                                // size read is 0
     }
-    return size;
+    return size;                                                 // return size of byte read
 }
 
-static struct fuse_operations hello_oper = {
-    .getattr  = hello_getattr,
-    .readdir  = hello_readdir,
-    .open     = hello_open,
-    .read     = hello_read,
+static struct fuse_operations hello_oper = {    // define supported op, so the kernel req can invoke them accordingly
+    .getattr  = hello_getattr,                  // called when file attr are requsted
+    .readdir  = hello_readdir,                  // called when dir content is requested
+    .open     = hello_open,                     // called when file opened
+    .read     = hello_read,                     // called when file content is requested
 };
 
 int main(int argc, char* argv[]){
-    return fuse_main(argc, argv, &hello_oper);
+    return fuse_main(argc, argv, &hello_oper);  // fuse_main: entry for fusefs, init fs & start eventloop
 }
 ```
 
@@ -234,12 +235,21 @@ rm -r /tmp/fuse
 
 <hr>
 
-### # fuse implementation for board eeprom
-todo
+### # fuse toy code based on libfuse
+libfuse api comes in two flavors:  
+1 libfuse high-level sync api: incoming req from kernel are passed to fuse mainloop by callback registered.
+the high-level callback work with filename or path instead of inode, and the process of request is done when
+callback func return.
+ref: http://libfuse.github.io/doxygen/hello_8c.html
+
+2 libfuse low-level async api: incoming req from kernel are passed to fuse mainloop by callback registered.
+the low-level callback work with inode and response must be processed with a separate set of apis.
+ref: http://libfuse.github.io/doxygen/fuse__lowlevel_8h.html
 
 <hr>
 
 ### # reference
 1 fuse golang implementation: https://github.com/bazil/fuse  
 2 fuse c implementation: libfuse (userspace clib): https://github.com/libfuse/libfuse/tree/master  
-3 fuse kernel module: fuse.ko
+3 libfuse doc: http://libfuse.github.io/doxygen/index.html  
+4 fuse kernel module: fuse.ko
