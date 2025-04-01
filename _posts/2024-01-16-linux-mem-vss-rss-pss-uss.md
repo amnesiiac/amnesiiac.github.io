@@ -39,6 +39,7 @@ definition: physical private memory taken up by proc sololy.
 
 ### # memory model graph cross running proc with shared memory
 given a live 5 processes memory model as follows:
+
 ```txt
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                         memory occupied by shared libs                          │
@@ -64,9 +65,11 @@ given a live 5 processes memory model as follows:
 │ └─────────────┘ └──────────────────┘ │
 └──────────────────────────────────────┘
 ```
+
 process 1-4 using common shared lib, while process 5 dont.  
 let x denote proc 1-4, hence, the four memory can be computed as:  
 vss_x = memory_allocated_x + common_shared_lib_memory
+
 ```txt
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                         memory occupied by shared libs                          │
@@ -78,7 +81,9 @@ vss_x = memory_allocated_x + common_shared_lib_memory
 │ └─────────────┘ └──────────────────┘ │
 └──────────────────────────────────────┘
 ```
+
 rss_x = memory_under_use_x + common_shared_lib_memory
+
 ```txt
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                         memory occupied by shared libs                          │
@@ -90,7 +95,9 @@ rss_x = memory_under_use_x + common_shared_lib_memory
 | └-------------┘ └──────────────────┘ |
 └--------------------------------------┘
 ```
+
 pss_x = memory_under_use_x + common_shared_lib_memory / num_proc_using_shared_mem
+
 ```txt
 ┌─────────────────────------------------------------------------------------------┐
 │ portion used by #1 |    memory occupied by shared libs                          |
@@ -102,7 +109,9 @@ pss_x = memory_under_use_x + common_shared_lib_memory / num_proc_using_shared_me
 | └-------------┘ └──────────────────┘ |
 └--------------------------------------┘
 ```
+
 uss_x = memory_under_use_x
+
 ```txt
 ┌---------------------------------------------------------------------------------┐
 |                         memory occupied by shared libs                          |
@@ -118,11 +127,12 @@ uss_x = memory_under_use_x
 <hr>
 
 ### # how to compute uss/pss/rss for certain proc
-uss = sum of /proc/${pid}/smaps private_clean + private_dirty  
-pss = sum of /proc/${pid}/smaps pss  
-rss = sum of /proc/${pid}/smaps rss
+uss = sum of `/proc/${pid}/smaps private_clean` + private_dirty  
+pss = sum of `/proc/${pid}/smaps` pss  
+rss = sum of `/proc/${pid}/smaps` rss
 
 program to automatically compute the statistics:
+
 ```text
 todo
 ```
@@ -130,6 +140,7 @@ todo
 <hr>
 
 ### # illustration of /proc/${pid}/smaps fields (todo)
+
 ```text
 /proc/13 # cat smaps | head -n 60
 55ffec366000-55ffec36c000 r--p 00000000 fe:01 3685107                    /bin/busybox

@@ -35,8 +35,7 @@ Chain POSTROUTING (policy ACCEPT 0 packets, 0 bytes)
 <hr>
 
 ### # iptable rules path (docker0 <─> eth0) on the host machine
-ongoing\... further cleaning up the iptables path between docker0 & eth0, pending to adding all necessary
-iptables rules in here.
+further cleaning up the iptables path between docker0 & eth0.
 
 ```text
 $ iptables -L -v
@@ -290,7 +289,7 @@ with pkt src ip masked as 172.20.0.1 (br-37105304fb02).
 <hr>
 
 ### # pkt route path from the view inside container
-1 prepare container env, and show ip route info:
+$ 1 prepare container env, and show ip route info:
 
 ```text
 $ docker run -it --rm alpine sh
@@ -315,12 +314,14 @@ default         172.17.0.1                                       eth0           
 ```
 
 some explanations about the above information derived:  
-a) for route rule 1, all pkt without specified rule will match this rule: redirect the pkt to gateway
+1 for route rule 1, all pkt without specified rule will match this rule: redirect the pkt to gateway
 (172.17.0.1) by interface eth0.  
-b) for route rule 2, all pkt dst to 172.17.0.0/16 subnet will be send through the container's default interface
+2 for route rule 2, all pkt dst to 172.17.0.0/16 subnet will be send through the container's default interface
 eth0, with preferred src set as 172.17.0.15 (eth0).
 
-2 check interface info inside the container:
+<p style="margin-bottom: 20px;"></p>
+
+$ 2 check interface info inside the container:
 
 ```text
 $(container) ifconfig

@@ -125,15 +125,15 @@ setup container logs: create dind (podman in docker) failed:
 
 ```text
 2025-03-19T13:41:11.664445527Z  * Caching service dependencies ... [ ok ]
-2025-03-19T13:41:12.000583949Z ssh-keygen: generating new host keys: ECDSA ED25519 
+2025-03-19T13:41:12.000583949Z ssh-keygen: generating new host keys: ECDSA ED25519
 2025-03-19T13:41:12.211037133Z  * Starting sshd ... [ ok ]
 2025-03-19T13:41:12.247962055Z  * Starting Entrypoint ... [ ok ]
 2025-03-19T13:41:12.249770469Z net.ipv6.conf.all.disable_ipv6 = 0
 2025-03-19T13:41:12.250453059Z fs.inotify.max_user_instances = 512000
 2025-03-19T13:41:12.258564028Z xt_CT is installed, only track tftp
 2025-03-19T13:41:12.26181232Z start nicon server in setup mode
-2025-03-19T13:41:12.279713265Z nicon health response: 
-2025-03-19T13:41:17.289605705Z nicon health response: 
+2025-03-19T13:41:12.279713265Z nicon health response:
+2025-03-19T13:41:17.289605705Z nicon health response:
 2025-03-19T13:41:22.296585371Z nicon health response: {"status":"ok"}
 2025-03-19T13:41:22.296669235Z nicon status is OK
 2025-03-19T13:41:22.298171365Z clean the stale containers
