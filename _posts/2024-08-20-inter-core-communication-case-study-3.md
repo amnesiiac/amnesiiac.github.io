@@ -18,90 +18,90 @@ s6-service scripts.
 <hr>
 
 ### # code walk through inco-proxy app (rust)
-rpmsg.rs:
+1 rpmsg.rs:
 
-```blurtext
-use crate::inotify::REDUN_NOTIFY;
-use async_trait::async_trait;
+```text
+use crate::inotify::REDUN_NOTIFY;                                                     // import pub constant
+use async_trait::async_trait;                                                         // import macro async_trait
 use pnet_datalink::{self, Channel, DataLinkReceiver, DataLinkSender, MacAddr, NetworkInterface};
 use pnet_packet::ethernet::{EtherType, EthernetPacket, MutableEthernetPacket};
 use pnet_packet::Packet;
 use std::io;
 use std::str;
-use std::sync::mpsc::{Receiver, Sender};
+use std::sync::mpsc::{Receiver, Sender};                                              // multi producer single consumer ch
 use tokio::time::{sleep, Duration};
 
 const ETHERNET_HEADER_LEN: usize = 14;
 
 #[async_trait]
-pub trait Services {
-    async fn watcher(&mut self, sync_tx: Sender<String>);
-    async fn handler(&mut self, sync_rx: Receiver<String>);
+pub trait Services {                                                                  // async trait def
+    async fn watcher(&mut self, sync_tx: Sender<String>);                             // watcher
+    async fn handler(&mut self, sync_rx: Receiver<String>);                           // handler
 }
 
 pub struct RawSocket {
-    pub interface: NetworkInterface,
-    pub receiver: Box<dyn DataLinkReceiver>,
-    pub sender: Box<dyn DataLinkSender>,
+    pub interface: NetworkInterface,                                                  // net itf associated with rawsocket
+    pub receiver: Box<dyn DataLinkReceiver>,                                          // receiver with type DataLinkReceiver
+    pub sender: Box<dyn DataLinkSender>,                                              // sender with type DataLinkSender
 }
 
-impl RawSocket {
-    pub fn new(name: &str) -> Self {
-        let interface_names_match = |iface: &NetworkInterface| iface.name == name;
-        let interfaces = pnet_datalink::interfaces();
-        let interface = interfaces
+impl RawSocket {                                                                      // impl specific method for rawsocket
+    pub fn new(name: &str) -> Self {                                                  // rawsocket ctor
+        let interface_names_match = |iface: &NetworkInterface| iface.name == name;    // define closure to match itf name
+        let interfaces = pnet_datalink::interfaces();                                 // get all itf
+        let interface = interfaces                                                    // get itf by name
             .into_iter()
             .filter(interface_names_match)
             .next()
-            .unwrap();
+            .unwrap();                                                                // ?
 
-        let (tx, rx) = match pnet_datalink::channel(&interface, Default::default()) {
-            Ok(Channel::Ethernet(tx, rx)) => (tx, rx),
-            Ok(_) => panic!("Unhandled channel type"),
-            Err(e) => panic!(
+        let (tx, rx) = match pnet_datalink::channel(&interface, Default::default()) { // init tx,rx ch on itf by pnet
+            Ok(Channel::Ethernet(tx, rx)) => (tx, rx),                                // ch is ethernet ch
+            Ok(_) => panic!("Unhandled channel type"),                                // panic for other ch types
+            Err(e) => panic!(                                                         // panic for error
                 "An error occurred when creating the datalink channel: {}",
                 e
             ),
         };
 
-        RawSocket {
+        RawSocket {                                                                   // return rawsocket obj for ctor
             interface: interface,
             receiver: rx,
             sender: tx,
         }
     }
 
-    pub fn send(&mut self, buf: &str) -> Option<io::Result<()>> {
-        let len = buf.len() + ETHERNET_HEADER_LEN;
+    pub fn send(&mut self, buf: &str) -> Option<io::Result<()>> {               // impl rawsocket.send
+        let len = buf.len() + ETHERNET_HEADER_LEN;                              // pkt len = ethernet hdr len + data buf len
         println!("[rpmsg] send raw packet to {:?}", self.interface.name);
-        return self.sender.build_and_send(1, len, &mut |packet| {
+        return self.sender.build_and_send(1, len, &mut |packet| {               // invoke backend sender obj for pkt sending
             let mut packet = MutableEthernetPacket::new(packet).unwrap();
-            packet.set_destination(MacAddr::broadcast());
-            packet.set_source(self.interface.mac.unwrap());
-            packet.set_ethertype(EtherType(0x8800));
-            packet.set_payload(buf.as_bytes().to_vec().as_slice());
+            packet.set_destination(MacAddr::broadcast());                       // set rawsocket dst mac addr as broadcast
+            packet.set_source(self.interface.mac.unwrap());                     // set src mac addr
+            packet.set_ethertype(EtherType(0x8800));                            // set rawsocket ethernet header type
+            packet.set_payload(buf.as_bytes().to_vec().as_slice());             // set payload by databuf
         });
     }
 }
 
 #[async_trait]
-impl Services for RawSocket {
-    async fn watcher(&mut self, sync_tx: Sender<String>) {
+impl Services for RawSocket {                                                   // impl trait itf for rawsocket
+    async fn watcher(&mut self, sync_tx: Sender<String>) {                      // async fn for non-block pkt watcher
         let mut error_printed = false;
         loop {
-            match self.receiver.next() {
-                Ok(packet) => {
-                    let packet = EthernetPacket::new(packet).unwrap();
-                    let payload = packet.payload().clone();
+            match self.receiver.next() {                                        // wait for next pkt from recv ch (Result)
+                Ok(packet) => {                                                 // if match ret Result as packet
+                    let packet = EthernetPacket::new(packet).unwrap();          // init ethernet pkt
+                    let payload = packet.payload().clone();                     // clone payload from the pkt
 
-                    let dst = str::from_utf8(payload).expect("Invalid utf-8");
-                    sync_tx.send(dst.to_string()).unwrap();
+                    let dst = str::from_utf8(payload).expect("Invalid utf-8");  // convert payload encoding
+                    sync_tx.send(dst.to_string()).unwrap();                     // send the payload to sync_tx ch
                     if error_printed {
                         eprintln!("Recovered from error");
                         error_printed = false;
                     }
                 }
-                Err(e) => {
+                Err(e) => {                                                     // err handling
                     if !error_printed {
                         eprintln!("An error occurred while reading: {}", e);
                         error_printed = true;
@@ -109,186 +109,178 @@ impl Services for RawSocket {
                     continue;
                 }
             };
-            sleep(Duration::from_millis(100)).await;
+            sleep(Duration::from_millis(100)).await;                            // sleep & await to giveup cpu
         }
     }
 
-    async fn handler(&mut self, sync_rx: Receiver<String>) {
+    async fn handler(&mut self, sync_rx: Receiver<String>) {                    // async pkt handler
         loop {
-            if let std::result::Result::Ok(dst) = sync_rx.try_recv() {
+            if let std::result::Result::Ok(dst) = sync_rx.try_recv() {          // if recv msg from sync_rx ch
                 match dst.as_str() {
-                    REDUN_NOTIFY => self.send(REDUN_NOTIFY),
-                    _ => None,
+                    REDUN_NOTIFY => self.send(REDUN_NOTIFY),                    // if REDUN_NOTIFY, invoke self.send
+                    _ => None,                                                  // do nothing for other cases
                 };
             }
-            sleep(Duration::from_millis(100)).await;
+            sleep(Duration::from_millis(100)).await;                            // sleep & await to giveup cpu
         }
     }
 }
 ```
 
-inotify.rs:
+2 inotify.rs:
 
-```blurtext
-use crate::rpmsg::Services;
-use async_trait::async_trait;
-use inotify::Inotify;
+```text
+use crate::rpmsg::Services;                                                       // import Services trait
+use async_trait::async_trait;                                                     // import macro async_trait
+use inotify::Inotify;                                                             // for fs event monitoring
 use std::fs;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io;
 use std::io::Write;
 use std::path::Path;
-use std::sync::mpsc::{Receiver, Sender};
-use tokio::time::{sleep, Duration};
+use std::sync::mpsc::{Receiver, Sender};                                          // import mpsc receiver & sender ch
+use tokio::time::{sleep, Duration};                                               // time & duration from tokio runtime
 
 pub const REDUN_NOTIFY: &str = "redun_notify_irq";
 pub const IHUB_HWWD: &str = "ihub_hwwd_irq";
 pub const IHUB_RESET: &str = "ihub_reset_irq";
 
-pub struct IrqDevs {
-    pub redun_notify_path: String,
-    pub ihub_hwwd_path: String,
-    pub ihub_reset_path: String,
+pub struct IrqDevs {                                                              // abstract irqdev whose irq to monitor
+    pub redun_notify_path: String,                                                // dev path for redun swo notify
+    pub ihub_hwwd_path: String,                                                   // dev path for ihub watchdog
+    pub ihub_reset_path: String,                                                  // dev path for ihub sw reset file
 }
 
-impl IrqDevs {
-    pub fn new(path: &str) -> Self {
+impl IrqDevs {                                                                    // impl irqdev methods
+    pub fn new(path: &str) -> Self {                                              // irqdev ctor 
         let data = fs::read_to_string(path).expect("Unable to read file");
-        let json: serde_json::Value =
-            serde_json::from_str(&data).expect("JSON does not have correct format.");
+        let json: serde_json::Value = serde_json::from_str(&data).expect("JSON does not have correct format.");
 
-        let ihub_irq_dev = json
-            .get("file")
-            .unwrap()
-            .get("ihub-irq-dev")
-            .unwrap()
-            .get("path")
-            .unwrap()
+        let ihub_irq_dev = json                                                   // get file.ihub-irq-dev.path field
+            .get("file").unwrap()
+            .get("ihub-irq-dev").unwrap()
+            .get("path").unwrap()
             .to_string()
-            .replace("\"", "");
-        let ihub_irq_dev_path = Path::new(ihub_irq_dev.as_str());
-        fs::create_dir_all(ihub_irq_dev_path.join("")).unwrap();
+            .replace("\"", "");                                                   // remove quote from string
+        let ihub_irq_dev_path = Path::new(ihub_irq_dev.as_str());                 // init path by str
+        fs::create_dir_all(ihub_irq_dev_path.join("")).unwrap();                  // create dev path
+        let ihub_config_dev_regs = json                                           // get misc.ihub_config_dev.regs field
+            .get("misc").unwrap()
+            .get("ihub_config_dev").unwrap()
+            .get("regs").unwrap();
 
-        let ihub_config_dev_regs = json
-            .get("misc")
-            .unwrap()
-            .get("ihub_config_dev")
-            .unwrap()
-            .get("regs")
-            .unwrap();
-
-        let mut redun_notify_trig = "message_6_trig".to_string();
-        match ihub_config_dev_regs.get("redun_notify_trig") {
-            Some(reg) => {
+        let mut redun_notify_trig = "message_6_trig".to_string();                 // redun swo notify str to ihub
+        match ihub_config_dev_regs.get("redun_notify_trig") {                     // check if redun_notify_trig is defined
+            Some(reg) => {                                                        // get redun swo notify path
                 let reg_value = reg.get("reg").unwrap().to_string();
                 let split: Vec<&str> = reg_value.split(".").collect();
                 redun_notify_trig = split[1].to_string().replace("\"", "");
             }
-            None => println!("redun_notify_trig use default path"),
+            None => println!("redun_notify_trig use default path"),               // log if use default path
         }
         let redun_notify_trig_path = ihub_irq_dev_path.join(redun_notify_trig);
-        File::create(redun_notify_trig_path.clone()).expect("redun_notify_trig file create failed");
+        File::create(redun_notify_trig_path.clone())
+            .expect("redun_notify_trig file create failed");
 
-        let mut ihub_hwwd_irq = "message_5_state".to_string();
-        match ihub_config_dev_regs.get("ihub_hwwd_irq") {
+        let mut ihub_hwwd_irq = "message_5_state".to_string();                    // hw watchdog irq msg str
+        match ihub_config_dev_regs.get("ihub_hwwd_irq") {                         // check if ihub_hwwd_irq is defined
             Some(reg) => {
                 let reg_value = reg.get("reg").unwrap().to_string();
                 let split: Vec<&str> = reg_value.split(".").collect();
                 ihub_hwwd_irq = split[1].to_string().replace("\"", "");
             }
-            None => println!("ihub_hwwd_irq use default path"),
+            None => println!("ihub_hwwd_irq use default path"),                   // log if use the default path
         }
         let ihub_hwwd_irq_path = ihub_irq_dev_path.join(ihub_hwwd_irq);
         File::create(ihub_hwwd_irq_path.clone()).expect("ihub_hwwd_irq file create failed");
 
-        let mut ihub_reset_irq = "message_4_state".to_string();
-        match ihub_config_dev_regs.get("ihub_reset_irq") {
+        let mut ihub_reset_irq = "message_4_state".to_string();                        // ihub hw reset msg str
+        match ihub_config_dev_regs.get("ihub_reset_irq") {                             // check if ihub_reset_irq is defined
             Some(reg) => {
                 let reg_value = reg.get("reg").unwrap().to_string();
                 let split: Vec<&str> = reg_value.split(".").collect();
                 ihub_reset_irq = split[1].to_string().replace("\"", "");
             }
-            None => println!("ihub_reset_irq use default path"),
+            None => println!("ihub_reset_irq use default path"),                       // log if use the default path
         }
         let ihub_reset_irq_path = ihub_irq_dev_path.join(ihub_reset_irq);
         File::create(ihub_reset_irq_path.clone()).expect("ihub_reset_irq file create failed");
 
-        IrqDevs {
-            redun_notify_path: redun_notify_trig_path.as_path().display().to_string(),
-            ihub_hwwd_path: ihub_hwwd_irq_path.as_path().display().to_string(),
-            ihub_reset_path: ihub_reset_irq_path.as_path().display().to_string(),
+        IrqDevs {                                                                      // return irqdev obj
+            redun_notify_path: redun_notify_trig_path.as_path().display().to_string(), // set redun swo notify path
+            ihub_hwwd_path: ihub_hwwd_irq_path.as_path().display().to_string(),        // set ihub watchdog path
+            ihub_reset_path: ihub_reset_irq_path.as_path().display().to_string(),      // set ihub reset path
         }
     }
 
-    fn write(&mut self, path: String, buf: &str) -> Option<io::Result<()>> {
+    fn write(&mut self, path: String, buf: &str) -> Option<io::Result<()>> {       // irqdev write method
         println!("[inotify] write file: {:?}", path);
-        let mut f = OpenOptions::new()
-            .append(false)
-            .create(true)
-            .write(true)
-            .open(path)
-            .expect("Unable to open file");
-        f.write_all(buf.as_bytes()).expect("Unable to write data");
+        let mut f = OpenOptions::new()                                             // open file with opt set
+            .append(false)                                                         // append to file forbidden
+            .create(true)                                                          // create if not exist
+            .write(true)                                                           // write auth
+            .open(path)                                                            // open the file
+            .expect("Unable to open file");                                        // handle err if any
+        f.write_all(buf.as_bytes()).expect("Unable to write data");                // write buf to file with err handling
 
-        Some(Ok(()))
+        Some(Ok(()))                                                               // return ok
     }
 }
 
 #[async_trait]
-impl Services for IrqDevs {
-    async fn watcher(&mut self, sync_tx: Sender<String>) {
-        let mut inotify = Inotify::init().expect("Failed to initialize inotify");
-        let redun_notify_descriptor = inotify
+impl Services for IrqDevs {                                                        // import service trait for irqdev
+    async fn watcher(&mut self, sync_tx: Sender<String>) {                         // async fn to watch file event
+        let mut inotify = Inotify::init().expect("Failed to initialize inotify");  // init inotify instance
+        let redun_notify_descriptor = inotify                                      // add file watch to inotify instance
             .add_watch(
-                self.redun_notify_path.clone(),
+                self.redun_notify_path.clone(),                                    // watch redun status file (close & write)
                 inotify::WatchMask::CLOSE_WRITE,
             )
             .expect("Failed to add inotify watch for notify file");
 
-        let mut buffer = [0; 32];
-        loop {
-            let events = inotify
+        let mut buffer = [0; 32];                                                  // buffer to hold inotify events
+        loop {                                                                     // infinite loop for event 
+            let events = inotify                                                   // block reading events from inotify obj
                 .read_events_blocking(&mut buffer)
                 .expect("Failed to read inotify events");
-            for event in events {
-                if event.wd == redun_notify_descriptor {
+            for event in events {                                                  // iterate over captured event by inotify
+                if event.wd == redun_notify_descriptor {                           // if event wd is redun notify fd
                     println!("[inotify] redun_notify file modified: {:?}", event.name);
-                    sync_tx.send(REDUN_NOTIFY.to_string()).unwrap();
+                    sync_tx.send(REDUN_NOTIFY.to_string()).unwrap();               // send a redun notify str by sync ch
                 }
             }
-            sleep(Duration::from_millis(100)).await;
+            sleep(Duration::from_millis(100)).await;                               // sleep & await to giveup cpu
         }
     }
 
-    async fn handler(&mut self, sync_rx: Receiver<String>) {
-        loop {
-            if let std::result::Result::Ok(dst) = sync_rx.try_recv() {
+    async fn handler(&mut self, sync_rx: Receiver<String>) {                       // async fn to handle msg
+        loop {                                                                     // infinite loop to check for msg
+            if let std::result::Result::Ok(dst) = sync_rx.try_recv() {             // try recv msg from sync ch 
                 match dst.as_str() {
-                    IHUB_HWWD => self.write(self.ihub_hwwd_path.clone(), "1"),
-                    IHUB_RESET => self.write(self.ihub_reset_path.clone(), "1"),
-                    _ => None,
+                    IHUB_HWWD => self.write(self.ihub_hwwd_path.clone(), "1"),     // IHUB_HWWD -> write 1 to watchdog path
+                    IHUB_RESET => self.write(self.ihub_reset_path.clone(), "1"),   // IHUB_RESET -> write 1 to reset path
+                    _ => None,                                                     // ignore other msg
                 };
             }
-            sleep(Duration::from_millis(100)).await;
+            sleep(Duration::from_millis(100)).await;                               // sleep & await to giveup cpu
         }
     }
 }
 ```
 
-main.rs:
+3 main.rs:
 
-```blurtext
-use rpmsg::Services;                          // ?
-use std::env;                                 // for access env var & cmdline arg
-use std::sync::mpsc;                          // for multi-producer-single-consumer msg channel between threads
+```text
+use rpmsg::Services;                                           // import rpmsg
+use std::env;                                                  // for access env var & cmdline arg
+use std::sync::mpsc;                                           // multi producer single consumer msg ch
 
-mod inotify;                                  // introduce inotify.rs content as mod
-mod rpmsg;                                    // introduce rpmsg.rs content as mod
+mod inotify;                                                   // introduce inotify.rs content as mod
+mod rpmsg;                                                     // introduce rpmsg.rs content as mod
 
-// micro tokio: mark main as async func, startup tokio runtime, allow await in it, allow async spawn task inside
-#[tokio::main]
-async fn main() {
+#[tokio::main]                                                 // macro tokio: mark main as async fn, startup tokio runtime,
+async fn main() {                                              // allow await in it, allow async spawn task inside
     let itf_name = env::args().nth(1).expect("Invalid interface name");
     let udrv_json = env::var("UDRV_JSON_PATH").expect("Invalid udrv.json path");
 
@@ -303,11 +295,13 @@ async fn main() {
             .watcher(rawsock_tx)                               // setup watcher for send msg to tx ch
             .await;
     });
+
     tokio::spawn(async move {
         rpmsg::RawSocket::new(itf_name_c.as_str())
             .handler(inotify_rx)                               // setup handler for recv msg from rx ch
             .await;
     });
+
     tokio::spawn(async move {
         inotify::IrqDevs::new(udrv_json.as_str())              // create new irqdev obj
             .watcher(inotify_tx)                               // setup watcher for send irq msg to tx ch
@@ -320,9 +314,9 @@ async fn main() {
 }
 ```
 
-cargo.toml:
+4 cargo.toml:
 
-```blurtext
+```text
 [package]
 name = "inco_proxy"
 version = "0.1.3"
@@ -341,10 +335,75 @@ tokio = {version = "1.4", features = ["full"]}
 strip = true
 ```
 
-usages:
+5 app usages (startup by s6 init-system on nt board):
 
-```blurtext
+```text
 $ UDRV_JSON_PATH=/isam/user/plat_srv/udrv.json start_app --bg /isam/user/host/apps/inco_proxy rpmsg4000 > /tmp/messages
+```
+
+6 udrv.json snippet highlights:
+
+```text
+{
+    "configs" : {
+        "print_level": "error"
+    },
+
+    ...
+
+    "file": {
+        "compatible": "udrv file controller",
+
+        "eps-host": {
+            "compatible": "udrv regular file device",
+            "path": "/isam/user/host/chassis/eps/"
+        },
+        ...
+        "ihub-irq-dev": {
+            "compatible": "udrv regular file device",
+            "path": "/isam/user/plat_srv/devdata/dev"
+        },
+    },
+
+    ...
+
+    "misc": {
+        "compatible": "udrv misc controller",
+        ...
+        "ihub_config_dev": {
+            "compatible": "udrv field supported device",
+            "regs": {
+                "ihub_cmdline":             {"reg": "ihub-cmdline.ihub-cmd",            "privatedata": "0x0"},
+                "ihub_uart_irqfwd_msgdata": {"reg": "ihub-irq-dev.uart_irqfwd_msgdata", "privatedata": "0x0"},
+                "ihub_uart_irqfwd_state":   {"reg": "ihub-irq-dev.uart_irqfwd_state",   "privatedata": "0x0"},
+                "ihub_hwwd_irq":            {"reg": "ihub-irq-dev.message_5_state",     "privatedata": "0x0"},
+                "ihub_reset_irq":           {"reg": "ihub-irq-dev.message_4_state",     "privatedata": "0x0"},
+                "redun_notify_irq":         {"reg": "ihub-irq-dev.message_6_state",     "privatedata": "0x0"},
+                "redun_notify_trig":        {"reg": "ihub-irq-dev.message_6_trig",      "privatedata": "0x0"},
+                "ihub_hwwd_irq_cpu":        {"reg": "ihub-irq-dev.message_5_dst_cpu",   "privatedata": "0x0"},
+                "ihub_reset_irq_cpu":       {"reg": "ihub-irq-dev.message_4_dst_cpu",   "privatedata": "0x0"},
+                "redun_notify_irq_dst_cpu": {"reg": "ihub-irq-dev.message_6_dst_cpu",   "privatedata": "0x1"}
+            }
+        },
+    },
+}
+```
+
+7 start_app utilities:
+
+```text
+#!/bin/sh
+
+# devtmpfs does not get automounted for initramfs
+var=`grep "chrt" /sbin/init`
+sed -i '/'"$var"'/d' /sbin/init
+var=`grep "chrt" /isam/supervisor/scripts/app_run`
+sed -i '/'"$var"'/d' /isam/supervisor/scripts/app_run
+var1=`grep "mount \\$entity_file \\$entity_mount_dir" /isam/scripts/swm_common_functions.sh`
+var2=`echo ${var1/mount/mount -t squashfs}`
+sed -i 's/'"$var1"'/'"$var2"'/g' /isam/scripts/swm_common_functions.sh
+
+exec /sbin/init "$@"
 ```
 
 <hr>
@@ -369,215 +428,37 @@ $ 2 features of async model:
 
 <hr>
 
-### # code walk through inco-proxy app (cpp)
-rpmsg.h:
+### # `Box<dyn Trait>`: safe syntax for rust polymorphism
+`Box<dyn Trait>` is used to create obj of certain type on heap, which implemented Trait interfaces.
+Box: a smart pointer assign to the allocated memory on heap, which allow dynamic mem & ownership management of data.
+dyn Trait: the 'type' of obj to be allocated on heap.
+
+unlike c/cpp, in golang or rust, a type is just collection of methods (interface or trait).
+the `Box<dyn Trait>` allow dynamic type dispatch: different type implement the same trait can be allocated here,
+hence, the exact type related trait method to call is determined at runtime rather than compile time.
+
+<hr>
+
+### # unwrap(): extract value from `Option<T>` & `Result<T, E>`
+1 `Option<T>` is an enum that can either be Some(v) (indicating a value is present) or None (indicating no value).
+using unwrap() on `Option<T>` will return value in Some(v) if exist, or program will panic if None.
 
 ```text
-#include <iostream>
-#include <string>
-#include <thread>
-#include <chrono>
-#include <memory>
-#include <vector>
-#include <mutex>
-#include <condition_variable>
-#include <queue>
-#include <functional>
-#include <optional>
-#include <stdexcept>
-#include <cstring>
-#include <pnet_datalink/pnet_datalink.h>
-#include <pnet_packet/pnet_packet.h>
+let some_value: Option<i32> = Some(10);
+let value = some_value.unwrap();                            // value = 10
 
-const size_t ETHERNET_HEADER_LEN = 14;
-
-class Services {
-public:
-    virtual void watcher(std::shared_ptr<std::queue<std::string>> sync_tx) = 0;
-    virtual void handler(std::shared_ptr<std::queue<std::string>> sync_rx) = 0;
-};
-
-class RawSocket : public Services {
-public:
-    pnet_datalink::NetworkInterface interface;
-    std::unique_ptr<pnet_datalink::DataLinkReceiver> receiver;
-    std::unique_ptr<pnet_datalink::DataLinkSender> sender;
-
-    RawSocket(const std::string& name){
-        auto interfaces = pnet_datalink::interfaces();
-        auto it = std::find_if(interfaces.begin(), interfaces.end(), [&](const pnet_datalink::NetworkInterface& iface){
-            return iface.name == name;
-        });
-        if(it == interfaces.end()){
-            throw std::runtime_error("Network interface not found");
-        }
-        interface = *it;
-        auto channel = pnet_datalink::channel(interface, pnet_datalink::Default::default());
-        if(std::holds_alternative<pnet_datalink::Channel>(channel)){
-            auto [tx, rx] = std::get<pnet_datalink::Channel>(channel);
-            sender = std::move(tx);
-            receiver = std::move(rx);
-        }
-        else{
-            throw std::runtime_error("Unhandled channel type");
-        }
-    }
-
-    std::optional<std::exception_ptr> send(const std::string& buf){
-        size_t len = buf.size() + ETHERNET_HEADER_LEN;
-        std::cout << "[rpmsg] send raw packet to " << interface.name << std::endl;
-
-        return sender->build_and_send(1, len, [&](uint8_t* packet){
-            auto mutable_packet = pnet_packet::MutableEthernetPacket::new(packet);
-            mutable_packet.set_destination(pnet_datalink::MacAddr::broadcast());
-            mutable_packet.set_source(interface.mac.value());
-            mutable_packet.set_ethertype(pnet_packet::EtherType(0x8800));
-            mutable_packet.set_payload(reinterpret_cast<const uint8_t*>(buf.data()), buf.size());
-        });
-    }
-
-    void watcher(std::shared_ptr<std::queue<std::string>> sync_tx) override {
-        bool error_printed = false;
-        while(true){
-            auto packet = receiver->next();
-            if(packet){
-                auto ethernet_packet = pnet_packet::EthernetPacket::new(*packet);
-                auto payload = ethernet_packet.payload();
-
-                std::string dst(reinterpret_cast<const char*>(payload.data()), payload.size());
-                sync_tx->push(dst);
-                if(error_printed){
-                    std::cerr << "Recovered from error" << std::endl;
-                    error_printed = false;
-                }
-            }
-            else{
-                if(!error_printed){
-                    std::cerr << "An error occurred while reading" << std::endl;
-                    error_printed = true;
-                }
-                continue;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-    }
-
-    void handler(std::shared_ptr<std::queue<std::string>> sync_rx) override {
-        while(true){
-            if(!sync_rx->empty()){
-                std::string dst = sync_rx->front();
-                sync_rx->pop();
-                if(dst == "REDUN_NOTIFY"){
-                    send("REDUN_NOTIFY");
-                }
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-    }
-};
+let none_value: Option<i32> = None;
+let value = none_value.unwrap();                            // panic
 ```
 
-inotify.h:
+2 `Result<T, E>` is an enum that can either be Ok(v) (indicating success and containing a value) or
+Err(E) (indicating failure and containing an error).
+using unwrap() on a `Result<T, E>` will return the value inside Ok if it exists, or program will panic if Err.
 
 ```text
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <thread>
-#include <chrono>
-#include <filesystem>
-#include <json/json.h>
-#include <condition_variable>
-#include <mutex>
-#include <queue>
-#include <unordered_map>
+let success: Result<i32, &str> = Ok(20);
+let value = success.unwrap();                               // value is 20
 
-class Services {
-public:
-    virtual void watcher(std::condition_variable& cv, std::queue<std::string>& sync_queue) = 0;
-    virtual void handler(std::queue<std::string>& sync_queue) = 0;
-};
-
-const std::string REDUN_NOTIFY = "redun_notify_irq";
-const std::string IHUB_HWWD = "ihub_hwwd_irq";
-const std::string IHUB_RESET = "ihub_reset_irq";
-
-class IrqDevs : public Services {
-public:
-    IrqDevs(const std::string& path){
-        std::ifstream file(path);
-        if(!file.is_open()){
-            throw std::runtime_error("Unable to read file");
-        }
-        Json::Value json;
-        file >> json;
-
-        std::string ihub_irq_dev = json["file"]["ihub-irq-dev"]["path"].asString();
-        std::filesystem::create_directory(ihub_irq_dev);
-        auto ihub_config_dev_regs = json["misc"]["ihub_config_dev"]["regs"];
-
-        std::string redun_notify_trig = "message_6_trig";
-        if(ihub_config_dev_regs.isMember("redun_notify_trig")){
-            std::string reg_value = ihub_config_dev_regs["redun_notify_trig"]["reg"].asString();
-            redun_notify_trig = reg_value.substr(reg_value.find(".") + 1);
-        }
-        redun_notify_path = ihub_irq_dev + "/" + redun_notify_trig;
-        std::ofstream(redun_notify_path).close();
-
-        std::string ihub_hwwd_irq = "message_5_state";
-        if(ihub_config_dev_regs.isMember("ihub_hwwd_irq")){
-            std::string reg_value = ihub_config_dev_regs["ihub_hwwd_irq"]["reg"].asString();
-            ihub_hwwd_irq = reg_value.substr(reg_value.find(".") + 1);
-        }
-        ihub_hwwd_path = ihub_irq_dev + "/" + ihub_hwwd_irq;
-        std::ofstream(ihub_hwwd_path).close();
-
-        std::string ihub_reset_irq = "message_4_state";
-        if(ihub_config_dev_regs.isMember("ihub_reset_irq")){
-            std::string reg_value = ihub_config_dev_regs["ihub_reset_irq"]["reg"].asString();
-            ihub_reset_irq = reg_value.substr(reg_value.find(".") + 1);
-        }
-        ihub_reset_path = ihub_irq_dev + "/" + ihub_reset_irq;
-        std::ofstream(ihub_reset_path).close();
-    }
-
-    void write(const std::string& path, const std::string& buf){
-        std::cout << "[inotify] write file: " << path << std::endl;
-        std::ofstream f(path);
-        if(!f.is_open()){
-            throw std::runtime_error("Unable to open file");
-        }
-        f << buf;
-        f.close();
-    }
-
-    void watcher(std::condition_variable& cv, std::queue<std::string>& sync_queue) override {
-        // Inotify implementation not provided in std cpp
-        // 1 use fs polling or equivalent
-        // 2 use custom inotify: ref: https://github.com/aabolfazl/inotify/blob/master/main.cpp
-    }
-
-    void handler(std::queue<std::string>& sync_queue) override {
-        while(true){
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            std::unique_lock<std::mutex> lock(mutex);
-            if(!sync_queue.empty()){
-                std::string dst = sync_queue.front();
-                sync_queue.pop();
-                if(dst == IHUB_HWWD){
-                    write(ihub_hwwd_path, "1");
-                }
-                else if(dst == IHUB_RESET){
-                    write(ihub_reset_path, "1");
-                }
-            }
-        }
-    }
-
-private:
-    std::string redun_notify_path;
-    std::string ihub_hwwd_path;
-    std::string ihub_reset_path;
-    std::mutex mutex;
-};
+let failure: Result<i32, &str> = Err("An error occurred");
+let value = failure.unwrap();                               // panic
 ```
