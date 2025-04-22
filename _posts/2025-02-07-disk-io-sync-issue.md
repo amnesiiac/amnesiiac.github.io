@@ -18,14 +18,12 @@ then there's a chance to report file not exist error or file broken problem.
 
 sync usage recommended scenarios:
 
-```text
 disk operation scenarios                                      | whether use sync?
 ---                                                           | ---
 access file after untar to normal fs                          | recommended
 access file after untar to overlayfs, nfs, docker mount fs    | strongly recommended
 file daily usages                                             | no-needed, the sync managed by os
 access file in pheriphrals: u-disk, embedded eqpt, mount card | recommended (avoid power down dataloss)
-```
 
 about smb (server message block):
 smb is a network file sharing protocol developed by ibm and later enhanced by microsoft,

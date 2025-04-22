@@ -240,8 +240,7 @@ libfuse api comes in two flavors:
 1 libfuse high-level sync api: incoming req from kernel are passed to fuse mainloop by callback registered.
 the high-level callback work with filename or path instead of inode, and the process of request is done when
 callback func return.
-ref: http://libfuse.github.io/doxygen/hello_8c.html
-
+ref: http://libfuse.github.io/doxygen/hello_8c.html  
 2 libfuse low-level async api: incoming req from kernel are passed to fuse mainloop by callback registered.
 the low-level callback work with inode and response must be processed with a separate set of apis.
 ref: http://libfuse.github.io/doxygen/fuse__lowlevel_8h.html
