@@ -41,7 +41,7 @@ page table info of the hypervisor process.
 in guest kernel thread runtime, the page table of hypervisor is visible to guest kernel, which enable guest ko
 access the vaddr of hypervisor process ctx.  
 2.2 vhost-user device:  
-todo!!!
+ref: vhost-user blk device emulation for hostfw blog post.
 
 <p style="margin-bottom: 20px;"></p>
 

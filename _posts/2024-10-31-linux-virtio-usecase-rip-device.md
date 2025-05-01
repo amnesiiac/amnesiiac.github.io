@@ -93,7 +93,9 @@ use vmm_sys_util::{epoll::EventSet, eventfd::EventFd};                       // 
 use block::raw_file::RawFile;                                                // raw file handling for blk dev
 use crate::RipArgs;                                                          // cmdline args struct
 use crate::RipConfiguration;                                                 // config struct for ripdev
+```
 
+```text
 type GuestMemoryMmap = vm_memory::GuestMemoryMmap<AtomicBitmap>;             // alias for guest mem mapped from atomic bitmap
 
 const SECTOR_SHIFT: u8 = 9;                                                  // shift for sector size
@@ -132,7 +134,9 @@ impl convert::From<Error> for io::Error {                         // Error -> io
         io::Error::new(io::ErrorKind::Other, e)                   // create a new io::Error from the custom error
     }
 }
+```
 
+```text
 struct VhostUserBlkThread {                                       // thread ctx to handle vhost user blk dev operation
     disk_image: Arc<Mutex<dyn DiskFile>>,                         // arc and mutex for thread-safe disk img access
     serial: Vec<u8>,                                              // serial num of the blk dev
@@ -164,7 +168,7 @@ impl VhostUserBlkThread {                                         // impl struct
 
     fn process_queue(                                                                 // process the req que
         &mut self,
-        vring: &mut RwLockWriteGuard<VringState<GuestMemoryAtomic<GuestMemoryMmap>>>, // guard for accessing the vring state
+        vring: &mut RwLockWriteGuard<VringState<GuestMemoryAtomic<GuestMemoryMmap>>>, // guard to access the vring
     ) -> bool {
         let mut used_descs = false;                                                   // init clean used_descs
         while let Some(mut desc_chain) = vring                                        // handle available desc chain in vring
@@ -174,8 +178,8 @@ impl VhostUserBlkThread {                                         // impl struct
             debug!("got an element in the queue");
             let len;                                                                  // len of the processed req
             match Request::parse(&mut desc_chain, None) {                             // parse the req from the desc chain
-                Ok(mut request) => {                                                  // if parsing is successful
-                    debug!("element is a valid request");                             // log valid req
+                Ok(mut request) => {                                                  // if parse succeed, handle the req
+                    debug!("element is a valid request");
                     request.set_writeback(self.writeback.load(Ordering::Acquire));    // set writeback mode for the request
                     let status = match request.execute(                               // exec the req
                         &mut self.disk_image.lock().unwrap().deref_mut(),             // lock and deref the disk image
@@ -233,7 +237,9 @@ impl VhostUserBlkThread {                                         // impl struct
         used_descs                                                                    // ret the used desc fd
     }
 }
+```
 
+```text
 struct VhostUserBlkBackend {                                          // vhost user blk backend
     threads: Vec<Mutex<VhostUserBlkThread>>,                          // thread for handling blk dev op
     config: VirtioBlockConfig,                                        // config for the virtio blk dev
@@ -243,8 +249,7 @@ struct VhostUserBlkBackend {                                          // vhost u
     mem: GuestMemoryAtomic<GuestMemoryMmap>,                          // guest mem for the backend
 }
 
-// Implementation of VhostUserBlkBackend
-impl VhostUserBlkBackend {
+impl VhostUserBlkBackend {                                            // vhost use blk dev backend
     fn new(                                                           // ctor
         image_path: String,                                           // path to the disk image
         mem: GuestMemoryAtomic<GuestMemoryMmap>,                      // guest memory
@@ -436,7 +441,9 @@ impl VhostUserBackendMut for VhostUserBlkBackend {                   // impl Vho
         Ok(())                                                       // return success
     }
 }
+```
 
+```text
 pub fn start_backend(args: RipArgs) {
     let config = RipConfiguration::try_from(args).unwrap();          // parse rip-args as rip-config
     let socket = config.socket.clone();                              // clone socket address ??? what if not use clone
@@ -455,7 +462,7 @@ pub fn start_backend(args: RipArgs) {
     let mut blk_daemon = VhostUserDaemon::new(name.to_string(), blk_backend.clone(), mem).unwrap(); // create blk daemon
     debug!("rip_daemon is created!\n");
     if let Err(e) = blk_daemon.start(listener) {                     // start the daemon with the listener
-        error!(                                                      // log any errors
+        error!(
             "Failed to start daemon for vdevice rip with error: {:?}\n",
             e
         );
@@ -463,7 +470,7 @@ pub fn start_backend(args: RipArgs) {
     }
 
     if let Err(e) = blk_daemon.wait() {                              // wait for the daemon to finish
-        error!("Error from the main thread: {:?}", e);               // log any errors that occur
+        error!("Error from the main thread: {:?}", e);
     }
 
     for thread in blk_backend.read().unwrap().threads.iter() {       // iterate through all threads in the backend
