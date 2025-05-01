@@ -206,7 +206,6 @@ impl VhostUserBlkThread {                                         // impl struct
                     len = 0;                                                          // set length to 0
                 }
             }
-
             vring.get_queue_mut()
                  .add_used(desc_chain.memory(), desc_chain.head_index(), len)         // add processed desc to used que
                  .unwrap();
