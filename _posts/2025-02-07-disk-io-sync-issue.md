@@ -16,7 +16,13 @@ but actually it still store in cache rather then nfs or smb or overlay fs.
 if a script start right after the file write operation done, and to try to access or use it immediately,
 then there's a chance to report file not exist error or file broken problem.
 
-sync usage recommended scenarios:
+about smb (server message block):
+smb is a network file sharing protocol developed by ibm and later enhanced by microsoft,
+allowing apps to read and write to file and request services from server programs within a local area network (lan).
+
+<hr>
+
+### # scenarios for sync usage recommended
 
 disk operation scenarios                                      | whether use sync?
 ---                                                           | ---
@@ -24,10 +30,6 @@ access file after untar to normal fs                          | recommended
 access file after untar to overlayfs, nfs, docker mount fs    | strongly recommended
 file daily usages                                             | no-needed, the sync managed by os
 access file in pheriphrals: u-disk, embedded eqpt, mount card | recommended (avoid power down dataloss)
-
-about smb (server message block):
-smb is a network file sharing protocol developed by ibm and later enhanced by microsoft,
-allowing apps to read and write to file and request services from server programs within a local area network (lan).
 
 <hr>
 
@@ -78,11 +80,11 @@ down to disk, rather than in page cached state, so that the following file exec 
 onu_pos=1
 for onu in $onus; do
     mkdir -p /var/onu_${onu_pos}
-    cp -rf ./* /var/onu_${onu_pos}/      # use the same binary file for each onu by file copy
+    cp -rf ./* /var/onu_${onu_pos}/
     onu_pos=$((onu_pos + 1))
 done
 
-sync
+sync                                                                     # sync after dir/file changes
 
 # loop through each ONU entry in the 'onus' array
 onu_pos=1
@@ -92,7 +94,7 @@ for onu in $onus; do
     echo "--- ONU $onu_pos ---"
     echo "  Time Start: $(date)"
     ...
-    echo "  File permissions: $(ls -l /var/onu_${onu_pos}/OnuHost)"      # reporting error
+    echo "  File permissions: $(ls -l /var/onu_${onu_pos}/OnuHost)"      # not error anymore
     ...
 done
 ...

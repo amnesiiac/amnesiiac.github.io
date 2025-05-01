@@ -43,6 +43,10 @@ int main(){
 </code></pre>
 ```
 
+```blurtext
+this is an example text blurred
+```
+
 $ customize normal text in blog:
 
 ```text

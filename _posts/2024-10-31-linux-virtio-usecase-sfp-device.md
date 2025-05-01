@@ -12,7 +12,7 @@ tags:
 
 ### # device simulation architecture overview
 
-```blurtext
+```txt
 
           ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
           │ setup container                                                                                             │
