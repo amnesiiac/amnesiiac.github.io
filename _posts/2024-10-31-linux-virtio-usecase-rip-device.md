@@ -133,7 +133,7 @@ impl convert::From<Error> for io::Error {                         // Error -> io
     }
 }
 
-struct VhostUserBlkThread {                                       // thread def to handle vhost user blk dev op
+struct VhostUserBlkThread {                                       // thread ctx to handle vhost user blk dev operation
     disk_image: Arc<Mutex<dyn DiskFile>>,                         // arc and mutex for thread-safe disk img access
     serial: Vec<u8>,                                              // serial num of the blk dev
     disk_nsectors: u64,                                           // num of sectors in the disk image

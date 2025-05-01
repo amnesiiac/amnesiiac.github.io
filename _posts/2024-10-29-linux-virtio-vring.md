@@ -10,7 +10,8 @@ tags:
   - todo
 ---
 
-what is vring? why we need it? the virtio standard is a protocol operated on shared memory to transfer data
+1 what is vring? why we need it?  
+the virtio standard is a protocol operated on shared memory to transfer data
 between the frontend guest kdrv and the backend dev on host, and is designed to improve the io efficiency.
 the shared mem to enable virtio msg transport is vring, which facilitate the communication between guest &
 host kernel in an efficient, reliable way.
@@ -30,8 +31,7 @@ the hypervisor can access it naturally.
 
 <p style="margin-bottom: 20px;"></p>
 
-2 for customized device (vhost-net dev or vhost-user dev), extra memory mapping infra is needed:
-
+2 for customized device (vhost-net dev or vhost-user dev), extra memory mapping infra is needed:  
 2.1 vhost-net device:  
 a) during kernel init process, the hypervisor pass the vring info (GPA, userspace_addr, size) to the vhost-net
 guest kernel module by ioctl;  
@@ -39,8 +39,7 @@ b) the vhost-net ko save the memory mapping of GPA and userspace_addr (hyperviso
 c) vhost-net ko start kthread, store the mapping between kthread and hypervisor instance, store the
 page table info of the hypervisor process.
 in guest kernel thread runtime, the page table of hypervisor is visible to guest kernel, which enable guest ko
-access the vaddr of hypervisor process ctx.
-
+access the vaddr of hypervisor process ctx.  
 2.2 vhost-user device:  
 todo!!!
 
