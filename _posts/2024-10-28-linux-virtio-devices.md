@@ -10,6 +10,10 @@ tags:
   - todo
 ---
 
+this article mainly conclude the basis of how to create & use the virtio dev/drv\...
+
+<hr>
+
 ### # relationship between qemu & kvm
 when working together, kvm arbitrates access to the cpu and memory, and qemu emulates the hardware resources
 (hard disk, video, usb, etc.).
@@ -26,18 +30,18 @@ performance enhancement (implemented as user or host process).
 
 <hr>
 
-### # virtio networking components
+### # virtio device components: taking virtio-net as an example
 1 control plane: for capability negotiation between the host & guest, for data plane management.  
-it is implemented in qemu process based on the virtio spec, while the data plane is out of qemu, why?
-reason: if data plane is implemented in qemu (as a linux userspace process), the operation to exchange
-data (pkt) between userspace & kernel will be too expensive!
+it's implemented in qemu process based on virtio spec; whereas, data plane is out of qemu, why?
+if data plane is implemented in qemu (as a linux userspace process), the operation to exchange
+data (pkt) between userspace & guest kernel will be too expensive (path too long)!
 
-2 data plane: used for transferring the actual data (pkt) between host and guest.  
+2 data plane: transfer the actual data (pkt) between host and guest.  
 it is designed to be as efficient as possible to move the packet fast, while the control plane
 is designed to be as flexible as possible to support different device and vendor in future architectures.
 
-3 data plane implementation offloading (vhost protocol's function): to help us implement a data plane
-going directly from the host to the guest (bypass the qemu process); by vhost offloading, we eliminate
+3 data plane implementation offloading (vhost protocol): help us implement a data plane
+going directly from host to the guest (bypass the qemu process); by vhost offloading, we eliminate
 the latency of data copy & process to enhance the performance.
 
 <hr>
@@ -45,12 +49,12 @@ the latency of data copy & process to enhance the performance.
 ### # virtio device introduction
 virtio device can be discovered by pci, mmio, channel io.
 
-virtio dev is a device that exposes virtio interface for software to manage & exchange info.
-virtio dev can be exposed to the emulated environment by pci, memory mapping io (expose the dev in a mem region)
+virtio dev: a device that expose "virtio interface" for software to manage & exchange info.
+virtio dev can be exposed to the emulated environment by pci, memory mapping io (expose dev in a mem region)
 and s/390 channel io.
 part of the communication need to be delegated to mechanism like device discovery.
 
-virtio device's main task: convert the signal from the form outside the virtual env (container, vm\...),
+virtio device's main task: convert the signal from the form outside virtual env (container, vm\...),
 to the form needed for data exchange on the virtio dataplane (vring\...).
 the signal could be physical (electricity or light from a nic) or already virtual (just a representation of pkt).
 

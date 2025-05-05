@@ -12,7 +12,7 @@ tags:
 
 $ 1 main.rs:
 
-```blurtext
+```text
 mod vhu_rip;                                           // module for vhost-user RIP backend functionality
 
 use clap::Parser;                                      // import the clap library for command-line argument parsing
@@ -58,7 +58,7 @@ fn main() {
 
 $ 2 vhu_rip.rs:
 
-```blurtext
+```text
 use block::{
     build_serial,                                                            // build serial num for blk dev
     Request,                                                                 // struct for handling blk dev req
@@ -95,7 +95,7 @@ use crate::RipArgs;                                                          // 
 use crate::RipConfiguration;                                                 // config struct for ripdev
 ```
 
-```blurtext
+```text
 type GuestMemoryMmap = vm_memory::GuestMemoryMmap<AtomicBitmap>;             // alias for guest mem mapped from atomic bitmap
 
 const SECTOR_SHIFT: u8 = 9;                                                  // shift for sector size
@@ -136,7 +136,7 @@ impl convert::From<Error> for io::Error {                         // Error -> io
 }
 ```
 
-```blurtext
+```text
 struct VhostUserBlkThread {                                       // thread ctx to handle vhost user blk dev operation
     disk_image: Arc<Mutex<dyn DiskFile>>,                         // arc and mutex for thread-safe disk img access
     serial: Vec<u8>,                                              // serial num of the blk dev
@@ -238,7 +238,7 @@ impl VhostUserBlkThread {                                         // impl struct
 }
 ```
 
-```blurtext
+```text
 struct VhostUserBlkBackend {                                          // vhost user blk backend
     threads: Vec<Mutex<VhostUserBlkThread>>,                          // thread for handling blk dev op
     config: VirtioBlockConfig,                                        // config for the virtio blk dev
@@ -442,7 +442,7 @@ impl VhostUserBackendMut for VhostUserBlkBackend {                   // impl Vho
 }
 ```
 
-```blurtext
+```text
 pub fn start_backend(args: RipArgs) {
     let config = RipConfiguration::try_from(args).unwrap();          // parse rip-args as rip-config
     let socket = config.socket.clone();                              // clone socket address ??? what if not use clone
