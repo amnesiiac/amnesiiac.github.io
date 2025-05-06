@@ -22,8 +22,8 @@ when working alone, qemu emulate both cpu and hardware.
 <hr>
 
 ### # virtio spec & vhost protocol
-1 virtio spec: maintained by oasis, define how to create the control & data plane between guest & host:
-the buffer & vring layout in data plane is described in details in the specification.
+1 virtio spec (maintained by oasis): define how to create the control & data plane between guest & host,
+the layout of buffer & vring of virtio data plane is described in details in the specification.
 
 2 vhost protocol: allow virtio data plane implementation to be offloaded to somewhere for
 performance enhancement (implemented as user or host process).
@@ -40,17 +40,17 @@ data (pkt) between userspace & guest kernel will be too expensive (path too long
 it is designed to be as efficient as possible to move the packet fast, while the control plane
 is designed to be as flexible as possible to support different device and vendor in future architectures.
 
-3 data plane implementation offloading (vhost protocol): help us implement a data plane
+3 offloading of data plane (vhost protocol): help us implement a data plane
 going directly from host to the guest (bypass the qemu process); by vhost offloading, we eliminate
 the latency of data copy & process to enhance the performance.
 
 <hr>
 
 ### # virtio device introduction
-virtio device can be discovered by pci, mmio, channel io.
-
 virtio dev: a device that expose "virtio interface" for software to manage & exchange info.
-virtio dev can be exposed to the emulated environment by pci, memory mapping io (expose dev in a mem region)
+
+virtio device can be discovered by pci, mmio, channel io,
+thus, the vdev is exposed to the virtual environment by pci, memory mapping io (expose dev in a mem region)
 and s/390 channel io.
 part of the communication need to be delegated to mechanism like device discovery.
 
@@ -60,13 +60,13 @@ the signal could be physical (electricity or light from a nic) or already virtua
 
 <hr>
 
-### # virtio interface: the mandatory component of virtio device
+### # virtio interface: mandatory component of virtio dev
 this section will introduce the basic components of virtio interface, and describe how virtio dev & drv
-communicate with each other by them.
+communicate with each other through it.
 
 $ 1 device status field (the traffic light)  
-the dev status field is a sequence of bits the dev & drv used to for their init,
-which act like traffic lights, the status of dev is indicated by set and clear the bits:
+it is a sequence of bits which is used by dev & drv for their init.
+the bits act like traffic lights, and status of dev is indicated by set & clear the bits:
 
 1.1 guest drv set the bit ACKNOWLEDGE (0x1) in device status field to indicate the ack for the dev,
 and set the bit DRIVER (0x2) to indicate the init is in progress.  
@@ -75,7 +75,7 @@ FEATURES_OK (0x8) to acknowledge the features, so the following communication ca
 1.3 however, if the dev want to indicate a fatal failure, it can set bit DEVICE_NEEDS_RESET (0x40),
 and the drv can do the same with bit FAILED (0x80).
 
-the device communicate the location of these bits using transport specific method, like pci scanning or knowing
+the device communicate the location of these bits by transport specific method, like pci scanning or knowing
 the address for mmio.
 
 <p style="margin-bottom: 20px;"></p>
@@ -139,7 +139,7 @@ $ 7 more details can refer to blog post vring intro.
 
 <p style="margin-bottom: 20px;"></p>
 
-$ 8 the steps for virtio driver to initialize a device  
+$ 8 the steps for virtio driver to init a device  
 8.1 reset the device.  
 8.2 set the ACKNOWLEDGE status bit: the guest kernel has notice the device.  
 8.3 set the DRIVER status bit: the guest kernel know how to drive the device.  

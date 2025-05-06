@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "virtio usecase: hot-plug sfp device emulation (linux, virtualization, driver)"
+title: "virtio usecase: hot-plug device emulation (linux, virtualization, driver)"
 author: "melon"
 date: 1111-10-31 21:44
 categories: "2024"
