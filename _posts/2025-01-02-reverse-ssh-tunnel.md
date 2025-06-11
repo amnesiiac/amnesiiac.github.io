@@ -6,6 +6,7 @@ date: 1111-01-02 21:03
 categories: "2025"
 tags:
   - python
+  - ssh
 ---
 
 the following diff introduces a python function, to enable ssh login on remote machine in a hack way,

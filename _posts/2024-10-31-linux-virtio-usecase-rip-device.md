@@ -66,10 +66,16 @@ use block::{
 };
 use libc::EFD_NONBLOCK;                                                      // non-blocking eventfd flag
 use log::*;
-use std::fs::File;
-use std::fs::OpenOptions;
+```
+
+```text
+use std::fs::File;                                                           // use file op for vhost blk dev drv mgnt
+use std::fs::OpenOptions;                                                    // set fs open options
 use std::io::Read;                                                           // trait for reading from a source
 use std::io::{Seek, SeekFrom, Write};                                        // trait for seeking and writing
+```
+
+```text
 use std::ops::Deref;                                                         // deref trait for smart pointer deref
 use std::ops::DerefMut;                                                      // derefMut trait for mutable deref
 use std::os::unix::fs::OpenOptionsExt;                                       // unix-specific extensions for OpenOptions
@@ -96,7 +102,7 @@ use crate::RipConfiguration;                                                 // 
 ```
 
 ```text
-type GuestMemoryMmap = vm_memory::GuestMemoryMmap<AtomicBitmap>;             // alias for guest mem mapped from atomic bitmap
+type GuestMemoryMmap = vm_memory::GuestMemoryMmap<AtomicBitmap>;             // type: guest mem mapped from atomic bitmap
 
 const SECTOR_SHIFT: u8 = 9;                                                  // shift for sector size
 const SECTOR_SIZE: u64 = 0x01 << SECTOR_SHIFT;                               // size of a sector in bytes
@@ -104,10 +110,14 @@ const BLK_SIZE: u32 = 512;                                                   // 
 
 const QUEUE_SIZE: usize = 1024;                                              // max size of queue
 const NUM_QUEUES: usize = 1;                                                 // num of queues
+```
 
-trait DiskFile: Read + Seek + Write + Send {}                                // define compound trait for diskfile op
+```text
+trait DiskFile: Read + Seek + Write + Send {}                                // define compound trait bound for diskfile op
 impl<D: Read + Seek + Write + Send> DiskFile for D {}                        // impl DiskFile for any type satisfy the bound
+```
 
+```text
 type Result<T> = std::result::Result<T, Error>;                              // alias for Result<T>
 type VhostUserBackendResult<T> = std::result::Result<T, std::io::Error>;     // alias for vhost user backend
 
@@ -139,6 +149,9 @@ impl convert::From<Error> for io::Error {                         // Error -> io
 ```text
 struct VhostUserBlkThread {                                       // thread ctx to handle vhost user blk dev operation
     disk_image: Arc<Mutex<dyn DiskFile>>,                         // arc and mutex for thread-safe disk img access
+                                                                  // dyn trait: dynamic dispatch for type fit Diskfile
+                                                                  // Mutex<dyn trait>: enable concurrent diskfile access
+                                                                  // Arc<T>: let diskimg ownership able to share across thd
     serial: Vec<u8>,                                              // serial num of the blk dev
     disk_nsectors: u64,                                           // num of sectors in the disk image
     event_idx: bool,                                              // flag for event index support
@@ -147,13 +160,13 @@ struct VhostUserBlkThread {                                       // thread ctx 
     mem: GuestMemoryAtomic<GuestMemoryMmap>,                      // guest mem for the thread
 }
 
-impl VhostUserBlkThread {                                         // impl struct methods
-    fn new(                                                       // ctor
-        disk_image: Arc<Mutex<dyn DiskFile>>,                     // disk image to be used
-        serial: Vec<u8>,                                          // serial num
-        disk_nsectors: u64,                                       // num of sectors in the disk img
-        writeback: Arc<AtomicBool>,                               // writeback mode flag
-        mem: GuestMemoryAtomic<GuestMemoryMmap>,                  // guest mem
+impl VhostUserBlkThread {                                                             // vhost-user thread methods
+    fn new(                                                                           // 1 ctor
+        disk_image: Arc<Mutex<dyn DiskFile>>,                                         // disk image to be used
+        serial: Vec<u8>,                                                              // serial num
+        disk_nsectors: u64,                                                           // num of sectors in the disk img
+        writeback: Arc<AtomicBool>,                                                   // writeback mode flag
+        mem: GuestMemoryAtomic<GuestMemoryMmap>,                                      // guest mem
     ) -> Result<Self> {
         Ok(VhostUserBlkThread {
             disk_image,
@@ -166,7 +179,7 @@ impl VhostUserBlkThread {                                         // impl struct
         })
     }
 
-    fn process_queue(                                                                 // process the req que
+    fn process_queue(                                                                 // 2 process the req que
         &mut self,
         vring: &mut RwLockWriteGuard<VringState<GuestMemoryAtomic<GuestMemoryMmap>>>, // guard to access the vring
     ) -> bool {
@@ -263,7 +276,7 @@ impl VhostUserBlkBackend {                                            // vhost u
         let image = Arc::new(Mutex::new(raw_img)) as Arc<Mutex<dyn DiskFile>>; // wrap the raw image in Arc and Mutex
 
         let nsectors = (image.lock().unwrap().seek(SeekFrom::End(0)).unwrap()) / SECTOR_SIZE; // num of sectors in disk img
-        let config = VirtioBlockConfig {                              // create the virtio blk config
+        let config = VirtioBlockConfig {                              // init virtio blk config
             capacity: nsectors,                                       // set the capacity to the num of sectors
             blk_size: BLK_SIZE,                                       // set the block size
             size_max: 65535,                                          // max size for a single i/o operation
@@ -318,6 +331,8 @@ impl VhostUserBlkBackend {                                            // vhost u
         self.writeback.store(writeback, Ordering::Release);          // store the new writeback mode
     }
 }
+
+// ref: https://docs.rs/vhost-user-backend/latest/vhost_user_backend/trait.VhostUserBackendMut.html
 
 impl VhostUserBackendMut for VhostUserBlkBackend {                   // impl VhostUserBackendMut trait
     type Bitmap = AtomicBitmap;                                      // alias type for atomic bitmap
